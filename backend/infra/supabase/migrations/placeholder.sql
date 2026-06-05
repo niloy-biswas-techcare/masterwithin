@@ -1,0 +1,1 @@
+-- Migration placeholder for Phase 0 setup

@@ -1,0 +1,11 @@
+{
+  "name": "@mw/config",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "tsconfig.base.json",
+    "eslint-preset.js",
+    "prettier-preset.js",
+    "tailwind-preset.js"
+  ]
+}

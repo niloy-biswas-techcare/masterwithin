@@ -1,0 +1,35 @@
+name: DB & Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/infra/supabase/**'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: Apply migrations
+        run: supabase db push
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Verify generated types are in sync (drift check)
+        run: |
+          supabase gen types typescript --linked > backend/infra/supabase/generated/types.ts
+          git diff --exit-code backend/infra/supabase/generated/types.ts || (echo "::error::generated/types.ts is stale — run 'pnpm db:types' and commit" && exit 1)
+
+      - name: Deploy Edge Functions (incl. syncSubstack cron)
+        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"

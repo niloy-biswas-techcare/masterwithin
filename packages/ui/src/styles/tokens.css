@@ -1,0 +1,38 @@
+:root {
+  /* Brand */
+  --color-primary:   #1E9AE0;  /* Primary blue */
+  --color-deep:      #1A5C8A;  /* Deep blue */
+  --color-accent:    #1E9AE0;
+
+  /* Neutrals */
+  --color-dark:      #3D4858;  /* Dark charcoal */
+  --color-text:      #2C3340;  /* Body text */
+  --color-muted:     #C8CFDA;  /* Muted blue-grey */
+  --color-bg:        #F7F8FA;  /* Page background */
+  --color-surface:   #FFFFFF;  /* Cards, panels */
+  --color-border:    #E3E7ED;
+
+  /* Semantic */
+  --color-success:   #2E8B57;
+  --color-warning:   #C9892B;
+  --color-danger:    #C0392B;
+
+  /* Typography */
+  --font-display: 'Lora', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* Radii & elevation */
+  --radius-sm: 6px;  --radius-md: 10px;  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(45,51,64,.06);
+  --shadow-md: 0 4px 16px rgba(45,51,64,.08);
+}
+
+/* Dark mode is a token override, not a parallel stylesheet. */
+[data-theme='dark'] {
+  --color-bg:      #11161D;
+  --color-surface: #1A2129;
+  --color-text:    #E6EAF0;
+  --color-muted:   #5C6573;
+  --color-border:  #2A323C;
+}

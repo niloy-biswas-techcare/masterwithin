@@ -37,30 +37,30 @@ Goal: an empty-but-correct monorepo that type-checks, lints, builds, and runs an
 later phase lands inside enforced quality gates. (§3, §9, §21, §24)
 
 ### 0.1 Repository & workspace
-- [ ] Initialize git repo with `main` branch; add `feature/*` branch convention (§21).
-- [ ] Create the monorepo layout from §9: `frontend/web`, `frontend/admin`, `backend`, `packages/*`, `tests/`.
-- [ ] Add `pnpm-workspace.yaml` declaring `frontend/*`, `backend`, `packages/*` (§3).
-- [ ] Add root `package.json` with workspace scripts (`dev`, `build`, `lint`, `typecheck`, `test`, `test:e2e`, `db:*`).
-- [ ] Add `turbo.json` task graph (`build`, `lint`, `typecheck`, `test`, `test:e2e`) with correct `dependsOn`/cache outputs (§3, §21).
-- [ ] Pin Node 20 + pnpm version (`.nvmrc` / `packageManager` field) to match CI (§21.2).
+- [x] Initialize git repo with `main` branch; add `feature/*` branch convention (§21).
+- [x] Create the monorepo layout from §9: `frontend/web`, `frontend/admin`, `backend`, `packages/*`, `tests/`.
+- [x] Add `pnpm-workspace.yaml` declaring `frontend/*`, `backend`, `packages/*` (§3).
+- [x] Add root `package.json` with workspace scripts (`dev`, `build`, `lint`, `typecheck`, `test`, `test:e2e`, `db:*`).
+- [x] Add `turbo.json` task graph (`build`, `lint`, `typecheck`, `test`, `test:e2e`) with correct `dependsOn`/cache outputs (§3, §21).
+- [x] Pin Node 20 + pnpm version (`.nvmrc` / `packageManager` field) to match CI (§21.2).
 
 ### 0.2 Shared config package (`packages/config`)
-- [ ] Base `tsconfig` (strict mode, no `any`) extended by every package/app (§24).
-- [ ] Shared ESLint config including the **import-boundary rule** forbidding `@supabase/*` / `cloudinary` outside `backend/adapters/*` (§9, §24). 🔒
-- [ ] Shared Prettier config.
-- [ ] Shared Tailwind preset (consumes design tokens from `packages/ui`) (§3, §4).
+- [x] Base `tsconfig` (strict mode, no `any`) extended by every package/app (§24).
+- [x] Shared ESLint config including the **import-boundary rule** forbidding `@supabase/*` / `cloudinary` outside `backend/adapters/*` (§9, §24). 🔒
+- [x] Shared Prettier config.
+- [x] Shared Tailwind preset (consumes design tokens from `packages/ui`) (§3, §4).
 
 ### 0.3 Env & secrets scaffolding
-- [ ] Author `.env.example` documenting **every** key in §15 (backend driver, Supabase, Cloudinary, business, admin auth).
-- [ ] Create per-app `src/lib/env.ts` (web, admin) and `backend/env.ts` — Zod-validated, **fail-fast**, no raw `process.env` reads (§15, §24).
-- [ ] Confirm `.gitignore` excludes `.env.local`, build outputs, `node_modules`, Playwright artifacts.
+- [x] Author `.env.example` documenting **every** key in §15 (backend driver, Supabase, Cloudinary, business, admin auth).
+- [x] Create per-app `src/lib/env.ts` (web, admin) and `backend/env.ts` — Zod-validated, **fail-fast**, no raw `process.env` reads (§15, §24).
+- [x] Confirm `.gitignore` excludes `.env.local`, build outputs, `node_modules`, Playwright artifacts.
 
 ### 0.4 CI skeleton (wire early, fill as features land)
-- [ ] Add `.github/workflows/ci.yml` per §21.2 (typecheck · lint · test · build · e2e · Lighthouse jobs) with concurrency cancel + Turbo remote cache env. 🧪
-- [ ] Add `.github/workflows/db-migrate.yml` per §21.3 (push to `main`, path-filtered to `backend/infra/supabase/**`).
-- [ ] Configure GitHub Environments/secrets per §21.4 (`TURBO_TOKEN`, `TURBO_TEAM`, `SUPABASE_*`).
-- [ ] Configure Turborepo **remote caching** shared between Actions and Vercel (§21).
-- [ ] **Gate:** CI is green on an empty/scaffold PR before Phase 1 begins. ⛔
+- [x] Add `.github/workflows/ci.yml` per §21.2 (typecheck · lint · test · build · e2e · Lighthouse jobs) with concurrency cancel + Turbo remote cache env. 🧪
+- [x] Add `.github/workflows/db-migrate.yml` per §21.3 (push to `main`, path-filtered to `backend/infra/supabase/**`).
+- [x] Configure GitHub Environments/secrets per §21.4 (`TURBO_TOKEN`, `TURBO_TEAM`, `SUPABASE_*`).
+- [x] Configure Turborepo **remote caching** shared between Actions and Vercel (§21).
+- [x] **Gate:** CI is green on an empty/scaffold PR before Phase 1 begins. ⛔
 
 ---
 

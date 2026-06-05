@@ -69,25 +69,25 @@ later phase lands inside enforced quality gates. (§3, §9, §21, §24)
 Goal: the design system and the typed domain contracts every app imports. (§4, §6, §11, §24)
 
 ### 1.1 `packages/types` — schemas & canonical constants
-- [ ] `ArticleSchema` (+ inferred `Article`) exactly per §8.
-- [ ] `categories.ts`: the **8 fixed categories** (id, slug, title, description, icon, keyword set) (§6). ⛔ blocks routing/categorizer.
-- [ ] `start-here.ts` path-definition type (title, blurb, target tags/category, deeper CTA) (§7.4, §17.5).
-- [ ] Commerce types: `CartItem`, `CustomerDetails`, `Order`, `OrderResult`, `OrderProvider` (§10.1).
-- [ ] Entity schemas/types: `Book`, `Ebook`, `Course`, `Freebie`, `Order`, `Contact`, `SiteConfig`, `AuditLog`, `Operator` (§16, §17.9).
-- [ ] Zod schemas for every entity used by server actions (admin write validation) (§17.4).
+- [x] `ArticleSchema` (+ inferred `Article`) exactly per §8.
+- [x] `categories.ts`: the **8 fixed categories** (id, slug, title, description, icon, keyword set) (§6). ⛔ blocks routing/categorizer.
+- [x] `start-here.ts` path-definition type (title, blurb, target tags/category, deeper CTA) (§7.4, §17.5).
+- [x] Commerce types: `CartItem`, `CustomerDetails`, `Order`, `OrderResult`, `OrderProvider` (§10.1).
+- [x] Entity schemas/types: `Book`, `Ebook`, `Course`, `Freebie`, `Order`, `Contact`, `SiteConfig`, `AuditLog`, `Operator` (§16, §17.9).
+- [x] Zod schemas for every entity used by server actions (admin write validation) (§17.4).
 
 ### 1.2 `packages/utils` — pure helpers
-- [ ] `slugify` (kebab-case, stable) (§24). 🧪
-- [ ] Formatters (price ₹, dates → ISO display, reading-time) (§4, §8).
-- [ ] Tag normalizer (lower-case, kebab, dedupe) (§6).
+- [x] `slugify` (kebab-case, stable) (§24). 🧪
+- [x] Formatters (price ₹, dates → ISO display, reading-time) (§4, §8).
+- [x] Tag normalizer (lower-case, kebab, dedupe) (§6).
 
 ### 1.3 `packages/ui` — design system
-- [ ] Token layer: CSS custom properties for color/type/spacing/radius/elevation + **dark-mode override** per §4.1. ⛔ no hard-coded hex anywhere downstream.
-- [ ] Self-hosted fonts (Lora display, DM Sans body) via `next/font` wiring; type scale per §4.2.
-- [ ] **Primitives** (Radix-backed): `Button`, `IconButton`, `Dialog`, `Drawer`, `Tabs`, `Input`, `Textarea`, `Select`, `Badge`, `Spinner`, `Skeleton` (§11). 🧪 a11y
-- [ ] **UI components:** `Card`, `ArticleCard`, `BookCard`, `CourseCard`, `CategoryCard`, `EmptyState`, `Prose`, `Pagination`, `CldImage` (Cloudinary `next/image` loader) (§11).
-- [ ] Enforce component layering (a component imports only from layers below) (§4.4).
-- [ ] Verify token contrast ≥ 4.5:1 in both themes (§14).
+- [x] Token layer: CSS custom properties for color/type/spacing/radius/elevation + **dark-mode override** per §4.1. ⛔ no hard-coded hex anywhere downstream.
+- [x] Self-hosted fonts (Lora display, DM Sans body) via `next/font` wiring; type scale per §4.2.
+- [x] **Primitives** (Radix-backed): `Button`, `IconButton`, `Dialog`, `Drawer`, `Tabs`, `Input`, `Textarea`, `Select`, `Badge`, `Spinner`, `Skeleton` (§11). 🧪 a11y
+- [x] **UI components:** `Card`, `ArticleCard`, `BookCard`, `CourseCard`, `CategoryCard`, `EmptyState`, `Prose`, `Pagination`, `CldImage` (Cloudinary `next/image` loader) (§11).
+- [x] Enforce component layering (a component imports only from layers below) (§4.4).
+- [x] Verify token contrast ≥ 4.5:1 in both themes (§14).
 
 ---
 

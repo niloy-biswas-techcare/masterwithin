@@ -1,0 +1,13 @@
+/**
+ * UI components layer (§4.4): composed from primitives + tokens, plus `@mw/types`
+ * and `@mw/utils`. May import from primitives below; never from app features above.
+ */
+export * from './Card';
+export * from './ArticleCard';
+export * from './BookCard';
+export * from './CourseCard';
+export * from './CategoryCard';
+export * from './EmptyState';
+export * from './Prose';
+export * from './Pagination';
+export * from './CldImage';

@@ -1,9 +1,7 @@
-export function slugify(text: string): string {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-") // Replace spaces with -
-    .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
-}
+/**
+ * @mw/utils — pure, dependency-light helpers shared across apps (§24).
+ * No IO, no framework imports; everything here is unit-testable in isolation.
+ */
+export * from './slugify';
+export * from './tags';
+export * from './format';

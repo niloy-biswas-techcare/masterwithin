@@ -4,11 +4,52 @@
   "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./fonts": {
+      "types": "./dist/fonts.d.ts",
+      "default": "./dist/fonts.js"
+    },
+    "./styles/tokens.css": "./src/styles/tokens.css"
+  },
   "scripts": {
     "build": "tsc --build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mw/types": "workspace:*",
+    "@mw/utils": "workspace:*",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.460.0",
+    "tailwind-merge": "^2.5.0"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "devDependencies": {
-    "@mw/config": "workspace:*"
+    "@mw/config": "workspace:*",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "jsdom": "^25.0.0",
+    "next": "15.5.19",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^2.1.0",
+    "vitest-axe": "^0.1.0"
   }
 }

@@ -20,6 +20,23 @@ module.exports = {
         body: ["var(--font-body)", "DM Sans", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"]
       },
+      // Type scale per §4.2 (px): 14/16/18/22/28/36/48/64.
+      // Line height 1.7 for body sizes, 1.2 for heading/display sizes.
+      fontSize: {
+        sm: ["14px", { lineHeight: "1.7" }],
+        base: ["16px", { lineHeight: "1.7" }],
+        lg: ["18px", { lineHeight: "1.7" }],
+        xl: ["22px", { lineHeight: "1.2" }],
+        "2xl": ["28px", { lineHeight: "1.2" }],
+        "3xl": ["36px", { lineHeight: "1.2" }],
+        "4xl": ["48px", { lineHeight: "1.2" }],
+        "5xl": ["64px", { lineHeight: "1.2" }]
+      },
+      // Reading measures per §4.2: article body 720px, full-width sections 1200px.
+      maxWidth: {
+        prose: "720px",
+        content: "1200px"
+      },
       borderRadius: {
         sm: "var(--radius-sm, 6px)",
         md: "var(--radius-md, 10px)",

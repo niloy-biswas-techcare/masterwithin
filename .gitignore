@@ -28,6 +28,9 @@ lerna-debug.log*
 # Turborepo cache
 .turbo/
 
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # OS and system files
 .DS_Store
 Thumbs.db

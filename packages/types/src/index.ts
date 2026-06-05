@@ -1,19 +1,24 @@
-import { z } from "zod";
+/**
+ * @mw/types — shared domain types, Zod schemas, and canonical constants.
+ *
+ * Every external boundary (backend, RSS, env, form input) is validated with a Zod
+ * schema here and converted into a typed domain model before it touches the UI (§3).
+ */
 
-export const ArticleSchema = z.object({
-  id: z.string(),                  // stable hash of Substack guid/link
-  title: z.string(),
-  slug: z.string(),                // URL-safe; immutable after first ingest
-  category: z.string(),            // one of the 8 category slugs (auto or manual)
-  tags: z.array(z.string()).default([]),
-  excerpt: z.string(),
-  bodyHtml: z.string(),            // sanitized HTML (Cloudinary-rewritten images)
-  coverImage: z.string().url().optional(),  // Cloudinary URL
-  publishedAt: z.string(),         // ISO string (serializable across RSC boundary)
-  readingTime: z.number().int().positive(),
-  substackUrl: z.string().url(),
-  featured: z.boolean().default(false),
-  categoryLocked: z.boolean().default(false), // true once an editor sets category manually
-});
+// Content
+export * from './article.schema';
+export * from './categories';
+export * from './start-here';
 
-export type Article = z.infer<typeof ArticleSchema>;
+// Commerce
+export * from './cart';
+export * from './order';
+
+// Store entities
+export * from './store';
+
+// Config & operations
+export * from './contact';
+export * from './site-config';
+export * from './audit-log';
+export * from './operator';

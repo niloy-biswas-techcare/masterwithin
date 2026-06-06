@@ -220,7 +220,8 @@ folders hold **composition only** (§9). Editorial gradient enforced (§1).
 - [x] ISR + hydrated client cache.
 
 ### 6.3 Wisdom Library (§7.2, §7.3)
-- [x] `/wisdom`: `CategoryGrid` (8 cards w/ counts), `SearchBar` + `TagFilter` (client Fuse.js over prebuilt index), `ArticleList`, indexable pagination (`?page=`) + optional "load more".
+
+- [x] `/wisdom`: **redesigned** — hero section (ambient gradient, large Lora H1, centered search bar, stats line); horizontal sticky category filter pill bar (replaces static 8-card grid); full-width 3-col article grid with Framer Motion stagger entrance; animated results/filter header; bottom contemplative CTA; no right-side tag-filter panel.
 - [x] Build-time/revalidate **search index** JSON (`{id,title,excerpt,tags,category,slug}`) as static asset behind a `SearchProvider` interface (§12.4).
 - [x] `/wisdom/[category]`: per-category ISR listing.
 - [x] `/wisdom/[category]/[slug]`: article — title/date/reading-time/category badge/clickable tags, `ReadingProgress`, `Prose` (sanitized HTML), `RelatedArticles` (viewport-prefetched), `ShareButtons`, "Read on Substack", `Article`+`BreadcrumbList` JSON-LD.

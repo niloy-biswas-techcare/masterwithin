@@ -451,7 +451,7 @@ This gradient is enforced through CSS and component choices, not just copy — a
 #### 4a.4.3 Attention architecture (F-pattern and Z-pattern)
 
 - **Home page:** Z-pattern layout. Hero → Featured Articles (left-right grid) → Full-width YouTube → Course teaser (left text, right CTA) → Store teaser.
-- **Wisdom Library:** F-pattern. Category grid at top (wide), then article list (left-dominant).
+- **Wisdom Library:** Hero-search pattern. Ambient gradient hero with large title + prominent centered search bar. Horizontal sticky category-filter pill bar below the hero (replaces the static category-card grid). Full-width article grid (no sidebar, no tag filter panel).
 - **Article page:** Single-column reading column, centered, max 720px. No sidebars. Nothing competes with the text.
 - **The above patterns mean:** on mobile, everything stacks correctly without cognitive cost.
 
@@ -572,9 +572,12 @@ Start Here). Any design that obscures these three signals should be changed.
 
 #### Wisdom Library visual hierarchy
 
-- **Category grid:** 4-column on desktop, 2-column on tablet, 1-column on mobile. Each `CategoryCard` has icon + article count. The 8 categories are always shown together — never paginated.
-- **Article list below:** full-width cards in single column, or 2-column on wide desktop.
-- **Search bar:** centered, `max-w-xl`, generous padding, `rounded-xl`, subtle `shadow-sm`, focus-visible ring.
+- **Hero section:** ambient radial-gradient background + dot-grid texture at 3% opacity. Large Lora H1 (`clamp(2.75rem, 5vw, 4.5rem)`), sub-headline, centered `max-w-xl` search bar with icon + animated clear button, and a stats line ("X writings · 8 domains of inquiry"). Entrance: staggered `fadeUp` Framer Motion sequence.
+- **Category filter bar:** sticky below the navbar (`top-[60px]`), horizontal overflow-scroll with `scrollbar-width: none`. Pills: "All writings" + one pill per category (icon + short label + count badge). Active pill: `bg-primary text-white shadow-sm ring-1`. Inactive: `border border-border/60`. No static category-card grid — the pill bar is the complete category navigation.
+- **No tag-filter sidebar** — removed entirely. Tags remain filterable via the search bar (Fuse.js matches tag fields).
+- **Results header:** animated `AnimatePresence` block that appears when a category or search query is active; shows category title + description, or search query + match count, plus a "Clear filters" button.
+- **Article grid:** `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, full-width (no sidebar). Framer Motion stagger entrance (`staggerChildren: 0.06`, `cardVariants` fade-up).
+- **Bottom CTA section** (visible only when no filters are active): contemplative italic pull-quote + "Find your guided entry" link to `/start-here`.
 
 #### Article page
 
@@ -688,11 +691,15 @@ Intent: orient a first-time visitor and offer two clear next steps without selli
 - **Footer** — navigation, social, newsletter (Substack subscribe), legal.
 
 ### 7.2 Wisdom Library — `/wisdom`
-- 8 category cards (icon, title, description, article count).
-- Search bar + tag filter (client-side over a prebuilt index; see §12).
-- Article cards: title, category badge, reading time, excerpt, date, cover.
+
+- **Hero section** with ambient gradient background, large Lora H1, sub-headline, and a prominent centered search bar. Stats line: "X writings · 8 domains of inquiry."
+- **Horizontal sticky category filter bar** (replaces the static 8-card grid): "All writings" pill + one pill per category (icon + short label + count). Active pill highlighted with primary colour. Horizontally scrollable on mobile with hidden scrollbar.
+- No right-side tag filter panel. Tags are still searchable via the Fuse.js search bar (matches `tags` field).
+- **Animated results header** (appears on active filter/search): category title + description or search query + match count + "Clear filters" button.
+- Article cards: title, category badge, reading time, excerpt, date, cover. 3-column grid on desktop, 2-column on tablet, 1-column on mobile. Framer Motion stagger entrance.
 - **Intent-prefetch:** hovering/touching a card prefetches the article into the TanStack Query cache and warms Next's route, so opening it feels instant (§12).
-- Pagination (SEO-friendly, indexable `?page=` or `/page/[n]`) rather than infinite scroll; optional "load more" as enhancement.
+- Pagination (SEO-friendly, indexable `?page=`) rather than infinite scroll.
+- **Bottom CTA** (when no filters active): contemplative pull-quote + "Find your guided entry" link to `/start-here`.
 
 ### 7.3 Article — `/wisdom/[category]/[slug]`
 - Title, publish date, reading time, category badge, clickable tags.

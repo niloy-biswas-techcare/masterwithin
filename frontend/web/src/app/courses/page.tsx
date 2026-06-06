@@ -78,7 +78,7 @@ export default async function CoursesPage() {
   const sortedCourses = [...displayedCourses].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="mx-auto max-w-content px-6 py-12 flex flex-col gap-16">
+    <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10 section-md flex flex-col gap-16">
       {/* Page Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center">
         <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-primary uppercase">

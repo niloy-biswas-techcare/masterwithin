@@ -26,7 +26,7 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
   };
 
   return (
-    <div className="mx-auto max-w-content px-6 py-12 flex flex-col gap-16">
+    <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10 section-md flex flex-col gap-16">
       {/* Header */}
       <div>
         <span className="text-xs font-semibold uppercase tracking-wider text-primary">Store</span>

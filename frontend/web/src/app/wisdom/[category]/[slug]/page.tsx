@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getArticle, listArticles } from '@mw/backend';
 import { getCategoryBySlug } from '@mw/types';
-import { Prose, Badge, CldImage } from '@mw/ui';
+import { Prose, Badge } from '@mw/ui';
 import { formatDate } from '@mw/utils';
 import { ReadingProgress } from '@/components/shared/ReadingProgress';
 import { ShareButtons } from '@/components/shared/ShareButtons';
@@ -172,24 +172,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Article Body */}
         <div className="mx-auto max-w-3xl px-6 py-12 md:py-16 flex flex-col gap-12">
-          {/* Main Cover Image */}
-          {article.coverImage && (
-            <div className="overflow-hidden rounded-xl border border-border shadow-sm">
-              <CldImage
-                src={article.coverImage}
-                alt=""
-                width={800}
-                height={450}
-                className="aspect-video w-full object-cover"
-                priority
-              />
-            </div>
-          )}
-
           {/* Editorial Prose Content */}
-          <Prose>
-            <div dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
-          </Prose>
+          <Prose html={article.bodyHtml} />
 
           {/* Clickable tags */}
           {article.tags && article.tags.length > 0 && (

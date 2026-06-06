@@ -51,7 +51,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-content px-6 py-12 flex flex-col gap-8">
+    <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10 section-md flex flex-col gap-8">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text/50">
         <Link href="/" className="hover:text-primary transition-colors">Home</Link>

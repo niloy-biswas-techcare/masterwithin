@@ -26,6 +26,9 @@ importers:
       '@mw/types':
         specifier: workspace:*
         version: link:../packages/types
+      '@mw/utils':
+        specifier: workspace:*
+        version: link:../packages/utils
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -36,6 +39,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.41
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@20.19.41)(jsdom@25.0.1)(lightningcss@1.32.0)
 
   frontend/admin:
     dependencies:

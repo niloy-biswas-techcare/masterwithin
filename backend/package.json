@@ -7,16 +7,19 @@
   "scripts": {
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "db:types": "echo 'Stub: db:types'",
     "db:migrate": "echo 'Stub: db:migrate'",
     "db:seed": "echo 'Stub: db:seed'"
   },
   "dependencies": {
     "zod": "^3.22.0",
-    "@mw/types": "workspace:*"
+    "@mw/types": "workspace:*",
+    "@mw/utils": "workspace:*"
   },
   "devDependencies": {
     "@mw/config": "workspace:*",
-    "@types/node": "^20"
+    "@types/node": "^20",
+    "vitest": "^2.1.0"
   }
 }

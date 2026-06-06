@@ -97,25 +97,25 @@ Goal: the entire domain + application layer with **zero** framework/IO dependenc
 is one adapter. Built and tested before any Supabase code exists. (§2a, §9, §20)
 
 ### 2.1 Domain layer (`backend/domain`)
-- [ ] Entities: `Article`, `Book`, `Ebook`, `Course`, `Freebie`, `Order`, `Contact`, `SiteConfig`, `StartHere`, `AuditLog`, `Operator` — pure, no IO (§9).
-- [ ] **Ports (interfaces):** `ArticleRepository`, `BookRepository`, `EbookRepository`, `CourseRepository`, `FreebieRepository`, `OrderRepository`, `ContactRepository`, `SiteConfigRepository`, `StartHereRepository`, `AuditLogRepository` (§9).
-- [ ] `AuthGateway` port: `signIn`, `verifySession`, `revoke`, role lookup (§17.2). 🔒
-- [ ] `StorageGateway` port: signed image upload (Cloudinary) + signed file upload (Supabase Storage) (§17.7).
+- [x] Entities: `Article`, `Book`, `Ebook`, `Course`, `Freebie`, `Order`, `Contact`, `SiteConfig`, `StartHere`, `AuditLog`, `Operator` — pure, no IO (§9).
+- [x] **Ports (interfaces):** `ArticleRepository`, `BookRepository`, `EbookRepository`, `CourseRepository`, `FreebieRepository`, `OrderRepository`, `ContactRepository`, `SiteConfigRepository`, `StartHereRepository`, `AuditLogRepository` (§9).
+- [x] `AuthGateway` port: `signIn`, `verifySession`, `revoke`, role lookup (§17.2). 🔒
+- [x] `StorageGateway` port: signed image upload (Cloudinary) + signed file upload (Supabase Storage) (§17.7).
 
 ### 2.2 Application use-cases (`backend/application`) — depend only on ports
-- [ ] Articles: `listArticles`, `getArticle`, `syncSubstack`, `featureArticle`, `overrideCategory`, `importBySubstackUrl` (§8, §17.5).
-- [ ] Store: `listBooks`/`upsertBook`, `listEbooks`/`upsertEbook`, `listFreebies`/`upsertFreebie`, `listCourses`/`upsertCourse`, `placeOrder` (§10.3, §17.5).
-- [ ] Content helpers (backend-agnostic): `sanitize.ts` (HTML allowlist), `autoCategorize.ts` (keyword match + `categoryLocked` respect), `substackRss.ts` (fetch+parse+normalize) (§8). 🧪
-- [ ] Config/curation: `getSiteConfig`/`updateSiteConfig`, `getStartHere`/`updateStartHere` (§17.5).
-- [ ] Contacts: `submitContact` (validate → persist → email hook) (§7.9).
-- [ ] Audit: `writeAuditLog` (actor, action, entity, diff) (§17.4, §17.9). 🔒
-- [ ] Auth use-case: `requireOperator(role?)` — re-verify cookie + role, the real authz boundary (§17.3). 🔒
-- [ ] Authoritative-price re-read in `placeOrder` (cart price is display-only) (§10.4).
+- [x] Articles: `listArticles`, `getArticle`, `syncSubstack`, `featureArticle`, `overrideCategory`, `importBySubstackUrl` (§8, §17.5).
+- [x] Store: `listBooks`/`upsertBook`, `listEbooks`/`upsertEbook`, `listFreebies`/`upsertFreebie`, `listCourses`/`upsertCourse`, `placeOrder` (§10.3, §17.5).
+- [x] Content helpers (backend-agnostic): `sanitize.ts` (HTML allowlist), `autoCategorize.ts` (keyword match + `categoryLocked` respect), `substackRss.ts` (fetch+parse+normalize) (§8). 🧪
+- [x] Config/curation: `getSiteConfig`/`updateSiteConfig`, `getStartHere`/`updateStartHere` (§17.5).
+- [x] Contacts: `submitContact` (validate → persist → email hook) (§7.9).
+- [x] Audit: `writeAuditLog` (actor, action, entity, diff) (§17.4, §17.9). 🔒
+- [x] Auth use-case: `requireOperator(role?)` — re-verify cookie + role, the real authz boundary (§17.3). 🔒
+- [x] Authoritative-price re-read in `placeOrder` (cart price is display-only) (§10.4).
 
 ### 2.3 In-memory adapter + contract suite
-- [ ] In-memory implementation of every port (for tests + local dev fallback) (§20).
-- [ ] **Shared port-contract test suite** any adapter must pass (proves interchangeability) (§20). 🧪 ⛔
-- [ ] Unit-test all use-cases against the in-memory adapter (§20). 🧪
+- [x] In-memory implementation of every port (for tests + local dev fallback) (§20).
+- [x] **Shared port-contract test suite** any adapter must pass (proves interchangeability) (§20). 🧪 ⛔
+- [x] Unit-test all use-cases against the in-memory adapter (§20). 🧪
 
 ---
 

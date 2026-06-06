@@ -8,14 +8,16 @@
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:types": "echo 'Stub: db:types'",
-    "db:migrate": "echo 'Stub: db:migrate'",
-    "db:seed": "echo 'Stub: db:seed'"
+    "db:types": "npx supabase gen types typescript --local > infra/supabase/generated/types.ts",
+    "db:migrate": "npx supabase db push",
+    "db:seed": "npx vite-node scripts/seed.ts",
+    "db:grant-admin": "npx vite-node scripts/grant-admin.ts"
   },
   "dependencies": {
-    "zod": "^3.22.0",
     "@mw/types": "workspace:*",
-    "@mw/utils": "workspace:*"
+    "@mw/utils": "workspace:*",
+    "@supabase/supabase-js": "^2.107.0",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@mw/config": "workspace:*",

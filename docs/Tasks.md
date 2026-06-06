@@ -125,30 +125,30 @@ Goal: the current backend implementation behind the ports, plus the composition 
 `BACKEND_DRIVER`. (§3, §9, §15, §16, §17)
 
 ### 3.1 Database schema & migrations (`backend/infra/supabase`)
-- [ ] Migrations for all tables in §16: `articles`, `books`, `ebooks`, `freebies`, `courses`, `contacts`, `orders`, `site_config`, `start_here`, `audit_logs` (+ optional `operators` mirror).
-- [ ] Row shapes match §16/§17.9 (books, orders, site_config, audit_logs).
-- [ ] Indexes for list queries, slug lookups, and tag/full-text search (§6, §12.4).
-- [ ] `supabase gen types` → `backend/infra/supabase/generated/types.ts`; wire `pnpm db:types` (§21.3).
+- [x] Migrations for all tables in §16: `articles`, `books`, `ebooks`, `freebies`, `courses`, `contacts`, `orders`, `site_config`, `start_here`, `audit_logs` (+ optional `operators` mirror).
+- [x] Row shapes match §16/§17.9 (books, orders, site_config, audit_logs).
+- [x] Indexes for list queries, slug lookups, and tag/full-text search (§6, §12.4).
+- [x] `supabase gen types` → `backend/infra/supabase/generated/types.ts`; wire `pnpm db:types` (§21.3).
 
 ### 3.2 Row-Level Security  🔒
-- [ ] Enable RLS on every table (§16).
-- [ ] Public-read policies on public-content tables; **no** insert/update/delete policies (writes via service role only) (§16).
-- [ ] `contacts`/`orders`/`audit_logs`: no permissive policies (private) (§16).
-- [ ] Optional `operators` read policy gated on JWT role claim (§16).
+- [x] Enable RLS on every table (§16).
+- [x] Public-read policies on public-content tables; **no** insert/update/delete policies (writes via service role only) (§16).
+- [x] `contacts`/`orders`/`audit_logs`: no permissive policies (private) (§16).
+- [x] Optional `operators` read policy gated on JWT role claim (§16).
 
 ### 3.3 Supabase adapter (`backend/adapters/supabase`)
-- [ ] `client.ts`: service-role (server-only) + SSR clients; never importable by frontends (§3, §24). 🔒
-- [ ] One `*Repository.supabase.ts` per port, validated against §16 schema.
-- [ ] `auth.supabase.ts`: implements `AuthGateway` via Supabase Auth + `@supabase/ssr` cookies (§17.2). 🔒
-- [ ] `storage.ts`: Cloudinary signed image upload + Supabase Storage signed file URLs (§17.7).
-- [ ] **Run the Supabase adapter through the Phase 2 contract suite** — must pass unchanged (§20). 🧪 ⛔
+- [x] `client.ts`: service-role (server-only) + SSR clients; never importable by frontends (§3, §24). 🔒
+- [x] One `*Repository.supabase.ts` per port, validated against §16 schema.
+- [x] `auth.supabase.ts`: implements `AuthGateway` via Supabase Auth + `@supabase/ssr` cookies (§17.2). 🔒
+- [x] `storage.ts`: Cloudinary signed image upload + Supabase Storage signed file URLs (§17.7).
+- [x] **Run the Supabase adapter through the Phase 2 contract suite** — must pass unchanged (§20). 🧪 ⛔
 
 ### 3.4 Composition root & operator provisioning
-- [ ] `backend/index.ts`: read `BACKEND_DRIVER`, wire adapter → use-cases, export **use-cases as the only public surface** (§9). ⛔
-- [ ] Stub `backend/adapters/http` directory + README for the future FastAPI adapter (interfaces only) (§9, §23).
-- [ ] `scripts/grant-admin.ts`: one-time bootstrap of `admin` role to `ADMIN_BOOTSTRAP_EMAIL` (§17.6). 🔒
-- [ ] Disable Supabase self-service signup; enforce `ADMIN_ALLOWLIST` gate in `signIn`/`verifySession` (§15, §17.6). 🔒
-- [ ] Seed script (`pnpm db:seed`): categories sanity, a sample book/course/freebie, site_config singleton, bootstrap admin (§25).
+- [x] `backend/index.ts`: read `BACKEND_DRIVER`, wire adapter → use-cases, export **use-cases as the only public surface** (§9). ⛔
+- [x] Stub `backend/adapters/http` directory + README for the future FastAPI adapter (interfaces only) (§9, §23).
+- [x] `scripts/grant-admin.ts`: one-time bootstrap of `admin` role to `ADMIN_BOOTSTRAP_EMAIL` (§17.6). 🔒
+- [x] Disable Supabase self-service signup; enforce `ADMIN_ALLOWLIST` gate in `signIn`/`verifySession` (§15, §17.6). 🔒
+- [x] Seed script (`pnpm db:seed`): categories sanity, a sample book/course/freebie, site_config singleton, bootstrap admin (§25).
 
 ---
 

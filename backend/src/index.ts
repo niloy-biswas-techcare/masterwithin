@@ -1,5 +1,17 @@
 import { env } from './env';
 import { createInMemoryPorts } from './adapters/inmemory';
+import { SupabaseArticleRepository } from './adapters/supabase/ArticleRepository.supabase';
+import { SupabaseBookRepository } from './adapters/supabase/BookRepository.supabase';
+import { SupabaseEbookRepository } from './adapters/supabase/EbookRepository.supabase';
+import { SupabaseCourseRepository } from './adapters/supabase/CourseRepository.supabase';
+import { SupabaseFreebieRepository } from './adapters/supabase/FreebieRepository.supabase';
+import { SupabaseOrderRepository } from './adapters/supabase/OrderRepository.supabase';
+import { SupabaseContactRepository } from './adapters/supabase/ContactRepository.supabase';
+import { SupabaseSiteConfigRepository } from './adapters/supabase/SiteConfigRepository.supabase';
+import { SupabaseStartHereRepository } from './adapters/supabase/StartHereRepository.supabase';
+import { SupabaseAuditLogRepository } from './adapters/supabase/AuditLogRepository.supabase';
+import { SupabaseAuthGateway } from './adapters/supabase/auth.supabase';
+import { SupabaseStorageGateway } from './adapters/supabase/storage';
 import type { Ports } from './domain';
 import {
   makeListArticles,
@@ -33,8 +45,20 @@ import {
 let ports: Ports;
 
 if (env.BACKEND_DRIVER === 'supabase') {
-  // Fallback to in-memory during Phase 2 before Supabase adapter exists
-  ports = createInMemoryPorts();
+  ports = {
+    articles: new SupabaseArticleRepository(),
+    books: new SupabaseBookRepository(),
+    ebooks: new SupabaseEbookRepository(),
+    courses: new SupabaseCourseRepository(),
+    freebies: new SupabaseFreebieRepository(),
+    orders: new SupabaseOrderRepository(),
+    contacts: new SupabaseContactRepository(),
+    siteConfig: new SupabaseSiteConfigRepository(),
+    startHere: new SupabaseStartHereRepository(),
+    auditLogs: new SupabaseAuditLogRepository(),
+    auth: new SupabaseAuthGateway(),
+    storage: new SupabaseStorageGateway(),
+  };
 } else if (env.BACKEND_DRIVER === 'fastapi') {
   // Fallback to in-memory during Phase 2
   ports = createInMemoryPorts();

@@ -359,14 +359,14 @@ The §20 matrix, completed for the whole system. (§20)
 
 Goal: the §21 pipeline fully live — Actions own gates + Supabase; Vercel owns frontend build/host. (§21)
 
-- [ ] `ci.yml` finalized: typecheck · lint · unit+component+contract · build · Playwright smoke · Lighthouse — all **required checks** (§21.2). ⛔
-- [ ] `db-migrate.yml` finalized: `supabase db push` · **gen-types drift check** · deploy Edge Functions, on merge to `main` (§21.3). 🔒
-- [ ] Vercel Git integration: `frontend/web` → `masterwithin.org`, `frontend/admin` → `admin.masterwithin.org`; per-PR previews (one per app) (§21).
-- [ ] Turbo remote cache hash shared CI ↔ Vercel (§21).
-- [ ] GitHub Environments/secrets per §21.4; **no app secret duplicated into Vercel by Actions**.
-- [ ] Vercel runtime env populated per §15 for production + preview (isolated) (§15, §21).
-- [ ] Supabase Edge Function cron deployed + scheduled (hourly sync) (§21.4).
-- [ ] Rollback drill: confirm Vercel immutable rollback + forward-fix migration policy (expand-then-contract) (§21.1, §21.4).
+- [x] `ci.yml` finalized: typecheck · lint · unit+component+contract · build · Playwright smoke · Lighthouse — all **required checks** (§21.2). ⛔
+- [x] `db-migrate.yml` finalized: `supabase db push` · **gen-types drift check** · deploy Edge Functions, on merge to `main` (§21.3). 🔒
+- [x] Vercel Git integration: `frontend/web` → `masterwithin.org`, `frontend/admin` → `admin.masterwithin.org`; per-PR previews (one per app) (§21).
+- [x] Turbo remote cache hash shared CI ↔ Vercel (§21).
+- [x] GitHub Environments/secrets per §21.4; **no app secret duplicated into Vercel by Actions**.
+- [x] Vercel runtime env populated per §15 for production + preview (isolated) (§15, §21).
+- [x] Supabase Edge Function cron deployed + scheduled (hourly sync) (§21.4).
+- [x] Rollback drill: confirm Vercel immutable rollback + forward-fix migration policy (expand-then-contract) (§21.1, §21.4).
 
 ---
 

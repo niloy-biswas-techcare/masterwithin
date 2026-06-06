@@ -12,24 +12,37 @@ jobs:
     environment: production
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
+      # All supabase CLI commands use working-directory: backend/infra so the CLI
+      # discovers supabase/config.toml at the expected relative path.
+
       - name: Link project
-        run: supabase --workdir backend/infra link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+        working-directory: backend/infra
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
 
       - name: Apply migrations
-        run: supabase --workdir backend/infra db push
+        working-directory: backend/infra
+        run: supabase db push
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
+      # Regenerate types and fail if the committed file is stale (drift check).
+      # Developers must run `pnpm db:types` locally and commit the result.
       - name: Verify generated types are in sync (drift check)
         run: |
-          supabase --workdir backend/infra gen types typescript --linked > backend/infra/supabase/generated/types.ts
-          git diff --exit-code backend/infra/supabase/generated/types.ts || (echo "::error::generated/types.ts is stale — run 'pnpm db:types' and commit" && exit 1)
+          cd backend/infra
+          supabase gen types typescript --linked > supabase/generated/types.ts
+          cd ../..
+          git diff --exit-code backend/infra/supabase/generated/types.ts \
+            || (echo "::error::generated/types.ts is stale — run 'pnpm db:types' and commit" && exit 1)
 
-      - name: Deploy Edge Functions (incl. syncSubstack cron)
-        run: supabase --workdir backend/infra functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+      - name: Deploy Edge Functions (incl. sync-substack hourly cron)
+        working-directory: backend/infra
+        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"

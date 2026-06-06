@@ -8,17 +8,20 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow-level env inherits to all jobs — Turbo remote cache shared across every job.
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+  # ── 1. Type-check · Lint · Unit/Component/Contract tests · Build ─────────────
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0       # full history → turbo affected diff
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -40,29 +43,80 @@ jobs:
       - name: Build (all apps/packages)
         run: pnpm turbo run build
 
+  # ── 2. Playwright E2E smoke (critical journeys — §20) ────────────────────────
   e2e:
     runs-on: ubuntu-latest
+    env:
+      CI: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: tests
+
+      # playwright.config.ts sets webServer: undefined when CI=true, so the workflow
+      # owns the server lifecycle: build → start → wait → test.
+      - name: Build web app for E2E
+        run: pnpm turbo run build --filter web
+
+      - name: Start web server (background)
+        run: pnpm --filter web start > /tmp/web-server.log 2>&1 &
+
+      - name: Wait for web server to be ready
+        run: |
+          echo "Waiting for http://localhost:3000 …"
+          timeout 60 bash -c 'until curl -sf http://localhost:3000 > /dev/null; do sleep 2; done'
+          echo "Server is ready."
+
       - name: Playwright smoke (critical journeys)
         run: pnpm turbo run test:e2e
+        env:
+          BASE_URL: http://localhost:3000
 
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+          retention-days: 7
+
+  # ── 3. Lighthouse CI (public web app only — §13 budget) ──────────────────────
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Lighthouse CI (web app only)
-        run: pnpm dlx @lhci/cli autorun --collect.startServerCommand="pnpm --filter web start"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `next start` requires a production build — run it before lhci spins up the server.
+      - name: Build web app for Lighthouse
+        run: pnpm turbo run build --filter web
+
+      - name: Lighthouse CI (web app only — §13 budget)
+        run: |
+          pnpm dlx @lhci/cli autorun \
+            --config=frontend/web/.lighthouserc.json \
+            --collect.startServerCommand="pnpm --filter web start" \
+            --collect.url=http://localhost:3000

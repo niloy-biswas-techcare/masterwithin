@@ -37,7 +37,7 @@ export function ArticleCard({
 }: ArticleCardProps) {
   const LinkEl: React.ElementType = linkComponent ?? 'a';
   return (
-    <Card className={cn('flex flex-col overflow-hidden group', className)}>
+    <Card className={cn('flex flex-col overflow-hidden group transition-transform duration-150 active:scale-[0.98]', className)}>
       <LinkEl
         href={href}
         className="flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -60,14 +60,14 @@ export function ArticleCard({
 
         <div className="flex flex-col gap-2 p-5 flex-1">
           {/* Required metadata row: [CategoryBadge] · [ReadingTime] · [PublishedDate] */}
-          <div className="flex items-center gap-2 text-[13px] text-text/60 font-body">
-            <Badge variant="primary" className="shrink-0">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-text/60 font-body">
+            <Badge variant="primary" className="shrink-0 max-w-[200px] truncate">
               {categoryLabel ?? article.category}
             </Badge>
             <span aria-hidden="true">·</span>
-            <span>{article.readingTime} min</span>
+            <span className="whitespace-nowrap">{article.readingTime} min</span>
             <span aria-hidden="true">·</span>
-            <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+            <time dateTime={article.publishedAt} className="whitespace-nowrap">{formatDate(article.publishedAt)}</time>
           </div>
 
           <h3 className="font-display font-semibold text-xl leading-snug text-text group-hover:text-deep transition-colors">

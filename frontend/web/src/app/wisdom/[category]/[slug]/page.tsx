@@ -129,86 +129,90 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <article className="w-full bg-bg">
         {/* Banner / Cover Header */}
         <div className="relative border-b border-border/20 bg-surface/30 py-16 md:py-24">
-          <div className="mx-auto max-w-3xl px-5 sm:px-8 lg:px-10 flex flex-col gap-6">
-            
-            {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text/50">
-              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-              <ChevronRight className="h-3.5 w-3.5" />
-              <Link href="/wisdom" className="hover:text-primary transition-colors">Wisdom</Link>
-              <ChevronRight className="h-3.5 w-3.5" />
-              <Link href={`/wisdom/${categorySlug}`} className="hover:text-primary transition-colors">
-                {category.title}
+          <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10">
+            <div className="mx-auto max-w-3xl flex flex-col gap-6">
+
+              {/* Breadcrumbs */}
+              <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text/50">
+                <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <Link href="/wisdom" className="hover:text-primary transition-colors">Wisdom</Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <Link href={`/wisdom/${categorySlug}`} className="hover:text-primary transition-colors">
+                  {category.title}
+                </Link>
+              </nav>
+
+              <Link
+                href={`/wisdom/${categorySlug}`}
+                className="group inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" /> Back to {category.title}
               </Link>
-            </nav>
 
-            <Link
-              href={`/wisdom/${categorySlug}`}
-              className="group inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" /> Back to {category.title}
-            </Link>
+              <h1 className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl leading-tight">
+                {article.title}
+              </h1>
 
-            <h1 className="font-display text-3xl font-bold tracking-tight text-text sm:text-4xl md:text-5xl leading-tight">
-              {article.title}
-            </h1>
-
-            {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-text/70 border-t border-border/40 pt-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="primary">{category.title}</Badge>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-text/50" />
-                <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-text/50" />
-                <span>{article.readingTime} min read</span>
+              {/* Meta row */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-text/70 border-t border-border/40 pt-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="primary">{category.title}</Badge>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-text/50" />
+                  <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-text/50" />
+                  <span>{article.readingTime} min read</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Article Body */}
-        <div className="mx-auto max-w-3xl px-5 sm:px-8 lg:px-10 py-12 md:py-16 flex flex-col gap-12">
-          {/* Editorial Prose Content */}
-          <Prose html={article.bodyHtml} />
+        {/* Article Body — outer container matches home page width, prose column centered inside */}
+        <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10 py-12 md:py-16">
+          <div className="mx-auto max-w-3xl flex flex-col gap-12">
+            {/* Editorial Prose Content */}
+            <Prose html={article.bodyHtml} />
 
-          {/* Clickable tags */}
-          {article.tags && article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-t border-b border-border/40 py-4 my-4">
-              {article.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/wisdom?tag=${tag}`}
-                  className="text-xs bg-surface border border-border/60 hover:bg-surface-hover hover:border-primary text-text/70 hover:text-primary transition-all px-2.5 py-1 rounded-full"
-                >
-                  #{tag}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Social Share & Substack Attribution */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-surface/30 border border-border/40 rounded-xl p-6">
-            <ShareButtons title={article.title} />
-            
-            {article.substackUrl && (
-              <a
-                href={article.substackUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white hover:bg-orange-700 transition-colors shadow-sm"
-              >
-                Read & Comment on Substack
-              </a>
+            {/* Clickable tags */}
+            {article.tags && article.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 border-t border-b border-border/40 py-4 my-4">
+                {article.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/wisdom?tag=${tag}`}
+                    className="text-xs bg-surface border border-border/60 hover:bg-surface-hover hover:border-primary text-text/70 hover:text-primary transition-all px-2.5 py-1 rounded-full"
+                  >
+                    #{tag}
+                  </Link>
+                ))}
+              </div>
             )}
+
+            {/* Social Share & Substack Attribution */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-surface/30 border border-border/40 rounded-xl p-6">
+              <ShareButtons title={article.title} />
+
+              {article.substackUrl && (
+                <a
+                  href={article.substackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white hover:bg-orange-700 transition-colors shadow-sm"
+                >
+                  Read & Comment on Substack
+                </a>
+              )}
+            </div>
           </div>
 
-          {/* Related Articles Section */}
+          {/* Related Articles Section — full-width within max-w-280, matching home page */}
           {relatedArticles.length > 0 && (
-            <div className="border-t border-border/40 pt-16 mt-8">
+            <div className="border-t border-border/40 pt-16 mt-16">
               <h2 className="font-display text-2xl font-bold tracking-tight text-text mb-8">
                 Keep Inquiring
               </h2>

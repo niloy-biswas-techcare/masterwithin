@@ -18,7 +18,7 @@ export function RelatedArticlesClient({ articles }: RelatedArticlesClientProps) 
           article={art}
           href={`/wisdom/${art.category}/${art.slug}`}
           categoryLabel={CATEGORIES.find((c) => c.slug === art.category)?.title}
-          className="h-full hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+          className="h-full"
         />
       ))}
     </div>

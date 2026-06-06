@@ -346,12 +346,12 @@ Revisit each prior phase against these; they are **acceptance criteria**, not a 
 
 The §20 matrix, completed for the whole system. (§20)
 
-- [ ] **Unit (Vitest):** WhatsApp message builder, auto-categorizer, cart math, Zod schemas, `slugify`, `requireOperator` role logic, audit-diff builder, use-cases vs in-memory adapter.
-- [ ] **Component (Vitest + RTL + axe):** cards, forms, cart drawer, admin `EntityForm`/`DataTable`, prefetch/hydration behavior.
-- [ ] **Contract (Vitest):** every adapter (Supabase now, http later) passes the shared port-contract suite (interchangeability proof). ⛔
-- [ ] **E2E (Playwright):** browse → article; add-to-cart → WhatsApp order; contact submit; search/filter; **offline reload still reads cached content**.
-- [ ] **E2E admin:** login → create/edit/publish a book → appears on `/store`; unauthenticated admin routes redirect to `/login`; `editor` denied operator-management. 🔒
-- [ ] **Quality gates:** ESLint, Prettier, `tsc --noEmit`, Lighthouse CI all green per-app via Turbo, merge-blocking (§20, §21).
+- [x] **Unit (Vitest):** WhatsApp message builder, auto-categorizer, cart math, Zod schemas, `slugify`, `requireOperator` role logic, audit-diff builder, use-cases vs in-memory adapter.
+- [x] **Component (Vitest + RTL + axe):** cards, forms, cart drawer, admin `EntityForm`/`DataTable`, prefetch/hydration behavior.
+- [x] **Contract (Vitest):** every adapter (Supabase now, http later) passes the shared port-contract suite (interchangeability proof). ⛔
+- [x] **E2E (Playwright):** browse → article; add-to-cart → WhatsApp order; contact submit; search/filter; **offline reload still reads cached content**.
+- [x] **E2E admin:** login → create/edit/publish a book → appears on `/store`; unauthenticated admin routes redirect to `/login`; `editor` denied operator-management. 🔒
+- [x] **Quality gates:** ESLint, Prettier, `tsc --noEmit`, Lighthouse CI all green per-app via Turbo, merge-blocking (§20, §21).
 
 ---
 

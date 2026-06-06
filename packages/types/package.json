@@ -6,12 +6,14 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc --build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@mw/config": "workspace:*"
+    "@mw/config": "workspace:*",
+    "vitest": "^2.1.0"
   }
 }

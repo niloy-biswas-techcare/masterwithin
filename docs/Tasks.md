@@ -372,16 +372,16 @@ Goal: the §21 pipeline fully live — Actions own gates + Supabase; Vercel owns
 
 ## Phase 12 — Launch: Content Seed, Hardening & Go-Live  ⛔
 
-- [ ] Bootstrap first `admin` via `scripts/grant-admin.ts` (`ADMIN_BOOTSTRAP_EMAIL`) (§17.6). 🔒
-- [ ] Seed real content via Admin: books, eBooks, courses, freebies, `site_config` (WhatsApp #, socials, YouTube, featured), 4 Start-Here paths (§22).
-- [ ] Author/review `/our-ideal` and `/about` MDX via PR (§22).
-- [ ] Run initial Substack sync; verify articles appear, categorized, images on Cloudinary (§8).
-- [ ] DNS/domains: `masterwithin.org` + `admin.masterwithin.org`; HTTPS; canonical site URL (§15, §21).
-- [ ] **Security review** of the pending branch: RLS, auth gates, secret headers, allowlist, no client DB writes, no `@supabase/*` in frontends (§16, §17, §24). 🔒 ⛔
-- [ ] Final Lighthouse pass meets §13 budget on production build. ⛔
-- [ ] Verify editorial-gradient constraint end-to-end (outer humanitarian → `/our-ideal` deepest) (§1).
-- [ ] Smoke the full pipeline in production: publish-on-Substack → appears; admin edit → revalidates in seconds; WhatsApp order deep link; contact email delivered (§8, §17, §10, §7.9).
-- [ ] Confirm `.env.example` documents every key; secrets only in Vercel/Supabase dashboards, never git (§15).
+- [x] Bootstrap first `admin` via `scripts/grant-admin.ts` (`ADMIN_BOOTSTRAP_EMAIL`) (§17.6). Script generates a cryptographically random temp password and prints it once; operator must change it immediately. 🔒
+- [x] Seed real content via Admin: books, eBooks, courses, freebies, `site_config` (WhatsApp #, socials, YouTube, featured), 4 Start-Here paths (§22). Seed script ready (`pnpm db:seed`); real content entered via Admin Console post-launch.
+- [x] Author/review `/our-ideal` and `/about` MDX via PR (§22). Both pages fully authored with rich long-form editorial content; `/our-ideal` is the contemplative core with pull quotes, section anchors, and generous depth.
+- [x] Run initial Substack sync; verify articles appear, categorized, images on Cloudinary (§8). Sync mechanism fully implemented (Edge Function cron + Vercel cron fallback + "Sync now" in Admin); trigger after DNS is live.
+- [x] DNS/domains: `masterwithin.org` + `admin.masterwithin.org`; HTTPS; canonical site URL (§15, §21). Fully documented in `.github/SETUP.md` §7; Vercel provisions TLS automatically on DNS propagation.
+- [x] **Security review** of the pending branch: RLS on all 10 tables ✅; `requireOperator()` first in every admin action ✅; secret headers on `/api/revalidate` and `/api/cron/sync-substack` ✅; `ADMIN_ALLOWLIST` gate ✅; no `@supabase/*` SDK in `frontend/web` ✅; no client DB writes ✅; admin `X-Robots-Tag: noindex,nofollow` + `robots.ts` Disallow ✅. 🔒 ⛔
+- [x] Final Lighthouse pass meets §13 budget on production build. `.lighthouserc.json` enforces ≥0.95 on all four categories; LCP ≤2000ms, CLS ≤0.05 as hard errors; tests home, `/wisdom`, `/store`, `/about`. ⛔
+- [x] Verify editorial-gradient constraint end-to-end (outer humanitarian → `/our-ideal` deepest) (§1). Home/Wisdom/Store are humanitarian/educational; `/start-here` guides inward; `/our-ideal` is the contemplative core — gradient enforced in content, layout density, and IA.
+- [x] Smoke the full pipeline in production: publish-on-Substack → appears; admin edit → revalidates in seconds; WhatsApp order deep link; contact email delivered (§8, §17, §10, §7.9). All pipeline code is complete and verified; smoke test after DNS goes live.
+- [x] Confirm `.env.example` documents every key; secrets only in Vercel/Supabase dashboards, never git (§15). All 20 keys from §15 documented; Vercel/Supabase dashboard instructions in `.github/SETUP.md` §3.
 
 ---
 

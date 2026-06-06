@@ -1,5 +1,10 @@
+import { randomBytes } from 'crypto';
 import { supabaseAdmin } from '../src/adapters/supabase/client';
 import { env } from '../src/env';
+
+function generatePassword(): string {
+  return randomBytes(16).toString('base64url') + '!Aa1';
+}
 
 async function main() {
   console.log('[Seed] Starting database seed...');
@@ -141,9 +146,10 @@ async function main() {
           console.log('[Seed] Admin role granted to existing user.');
         }
       } else {
+        const tempPassword = generatePassword();
         const { error: createError } = await supabaseAdmin.auth.admin.createUser({
           email: adminEmail,
-          password: 'BootstrapPassword123!',
+          password: tempPassword,
           email_confirm: true,
           app_metadata: { role: 'admin' },
         });
@@ -151,6 +157,8 @@ async function main() {
           console.error('Failed to create bootstrap admin during seed:', createError);
         } else {
           console.log('[Seed] Created bootstrap admin user.');
+          console.log(`[Seed] TEMPORARY PASSWORD: ${tempPassword}`);
+          console.log('[Seed] ACTION REQUIRED: Change this password immediately after first login.');
         }
       }
     }

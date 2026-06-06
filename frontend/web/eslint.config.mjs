@@ -15,6 +15,18 @@ const eslintConfig = [
   {
     rules: {
       ...sharedPreset.rules,
+      // Guardrail (§12.6 RC 1 / Phase 6b.4): a raw `<a href="/…">` on an internal route
+      // forces a full-page browser reload. Internal navigation must use `next/link`
+      // (or a card's `linkComponent` injection point) so it stays a soft transition.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXOpeningElement[name.name='a'] > JSXAttribute[name.name='href'] > Literal[value=/^\\/(?!\\/)/]",
+          message:
+            'Use next/link for internal navigation — a raw <a href="/…"> causes a full-page reload (§12.6 RC 1).',
+        },
+      ],
     },
   },
   {

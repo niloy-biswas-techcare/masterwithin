@@ -96,7 +96,7 @@ export function CartPageClient() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-content px-6 py-16">
+      <div className="mx-auto max-w-content px-5 sm:px-8 lg:px-10 py-16">
         <EmptyState
           icon={<ShoppingBag className="h-12 w-12" />}
           title="Your shelf is waiting."
@@ -115,7 +115,7 @@ export function CartPageClient() {
   }
 
   return (
-    <div className="mx-auto max-w-content px-6 py-12">
+    <div className="mx-auto max-w-content px-5 sm:px-8 lg:px-10 py-12">
       {/* Page title */}
       <div className="mb-8 flex items-center gap-3">
         <Link

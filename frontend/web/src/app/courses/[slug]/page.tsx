@@ -131,7 +131,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
         dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
       />
 
-      <div className="mx-auto max-w-content px-6 py-12 flex flex-col gap-10">
+      <div className="mx-auto max-w-content px-5 sm:px-8 lg:px-10 py-12 flex flex-col gap-10">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text/50">
           <Link href="/" className="hover:text-primary transition-colors">Home</Link>

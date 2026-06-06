@@ -70,7 +70,7 @@ describe('ArticleCard', () => {
     render(<ArticleCard article={sampleArticle} href="/wisdom/science-of-consciousness/science-of-mind" />);
     expect(screen.getByRole('heading', { name: 'The Science of Mind' })).toBeInTheDocument();
     expect(screen.getByText(/investigation into consciousness/i)).toBeInTheDocument();
-    expect(screen.getByText(/4 min read/i)).toBeInTheDocument();
+    expect(screen.getByText(/4 min/i)).toBeInTheDocument();
   });
 
   it('renders the category badge', () => {

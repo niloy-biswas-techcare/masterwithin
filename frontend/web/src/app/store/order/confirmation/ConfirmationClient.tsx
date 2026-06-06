@@ -28,7 +28,7 @@ export function ConfirmationClient() {
   }, [clearCart]);
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-16 md:py-24 flex flex-col items-center gap-10 text-center">
+    <div className="mx-auto max-w-xl px-5 sm:px-8 lg:px-10 py-16 md:py-24 flex flex-col items-center gap-10 text-center">
       {/* Success icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 border border-success/30">
         <CheckCircle2 className="h-10 w-10 text-success" aria-hidden="true" />

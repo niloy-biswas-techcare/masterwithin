@@ -27,7 +27,7 @@ describe('CartDrawer', () => {
   it('shows the empty-state message when the cart has no items', () => {
     render(<CartDrawer trigger={<button>Cart</button>} />);
     fireEvent.click(screen.getByRole('button', { name: 'Cart' }));
-    expect(screen.getByText(/your cart is empty/i)).toBeInTheDocument();
+    expect(screen.getByText(/Your shelf is waiting/i)).toBeInTheDocument();
   });
 
   it('shows the "Browse Store" link in the empty state', () => {

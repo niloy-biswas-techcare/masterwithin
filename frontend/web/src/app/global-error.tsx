@@ -16,7 +16,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body className="bg-[#F7F8FA] text-[#2C3340] antialiased">
-        <div className="flex min-h-screen flex-col items-center justify-center py-24 px-6 text-center">
+        <div className="flex min-h-screen flex-col items-center justify-center py-24 px-5 sm:px-8 lg:px-10 text-center">
           <h2 className="font-display text-4xl font-bold text-[#C0392B]">Critical System Error</h2>
           <p className="mt-4 text-[#3D4858]">The application encountered a critical issue and must reload.</p>
           <button

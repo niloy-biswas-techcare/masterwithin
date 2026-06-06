@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getSiteConfig, listArticles } from '@mw/backend';
-import { ArticleCard } from '@mw/ui';
+import { SmartArticleCard } from '@/components/shared/SmartCards';
 import { LiteYouTube } from '@/components/shared/LiteYouTube';
 import { AnimateOnScroll } from '@/components/shared/AnimateOnScroll';
 import { HeroSection } from '@/features/home/HeroSection';
@@ -86,8 +86,8 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {displayedArticles.map((art, i) => (
-              <AnimateOnScroll key={art.id} variant="fadeUp" delay={i * 0.05}>
-                <ArticleCard
+              <AnimateOnScroll key={art.id} variant="fadeUp" delay={i * 0.05} className="h-full">
+                <SmartArticleCard
                   article={art}
                   href={`/wisdom/${art.category}/${art.slug}`}
                   className="h-full"
@@ -195,9 +195,9 @@ export default async function Home() {
 
             <div className="flex items-center justify-center gap-4 md:gap-6 relative">
               {([
-                { label: 'Self-Actualization', title: 'The Path Within', rotate: '-6deg', color: 'text-primary' },
+                { label: 'Self-Actualization', title: 'The Path Within', rotate: '-6deg', color: 'text-primary', elevated: false },
                 { label: 'Consciousness', title: 'Inner Horizons', rotate: '0deg', color: 'text-indigo-500', elevated: true },
-                { label: 'Optimal Living', title: 'Daily Code', rotate: '6deg', color: 'text-emerald-500' },
+                { label: 'Optimal Living', title: 'Daily Code', rotate: '6deg', color: 'text-emerald-500', elevated: false },
               ] as const).map((book) => (
                 <AnimateOnScroll key={book.title} variant="scaleUp">
                   <div

@@ -1,20 +1,51 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useUiStore } from '@/store/uiStore';
 import { ThemeToggle } from '../shared/ThemeToggle';
+import { articlesListKey, fetchArticlesIndex } from '@/lib/queries';
 
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
 
   const { isMobileMenuOpen, setMobileMenuOpen } = useUiStore();
   const cartItemsCount = useCartStore((state) => state.totalItems());
+
+  /**
+   * Intent-warming for primary nav (§12.2, §12.6 RC 4): on hover/focus, prefetch the
+   * destination **route** and warm its **query data** so the page is cache-hot, not
+   * just route-hot. Respects Save-Data.
+   */
+  const warm = useCallback(
+    (href: string) => {
+      const nav = navigator as unknown as { connection?: { saveData?: boolean } };
+      if (nav.connection?.saveData) return;
+      router.prefetch(href);
+      if (href.startsWith('/wisdom')) {
+        queryClient.prefetchQuery({
+          queryKey: articlesListKey,
+          queryFn: fetchArticlesIndex,
+          staleTime: 1000 * 60 * 5,
+        });
+      }
+    },
+    [router, queryClient],
+  );
+
+  const warmHandlers = (href: string) => ({
+    onMouseEnter: () => warm(href),
+    onFocus: () => warm(href),
+    onTouchStart: () => warm(href),
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,6 +105,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                {...warmHandlers(link.href)}
                 aria-current={isActive(link.href) ? 'page' : undefined}
                 className={`text-sm font-body font-medium transition-colors relative py-1 hover:text-primary ${
                   isActive(link.href) ? 'text-primary' : 'text-text/80'
@@ -87,6 +119,7 @@ export function Navbar() {
             ))}
             <Link
               href="/start-here"
+              {...warmHandlers('/start-here')}
               aria-current={pathname === '/start-here' ? 'page' : undefined}
               className={`font-semibold transition-colors px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-[11px] tracking-widest uppercase ${
                 pathname === '/start-here' ? 'bg-primary/20 border-primary' : ''
@@ -162,6 +195,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              {...warmHandlers(link.href)}
               aria-current={isActive(link.href) ? 'page' : undefined}
               className={`hover:text-primary transition-colors ${
                 isActive(link.href) ? 'text-primary' : 'text-text/80'
@@ -172,6 +206,7 @@ export function Navbar() {
           ))}
           <Link
             href="/start-here"
+            {...warmHandlers('/start-here')}
             aria-current={pathname === '/start-here' ? 'page' : undefined}
             className="text-primary font-semibold border border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-full px-4 py-2.5 text-center text-sm tracking-widest uppercase mt-4"
           >

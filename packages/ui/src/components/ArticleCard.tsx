@@ -17,6 +17,12 @@ export interface ArticleCardProps {
    * (`onMouseEnter`/`onFocus`/`onTouchStart`) without coupling this card to a router (§12.2).
    */
   anchorProps?: React.AnchorHTMLAttributes<HTMLAnchorElement>;
+  /**
+   * Router-aware link element injected by the consuming app (e.g. `next/link`'s `Link`)
+   * so navigation is a soft client transition, not a full-page reload (§12.6 RC 1).
+   * Defaults to a plain `'a'` to keep this design-system package framework-agnostic.
+   */
+  linkComponent?: React.ElementType;
   className?: string;
 }
 
@@ -26,11 +32,13 @@ export function ArticleCard({
   href,
   categoryLabel,
   anchorProps,
+  linkComponent,
   className,
 }: ArticleCardProps) {
+  const LinkEl: React.ElementType = linkComponent ?? 'a';
   return (
     <Card className={cn('flex flex-col overflow-hidden group', className)}>
-      <a
+      <LinkEl
         href={href}
         className="flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         {...anchorProps}
@@ -71,7 +79,7 @@ export function ArticleCard({
             {article.excerpt}
           </p>
         </div>
-      </a>
+      </LinkEl>
     </Card>
   );
 }

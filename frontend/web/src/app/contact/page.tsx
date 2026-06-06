@@ -9,7 +9,7 @@ export default function ContactPage() {
   const [state, formAction, isPending] = useActionState(submitContactAction, null);
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-16 md:py-24 flex flex-col gap-10">
+    <div className="mx-auto max-w-xl px-5 sm:px-8 lg:px-10 py-16 md:py-24 flex flex-col gap-10">
       {/* Header */}
       <div className="text-center">
         <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-primary uppercase">

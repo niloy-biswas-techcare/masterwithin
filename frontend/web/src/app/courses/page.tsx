@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { listCourses } from '@mw/backend';
-import { CourseCard } from '@mw/ui';
+import { SmartCourseCard } from '@/components/shared/SmartCards';
 import { ArrowRight, Layers } from 'lucide-react';
 import type { Course } from '@mw/types';
 import { generateSiteMetadata } from '@/lib/seo';
@@ -156,7 +156,7 @@ export default async function CoursesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {sortedCourses.map((course) => (
             <div key={course.id} className="flex flex-col h-full justify-between">
-              <CourseCard
+              <SmartCourseCard
                 course={course}
                 href={`/courses/${course.slug}`}
                 className="h-full hover:-translate-y-1 hover:shadow-md transition-all duration-300 border border-border/60 bg-surface/30"

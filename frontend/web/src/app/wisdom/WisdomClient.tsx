@@ -5,17 +5,13 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import Fuse from 'fuse.js';
+import Link from 'next/link';
 import { CATEGORIES } from '@mw/types';
-import { ArticleCard, EmptyState, Pagination, Spinner } from '@mw/ui';
+import { EmptyState, Pagination, Spinner } from '@mw/ui';
+import { SmartArticleCard } from '@/components/shared/SmartCards';
 import * as LucideIcons from 'lucide-react';
-import type { Article } from '@mw/types';
 import { motionTokens } from '@/lib/motion';
-
-async function fetchArticles(): Promise<Article[]> {
-  const res = await fetch('/api/search-index');
-  if (!res.ok) throw new Error('Failed to fetch search index');
-  return res.json();
-}
+import { articlesListKey, fetchArticlesIndex } from '@/lib/queries';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   BrainCircuit:   LucideIcons.BrainCircuit,
@@ -110,8 +106,8 @@ export function WisdomClient() {
   }, [searchQuery, initialSearchQuery, updateUrlParams]);
 
   const { data: articles = [], isLoading } = useQuery({
-    queryKey: ['articles'],
-    queryFn:  fetchArticles,
+    queryKey: articlesListKey,
+    queryFn:  fetchArticlesIndex,
   });
 
   const fuse = useMemo(
@@ -454,8 +450,8 @@ export function WisdomClient() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
           >
             {paginatedArticles.map((art) => (
-              <motion.div key={art.id} variants={cardVariants}>
-                <ArticleCard
+              <motion.div key={art.id} variants={cardVariants} className="h-full flex flex-col">
+                <SmartArticleCard
                   article={art}
                   href={`/wisdom/${art.category}/${art.slug}`}
                   categoryLabel={CATEGORIES.find((c) => c.slug === art.category)?.title}
@@ -491,6 +487,7 @@ export function WisdomClient() {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              linkComponent={Link}
               hrefForPage={(page) => {
                 const params = new URLSearchParams(searchParams.toString());
                 params.set('page', page.toString());
@@ -517,13 +514,13 @@ export function WisdomClient() {
               &ldquo;If you&apos;ve ever felt that the answers must go deeper than what
               you&apos;ve been given — you&apos;re in the right place.&rdquo;
             </p>
-            <a
+            <Link
               href="/start-here"
               className="mt-8 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-deep transition-colors shadow-sm"
             >
               <LucideIcons.Compass className="h-4 w-4" aria-hidden="true" />
               Find your guided entry
-            </a>
+            </Link>
           </div>
         </motion.section>
       )}

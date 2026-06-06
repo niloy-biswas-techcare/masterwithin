@@ -5,6 +5,7 @@ import { listArticles } from '@mw/backend';
 import { WisdomClient } from './WisdomClient';
 import { Spinner } from '@mw/ui';
 import { generateSiteMetadata } from '@/lib/seo';
+import { articlesListKey } from '@/lib/queries';
 
 export const revalidate = 3600; // Cache index for 1 hour (ISR)
 
@@ -19,10 +20,26 @@ export default async function WisdomPage() {
   const queryClient = new QueryClient();
 
   try {
-    // Prefetch articles server-side to warm Cache and enable instant SEO-ready hydration (§12.3)
+    // Prefetch articles server-side to warm the cache and enable instant SEO-ready
+    // hydration (§12.3). Dehydrate the *same lightweight shape* the client reader
+    // (`WisdomClient` → `/api/search-index`) expects under the *same key* so the entry
+    // is a cache hit on arrival — no duplicate fetch (§12.6 bullet 4).
     await queryClient.prefetchQuery({
-      queryKey: ['articles'],
-      queryFn: () => listArticles(),
+      queryKey: articlesListKey,
+      queryFn: async () => {
+        const articles = await listArticles();
+        return articles.map((art) => ({
+          id: art.id,
+          title: art.title,
+          excerpt: art.excerpt,
+          tags: art.tags,
+          category: art.category,
+          slug: art.slug,
+          publishedAt: art.publishedAt,
+          coverImage: art.coverImage,
+          readingTime: art.readingTime,
+        }));
+      },
     });
   } catch (err) {
     console.error('[wisdom-page] Failed to prefetch articles on server:', err);

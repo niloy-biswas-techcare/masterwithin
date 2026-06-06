@@ -1,5 +1,6 @@
 import type { MDXComponents } from 'mdx/types';
 import React from 'react';
+import Link from 'next/link';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -43,15 +44,25 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </li>
     ),
-    a: ({ children, href, ...props }) => (
-      <a
-        href={href}
-        className="text-primary underline hover:text-primary/80 transition-colors font-medium"
-        {...props}
-      >
-        {children}
-      </a>
-    ),
+    a: ({ children, href, ...props }) => {
+      const className =
+        'text-primary underline hover:text-primary/80 transition-colors font-medium';
+      // Internal routes use next/link for soft navigation (§12.6 RC 1); in-page
+      // anchors (#…) and external/protocol links stay as plain <a>.
+      const isInternal = typeof href === 'string' && href.startsWith('/');
+      if (isInternal) {
+        return (
+          <Link href={href} className={className}>
+            {children}
+          </Link>
+        );
+      }
+      return (
+        <a href={href} className={className} {...props}>
+          {children}
+        </a>
+      );
+    },
     pre: ({ children, ...props }) => (
       <pre className="bg-surface p-4 rounded-lg overflow-x-auto border border-border my-6 font-mono text-sm text-text" {...props}>
         {children}

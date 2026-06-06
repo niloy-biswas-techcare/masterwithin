@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { listArticles } from '@mw/backend';
 import { CATEGORIES, getCategoryBySlug } from '@mw/types';
-import { ArticleCard } from '@mw/ui';
+import { SmartArticleCard } from '@/components/shared/SmartCards';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
 import type { Article } from '@mw/types';
 import { generateSiteMetadata } from '@/lib/seo';
@@ -81,7 +81,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       {articles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {articles.map((art) => (
-            <ArticleCard
+            <SmartArticleCard
               key={art.id}
               article={art}
               href={`/wisdom/${art.category}/${art.slug}`}

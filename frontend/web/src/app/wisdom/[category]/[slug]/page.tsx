@@ -129,7 +129,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <article className="w-full bg-bg">
         {/* Banner / Cover Header */}
         <div className="relative border-b border-border/20 bg-surface/30 py-16 md:py-24">
-          <div className="mx-auto max-w-3xl px-6 flex flex-col gap-6">
+          <div className="mx-auto max-w-3xl px-5 sm:px-8 lg:px-10 flex flex-col gap-6">
             
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text/50">
@@ -171,7 +171,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
 
         {/* Article Body */}
-        <div className="mx-auto max-w-3xl px-6 py-12 md:py-16 flex flex-col gap-12">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8 lg:px-10 py-12 md:py-16 flex flex-col gap-12">
           {/* Editorial Prose Content */}
           <Prose html={article.bodyHtml} />
 

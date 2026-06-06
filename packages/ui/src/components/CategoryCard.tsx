@@ -15,6 +15,12 @@ export interface CategoryCardProps {
    */
   icon?: React.ReactNode;
   anchorProps?: React.AnchorHTMLAttributes<HTMLAnchorElement>;
+  /**
+   * Router-aware link element injected by the consuming app (e.g. `next/link`'s `Link`)
+   * so navigation is a soft client transition, not a full-page reload (§12.6 RC 1).
+   * Defaults to a plain `'a'` to keep this design-system package framework-agnostic.
+   */
+  linkComponent?: React.ElementType;
   className?: string;
 }
 
@@ -25,8 +31,10 @@ export function CategoryCard({
   count,
   icon,
   anchorProps,
+  linkComponent,
   className,
 }: CategoryCardProps) {
+  const LinkEl: React.ElementType = linkComponent ?? 'a';
   return (
     <Card
       className={cn(
@@ -34,7 +42,7 @@ export function CategoryCard({
         className,
       )}
     >
-      <a
+      <LinkEl
         href={href}
         className="group flex flex-col gap-3 p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         {...anchorProps}
@@ -60,7 +68,7 @@ export function CategoryCard({
             {count} {count === 1 ? 'article' : 'articles'}
           </span>
         ) : null}
-      </a>
+      </LinkEl>
     </Card>
   );
 }

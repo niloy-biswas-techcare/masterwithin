@@ -267,6 +267,8 @@ for the public site, not post-launch polish; they must be complete before the si
 - [x] Audit every section on every public page (`/`, `/wisdom`, `/wisdom/[category]`, `/wisdom/[category]/[slug]`, `/start-here`, `/our-ideal`, `/courses`, `/courses/[slug]`, `/store`, `/about`, `/contact`) and replace raw `py-*` values with the named rhythm classes. 🧪 (visual regression)
 - [x] Verify **no horizontal scroll on mobile** (375px viewport) on any public route. 🧪
 - [x] Verify content never touches viewport edges — all gutters respected at 360px, 768px, 1024px, 1440px. 🧪
+- [x] Audit and align global spacing consistency: standardise all page margins, paddings, and vertical rhythms to match the Home page standard (using responsive gutters: `px-5 sm:px-8 lg:px-10` for horizontal boundaries).
+- [x] Update the Article Details page (`/wisdom/[category]/[slug]`) header banner and body containers to use the responsive side padding (`px-5 sm:px-8 lg:px-10`) matching the Home page instead of custom page-specific paddings (such as hardcoded `px-6`).
 
 ### 6a.2 Typography Refinements (§4a.2)  ⛔
 
@@ -304,6 +306,8 @@ for the public site, not post-launch polish; they must be complete before the si
 - [x] **Navbar**: implement full scroll-condense behaviour (§4a.5). Logo uses Lora wordmark + icon mark. Cart badge is 18px pill. Mobile menu is a full-height sheet.
 - [x] **Footer**: implement 4-column layout (Brand / Navigation / Library / Subscribe) per §4a.5 spec. Divider line above. Legal row 12px.
 - [x] **HeroSection** (`src/features/home`): background radial gradient at `3% opacity`, grid texture at `0.025 opacity`. H1 uses `clamp`. "Source Within" / key phrase in `text-primary`. Eyebrow above H1.
+- [x] Standardize the `ArticleCard` component height across the application, using the Home page featured writings card as the standard. Ensure all cards in any grid are equal height.
+- [x] Implement CSS truncation/ellipsis (ellipsoid `...`) on the `ArticleCard` title and excerpt to prevent larger titles/excerpts from pushing card heights differently (e.g. clamp title to `line-clamp-2` and excerpt to `line-clamp-3`).
 
 ### 6a.5 Psychological Design & Micro-copy (§4a.4)
 
@@ -344,6 +348,46 @@ for the public site, not post-launch polish; they must be complete before the si
 - [x] Touch targets ≥ 44px on all interactive elements (Playwright axe check).
 - [x] Lighthouse Performance ≥ 95, no CLS regression from animations.
 - [x] Lighthouse A11y ≥ 95 on every audited route.
+
+---
+
+## Phase 6b — Routing Performance: Instant Navigation  ⛔ 🧪
+
+Goal: fix the slow tab-to-tab and card-to-article navigation. The instant-nav contract in §12.2 is
+specified but not honoured — internal navigation is doing **full-page browser reloads** and **no
+prefetching is wired up**. Root-cause analysis and target behaviour are documented in §12.6 of
+[Project.md](./Project.md). These are **acceptance criteria** for the public site, not polish: a
+visitor must never wait on a hard reload or stare at an unchanged page after a click.
+
+> **Measure on a production build (`next build && next start`), not `next dev`.** Dev mode compiles
+> each route on first visit and will mask/exaggerate findings (§12.6 RC 4). Capture before/after
+> nav timings in the production build.
+
+### 6b.1 Eliminate hard navigation — cards must be soft `next/link` (§12.6 RC 1)  ⛔
+
+- [x] Add an optional `linkComponent` prop (default `'a'`) to `ArticleCard`, `CourseCard`, and `CategoryCard` in `packages/ui` so the framework-agnostic design system can render a real router link without importing `next/link`. Keep `anchorProps` as the handler/attribute pass-through. 🧪
+- [x] In `frontend/web`, pass `next/link`'s `Link` as `linkComponent` everywhere these cards are used: `src/app/page.tsx`, `src/app/wisdom/WisdomClient.tsx`, `src/app/wisdom/[category]/page.tsx`, `src/app/wisdom/[category]/[slug]/RelatedArticlesClient.tsx`, courses and store grids.
+- [x] Audit the whole of `frontend/web/src` and `packages/ui` for any remaining raw `<a href="/…">` pointing at **internal** routes; convert each to `next/link`. (External links — Substack, Play/Kindle, social — stay `<a>` with `rel`/`target`.) 🧪
+- [x] Verify in the production build that clicking an article/course/category card is a **soft navigation** (no full document reload — providers and Framer Motion do not re-mount). 🧪
+
+### 6b.2 Wire the prefetch layer that already exists (§12.6 RC 2, §12.2)
+
+- [x] Attach intent-prefetch to card links via `anchorProps`/`usePrefetch`: on `onMouseEnter`, `onMouseDown`/`onTouchStart`, and `onFocus`, call `router.prefetch(href)` **and** `queryClient.prefetchQuery(['article', slug])` (respect `Save-Data`).
+- [x] Add throttled `IntersectionObserver` viewport prefetch for in-view cards/links (rootMargin ~100px, Save-Data respected) — reuse the logic already in `PrefetchLink`/`usePrefetch` instead of leaving them as dead code.
+- [x] Replace the navbar's plain `next/link` items with intent-warming links so primary-nav destinations prefetch route **and** query data on hover/focus (Home, Wisdom, Courses, Store, etc.).
+- [x] Confirm structured query keys (`['articles', filters]`, `['article', slug]`) match between server prefetch (`HydrationBoundary`) and client reads so a prefetched/dehydrated entry is a cache **hit** on arrival (no duplicate fetch). 🧪
+
+### 6b.3 Instant feedback on every data segment — `loading.tsx` (§12.6 RC 3)
+
+- [x] Add a skeleton `loading.tsx` to each data route segment that `await`s a backend use-case: `/wisdom/[category]`, `/wisdom/[category]/[slug]`, `/store`, `/courses`, `/courses/[slug]`, `/start-here`. Use existing `Skeleton`/`Spinner` primitives; match the page's layout to avoid CLS (§13).
+- [x] Verify each segment paints its skeleton **immediately** on soft navigation while the server streams content (no stalling on the previous page). 🧪
+
+### 6b.4 Verification & guardrails  🧪
+
+- [x] Production-build nav audit: measure click→content-painted for tab-to-tab and card→article on a warm cache; confirm it is instant (cache-hit) and never a hard reload. Record before/after numbers.
+- [x] Add a lint/test guard against regression: forbid raw internal `<a href="/…">` in `frontend/web` (ESLint `jsx-a11y`/custom rule or a test that greps the build output), so cards can't silently revert to hard links.
+- [x] Confirm `prefers-reduced-motion` and `Save-Data` are both still respected by the prefetch + transition changes (§9.1, §12.2).
+- [x] Re-run Lighthouse on `/`, `/wisdom`, a `/wisdom/[category]/[slug]`, `/store` — no perf/CLS regression; INP within budget (§13).
 
 ---
 

@@ -14,7 +14,7 @@ export default function ErrorBoundary({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-content flex flex-col items-center justify-center py-24 px-6 text-center">
+    <div className="mx-auto max-w-content flex flex-col items-center justify-center py-24 px-5 sm:px-8 lg:px-10 text-center">
       <h2 className="font-display text-3xl font-bold text-danger">Something went wrong!</h2>
       <p className="mt-4 text-text/80">A segment-level error occurred in the application.</p>
       <button

@@ -233,6 +233,8 @@ evidence-based psychological design patterns for trust, depth, and reader attrac
 The single largest source of unprofessional appearance is **inconsistent horizontal margins and
 uncontrolled vertical rhythm**. These rules are non-negotiable.
 
+**Global Spacing Consistency:** Spacing across all pages must be strictly consistent. The Home page's layout, margin, padding, and vertical rhythm are the universal baseline standard. All pages, including sub-pages and dynamic route directories, must inherit these exact padding rules (`px-5 sm:px-8 lg:px-10` for horizontal boundaries) and named vertical rhythm classes. Custom padding values (such as hardcoded `px-6`) are forbidden.
+
 #### Horizontal layout
 
 Three named container widths are the only permitted content boundaries:
@@ -501,7 +503,8 @@ specs in §11.
 - **Aspect ratio:** cover image is `aspect-[16/9]` on hover, transitions from `aspect-[4/3]` on idle (Framer Motion layout animation).
 - **Hover state:** `y: −4px`, shadow deepens from `shadow-sm` to `shadow-md`, cover image subtle `scale(1.03)` (overflow hidden on card).
 - **Typography treatment:** title is Lora `font-semibold`; category badge left-aligned above title; reading time + date in `caption` role right-aligned.
-- **No truncation on excerpt** — use `line-clamp-3` (3 lines), never 1-line truncation.
+- **Same Height Grid Consistency:** All article cards within a grid layout must be exactly the same height. This is standardized across the entire application based on the home page featured writings card.
+- **Text Truncation & Ellipsis:** To maintain uniform card heights, use a flex layout where cards expand to fill the container height, and use CSS `line-clamp` / ellipsis (`...` / ellipsoid) for truncation if the content (such as title or excerpt) is larger than the card's visual boundaries (e.g. clamp title to `line-clamp-2` or excerpt to `line-clamp-3`).
 - **Required metadata row:** `[CategoryBadge] · [ReadingTime] · [PublishedDate]`
 
 #### CategoryCard
@@ -582,9 +585,10 @@ Start Here). Any design that obscures these three signals should be changed.
 #### Article page
 
 - **Reading column:** `max-w-prose` (720px), centered with `mx-auto`.
+- **Spacing and Margins:** The side spacing (gutters) and layout margins for both the header banner and the main reading body must strictly match the Home page standard (`px-5 sm:px-8 lg:px-10`). No custom page-specific gutters (such as hardcoded `px-6`) are allowed, to ensure consistency all over the app.
 - **Above the fold:** Title (Lora 2rem+), byline with author + date + reading time (small caps DM Sans), cover image full-width of the reading column.
 - **Floating share buttons** on desktop: fixed left side at `top-50%`, vertical stack of 3 (Twitter/X, WhatsApp, copy-link). Fade in after 500px scroll.
-- **Related articles:** 3-card grid below the article body, inside `max-w-content`. "You might also enjoy" heading.
+- **Related articles:** 3-card grid below the article body, inside `max-w-content` (following the standardized same-height ArticleCard grid format). "You might also enjoy" heading.
 
 #### Our Ideal page
 
@@ -1148,6 +1152,61 @@ Components are Server Components by default. A component becomes a Client Compon
 only when it needs state, effects, browser APIs, or the TanStack Query hooks (lists with client
 filters, cart, prefetching, share). Keep client bundles small by pushing interactivity to leaf
 components.
+
+### 12.6 Routing-performance regression — root causes & remediation (instant navigation)
+
+The instant-navigation contract in §12.2 was **specified but not honoured in the shipped code**.
+Tab-to-tab and card-to-article navigation is slow — often appearing to do nothing for a beat — because
+the app is performing **full-page browser reloads instead of client-side soft navigations**, and none
+of the prefetch machinery described in §12.2 is actually wired up. The diagnosis below is the source of
+truth; the fixes are tracked in **Tasks.md → "Phase 6b — Routing Performance: Instant Navigation"**.
+
+**Why a React (Vite SPA) app felt instant and this does not.** A client-rendered SPA keeps one running
+JS runtime and only swaps a view on navigation. Next.js App Router is the same *only when navigation is
+a soft client transition* (`next/link` → RSC fetch → React reconcile). The moment a real `<a href>` is
+used for an internal route, the browser does a **hard navigation**: it tears down the page, re-downloads
+HTML, re-parses and re-executes the entire JS bundle, re-mounts every provider (QueryClient + IndexedDB
+restore, ThemeProvider, Framer Motion), and re-hydrates from scratch. That is exactly the multi-hundred-
+millisecond "nothing is happening, then a flash" symptom — and it is structural, not network jitter.
+
+**Root cause 1 — design-system cards link with raw `<a href>` (PRIMARY).** `ArticleCard`,
+`CourseCard`, and `CategoryCard` in `packages/ui` render `<a href={href}>…</a>`. Every article, course,
+and category click is therefore a hard reload. Because `packages/ui` is intentionally framework-agnostic
+(it must not import `next/link`), the cards need a **link-component injection point**: an optional
+`linkComponent` prop (default `'a'`) that the web app fills with `next/link`'s `Link`. The existing
+`anchorProps` escape hatch is the place to attach intent-prefetch handlers once the element is a real
+`Link`.
+
+**Root cause 2 — the prefetch layer is dead code.** `PrefetchLink` (`components/shared/PrefetchLink.tsx`)
+and the `usePrefetch` hook were built per §12.2 but are **imported nowhere**. No card passes prefetch
+handlers through `anchorProps`; no `router.prefetch` / `queryClient.prefetchQuery` ever fires on hover,
+focus, touch, or viewport entry. So even after cards become soft links, the destination route and its
+data are cold at click time — the human hover-to-click gap that §12.2 relies on is being wasted.
+
+**Root cause 3 — no per-segment `loading.tsx`, so soft navigations have no instant feedback.** Only the
+root `app/loading.tsx` exists. Data routes (`/wisdom/[category]`, `/wisdom/[category]/[slug]`, `/store`,
+`/courses`, `/courses/[slug]`, `/start-here`) `await` backend use-cases (`listArticles`, `getArticle`,
+…) directly in the Server Component. On a soft navigation Next streams the segment, but with no segment
+-level `loading.tsx` there is no Suspense fallback, so the UI sits on the *old* page until the server
+round-trip to Supabase resolves — reinforcing the "froze, then jumped" feel. Each data segment needs a
+skeleton `loading.tsx` so navigation paints instantly and streams content in.
+
+**Root cause 4 — navbar links never warm.** The `Navbar` uses plain `next/link` (correct for soft nav),
+but Next only auto-prefetches links **in production builds**; in `next dev` every first visit to a route
+also pays an on-demand compile. Tab-to-tab slowness while developing is partly this. It must be measured
+on a production build (`next build && next start`) before drawing conclusions, and the nav links should
+additionally warm their query data on intent so the destination is cache-hot, not just route-hot.
+
+**Root cause 5 — self-reinforcing provider re-mount.** Because of Root cause 1, every navigation re-runs
+`QueryProvider` (including the async IndexedDB `restoreClient`), re-creates the persisted cache, and
+re-initialises Framer Motion / theme. None of this should happen on an in-app navigation; it all goes
+away once cards are soft links (RC 1) and disappears as a cost the moment hard navigation is eliminated.
+
+**Target behaviour after remediation.** All internal navigation is a soft client transition; route +
+query data are prefetched on intent (hover/focus/touch) and on viewport entry (Save-Data respected);
+every data segment paints an instant skeleton via `loading.tsx`; returning to a tab shows cached content
+with zero spinner and revalidates in the background (§12.2.1). Verified on a **production build**, not
+`next dev`.
 
 ---
 

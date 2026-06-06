@@ -20,7 +20,7 @@ export interface ArticleCardProps {
   className?: string;
 }
 
-/** Article preview card for lists and the home grid (§7.2, §11). */
+/** Article preview card for lists and the home grid (§7.2, §11, §4a.5). */
 export function ArticleCard({
   article,
   href,
@@ -29,33 +29,47 @@ export function ArticleCard({
   className,
 }: ArticleCardProps) {
   return (
-    <Card className={cn('flex flex-col', className)}>
+    <Card className={cn('flex flex-col overflow-hidden group', className)}>
       <a
         href={href}
-        className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         {...anchorProps}
       >
-        {article.coverImage ? (
-          <CldImage
-            src={article.coverImage}
-            alt=""
-            width={640}
-            height={360}
-            className="aspect-video w-full object-cover"
-          />
-        ) : null}
-        <div className="flex flex-col gap-2 p-5">
-          <div className="flex items-center gap-2">
-            <Badge variant="primary">{categoryLabel ?? article.category}</Badge>
-            <span className="text-sm text-text/70">{article.readingTime} min read</span>
+        {/* Cover image — aspect-[16/9], overflow hidden for subtle scale on hover */}
+        <div className="aspect-[16/9] w-full overflow-hidden bg-muted/20">
+          {article.coverImage ? (
+            <CldImage
+              src={article.coverImage}
+              alt=""
+              width={640}
+              height={360}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/5 to-surface" />
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 p-5 flex-1">
+          {/* Required metadata row: [CategoryBadge] · [ReadingTime] · [PublishedDate] */}
+          <div className="flex items-center gap-2 text-[13px] text-text/60 font-body">
+            <Badge variant="primary" className="shrink-0">
+              {categoryLabel ?? article.category}
+            </Badge>
+            <span aria-hidden="true">·</span>
+            <span>{article.readingTime} min</span>
+            <span aria-hidden="true">·</span>
+            <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
           </div>
-          <h3 className="font-display text-xl leading-tight text-text group-hover:text-deep">
+
+          <h3 className="font-display font-semibold text-xl leading-snug text-text group-hover:text-deep transition-colors">
             {article.title}
           </h3>
-          <p className="line-clamp-3 text-base text-text/80">{article.excerpt}</p>
-          <time dateTime={article.publishedAt} className="mt-1 text-sm text-text/70">
-            {formatDate(article.publishedAt)}
-          </time>
+
+          {/* line-clamp-3: never 1-line truncation (§4a.5) */}
+          <p className="line-clamp-3 text-[0.9375rem] text-text/70 leading-relaxed flex-1">
+            {article.excerpt}
+          </p>
         </div>
       </a>
     </Card>

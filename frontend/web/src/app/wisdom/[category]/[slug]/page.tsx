@@ -8,6 +8,7 @@ import { Prose, Badge, CldImage } from '@mw/ui';
 import { formatDate } from '@mw/utils';
 import { ReadingProgress } from '@/components/shared/ReadingProgress';
 import { ShareButtons } from '@/components/shared/ShareButtons';
+import { FloatingShareButtons } from '@/components/shared/FloatingShareButtons';
 import { generateSiteMetadata, getArticleJsonLd, getBreadcrumbsJsonLd } from '@/lib/seo';
 import { RelatedArticlesClient } from './RelatedArticlesClient';
 import { ChevronRight, Calendar, Clock, ArrowLeft } from 'lucide-react';
@@ -121,6 +122,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {/* Reading Progress Bar (top sticky) */}
       <ReadingProgress />
+
+      {/* Floating share buttons — desktop only, fades in after 500px scroll */}
+      <FloatingShareButtons title={article.title} />
 
       <article className="w-full bg-bg">
         {/* Banner / Cover Header */}

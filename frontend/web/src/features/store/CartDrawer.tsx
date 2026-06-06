@@ -30,8 +30,8 @@ export function CartDrawer({ trigger }: CartDrawerProps) {
         {items.length === 0 ? (
           <EmptyState
             icon={<ShoppingBag className="h-10 w-10" />}
-            title="Your cart is empty"
-            description="Add physical books to start an order."
+            title="Your shelf is waiting."
+            description="Browse the bookstore and bring a book home."
             action={
               <DrawerClose asChild>
                 <Link
@@ -82,7 +82,7 @@ export function CartDrawer({ trigger }: CartDrawerProps) {
                     >
                       <Minus className="h-3 w-3" />
                     </button>
-                    <span className="min-w-[1.25rem] text-center text-xs font-bold text-text">
+                    <span className="min-w-5 text-center text-xs font-bold text-text">
                       {item.qty}
                     </span>
                     <button

@@ -92,8 +92,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-2xl bg-surface/10">
-          <p className="text-text/75 text-lg font-display font-medium">No articles in this category yet</p>
-          <p className="text-text/50 text-sm mt-1">Check back later or explore other sections of the library.</p>
+          <p className="text-text/75 text-lg font-display font-medium italic">The library is growing. Return soon.</p>
+          <p className="text-text/50 text-sm mt-1">New writings in this category are being curated.</p>
           <Link
             href="/wisdom"
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/95 transition-colors shadow-sm"

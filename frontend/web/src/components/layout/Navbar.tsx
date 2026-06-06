@@ -12,20 +12,18 @@ import { ThemeToggle } from '../shared/ThemeToggle';
 export function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
-  
+
   const { isMobileMenuOpen, setMobileMenuOpen } = useUiStore();
   const cartItemsCount = useCartStore((state) => state.totalItems());
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 64);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route changes
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname, setMobileMenuOpen]);
@@ -35,7 +33,7 @@ export function Navbar() {
     { href: '/wisdom', label: 'Wisdom Library' },
     { href: '/courses', label: 'Courses' },
     { href: '/store', label: 'Store' },
-    { href: '/about', label: 'About' },
+    { href: '/about', label: 'The Foundation' },
     { href: '/contact', label: 'Contact' },
   ];
 
@@ -47,31 +45,37 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 border-b border-border/40 ${
+        style={{ transition: 'background-color 0.2s ease-out, box-shadow 0.2s ease-out, height 0.2s ease-out' }}
+        className={`sticky top-0 z-50 w-full border-b ${
           isScrolled
-            ? 'h-14 bg-surface/90 backdrop-blur-md shadow-sm'
-            : 'h-20 bg-bg'
+            ? 'h-16 bg-surface/90 backdrop-blur-md border-border/40 shadow-sm'
+            : 'h-20 bg-transparent border-transparent'
         }`}
       >
-        <div className="mx-auto h-full max-w-content flex items-center justify-between px-6">
-          {/* Logo */}
+        <div className="mx-auto h-full max-w-280 flex items-center justify-between px-5 sm:px-8 lg:px-10">
+          {/* Logo — Lora wordmark + dot mark (§4a.5) */}
           <Link
             href="/"
-            className="font-display text-xl font-bold tracking-tight text-text hover:text-primary transition-colors flex items-center gap-1.5"
+            className="font-display text-[15px] font-bold tracking-tight text-text hover:text-primary transition-colors flex items-center gap-2"
             aria-label="Master Within Foundation — Home"
           >
+            {/* Icon mark */}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-primary">
+              <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="10" cy="10" r="5" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+            </svg>
             <span>Master Within</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 aria-current={isActive(link.href) ? 'page' : undefined}
-                className={`transition-colors relative py-1 hover:text-primary ${
+                className={`text-sm font-body font-medium transition-colors relative py-1 hover:text-primary ${
                   isActive(link.href) ? 'text-primary' : 'text-text/80'
                 }`}
               >
@@ -84,28 +88,27 @@ export function Navbar() {
             <Link
               href="/start-here"
               aria-current={pathname === '/start-here' ? 'page' : undefined}
-              className={`font-semibold transition-colors px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-xs tracking-wider uppercase ${
+              className={`font-semibold transition-colors px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-[11px] tracking-widest uppercase ${
                 pathname === '/start-here' ? 'bg-primary/20 border-primary' : ''
               }`}
             >
-              Start Here
+              Guided Entry
             </Link>
           </nav>
 
-          {/* Actions: Theme, Cart, Mobile Menu button */}
+          {/* Actions */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
 
-            {/* Shopping Cart button */}
             <Link
               href="/store/cart"
-              className="relative rounded-lg p-2 text-text/80 hover:text-primary transition-all duration-300 hover:bg-surface border border-transparent hover:border-border"
+              className="relative rounded-lg p-2 text-text/80 hover:text-primary transition-all duration-200 hover:bg-surface border border-transparent hover:border-border"
               aria-label={cartItemsCount > 0 ? `Shopping Cart — ${cartItemsCount} item${cartItemsCount !== 1 ? 's' : ''}` : 'Shopping Cart'}
             >
               <ShoppingBag className="h-5 w-5" aria-hidden="true" />
               {cartItemsCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white leading-none"
+                  className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white leading-none"
                   aria-hidden="true"
                 >
                   {cartItemsCount}
@@ -113,7 +116,6 @@ export function Navbar() {
               )}
             </Link>
 
-            {/* Mobile Menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden rounded-lg p-2 text-text/80 hover:text-primary hover:bg-surface border border-transparent hover:border-border transition-all"
@@ -127,7 +129,7 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Menu Drawer Overlay */}
+      {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
@@ -136,25 +138,26 @@ export function Navbar() {
         />
       )}
 
-      {/* Mobile Menu Drawer Content */}
+      {/* Mobile menu drawer — full-height sheet from right */}
       <div
         id="mobile-nav"
         role="dialog"
         aria-label="Navigation menu"
         aria-modal="true"
-        className={`fixed top-0 right-0 bottom-0 z-40 w-[280px] bg-surface border-l border-border px-6 py-20 flex flex-col gap-6 md:hidden transition-transform duration-300 ease-in-out shadow-xl ${
+        style={{ transition: 'transform 0.3s ease-in-out' }}
+        className={`fixed top-0 right-0 bottom-0 z-40 w-[280px] bg-surface border-l border-border px-6 py-20 flex flex-col gap-6 md:hidden shadow-xl ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <button
           onClick={() => setMobileMenuOpen(false)}
-          className="absolute top-5 right-6 rounded-lg p-2 text-text/80 hover:text-primary hover:bg-surface border border-transparent hover:border-border"
+          className="absolute top-5 right-6 rounded-lg p-2 text-text/80 hover:text-primary"
           aria-label="Close navigation menu"
         >
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <nav aria-label="Mobile navigation" className="flex flex-col gap-6 font-display text-lg font-medium">
+        <nav aria-label="Mobile navigation" className="flex flex-col gap-6 font-body text-[18px] font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -170,9 +173,9 @@ export function Navbar() {
           <Link
             href="/start-here"
             aria-current={pathname === '/start-here' ? 'page' : undefined}
-            className="text-primary font-semibold border border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-full px-4 py-2.5 text-center text-sm tracking-wider uppercase mt-4"
+            className="text-primary font-semibold border border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-full px-4 py-2.5 text-center text-sm tracking-widest uppercase mt-4"
           >
-            Start Here
+            Guided Entry
           </Link>
         </nav>
       </div>

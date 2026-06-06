@@ -166,11 +166,11 @@ export default function ContactPage() {
               {isPending ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Sending Inquiry...
+                  Sending your message…
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4" /> Send Inquiry
+                  <Send className="h-4 w-4" /> Send your message
                 </>
               )}
             </Button>

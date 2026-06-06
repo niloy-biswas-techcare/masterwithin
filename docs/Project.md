@@ -215,6 +215,385 @@ system legible. Primitives + UI live in `packages/ui`; feature sections and page
 
 ---
 
+## 4a. UI/UX Excellence System
+
+This section captures the **UI/UX enhancement specification** for the customer-facing site
+(`frontend/web`). It defines how the site must *look*, *feel*, and *move* to create the deep emotional
+resonance appropriate for a spiritual-philosophical knowledge hub. Every rule here is derived from three
+design references — The Marginalian, Farnam Street, Substack editorial style — synthesised with
+evidence-based psychological design patterns for trust, depth, and reader attraction.
+
+> **Why this section exists:** The §4 design system specifies *tokens* — the raw materials. This section
+> specifies *application* — how those tokens are composed into a distinctive, professional, emotionally
+> compelling experience. Any component or page that doesn't follow these rules should be treated as a
+> bug, not a style choice.
+
+### 4a.1 Layout Grid & Spacing System (the core fix)
+
+The single largest source of unprofessional appearance is **inconsistent horizontal margins and
+uncontrolled vertical rhythm**. These rules are non-negotiable.
+
+#### Horizontal layout
+
+Three named container widths are the only permitted content boundaries:
+
+| Name | Max-width | Use |
+|------|-----------|-----|
+| `max-w-prose` | **720px** | Article body, MDX pages, single-column editorial text |
+| `max-w-content` | **1120px** | Standard page sections, grids, card layouts |
+| `max-w-wide` | **1320px** | Hero sections, full-bleed backgrounds (inner content still bounded) |
+
+Every section uses one of these. **No `max-w-full` or unconstrained widths on text blocks.**
+
+Horizontal padding (gutters) by breakpoint — applied to the bounding container:
+
+| Breakpoint | Side padding |
+|------------|-------------|
+| `< 640px` (mobile) | `px-5` (20px) |
+| `640px – 1023px` (tablet) | `px-8` (32px) |
+| `≥ 1024px` (desktop) | `px-10` (40px) |
+| `≥ 1280px` (large desktop) | `px-12` (48px) |
+
+These are expressed as the shared `Container` component variant — never inline `px-6` in page files.
+
+#### Vertical rhythm (section spacing)
+
+Sections use a **named rhythm scale**, not arbitrary `py-*` values:
+
+| Name | Mobile | Desktop | Use |
+|------|--------|---------|-----|
+| `section-sm` | `py-12` (48px) | `py-16` (64px) | Tight supplementary sections |
+| `section-md` | `py-16` (64px) | `py-24` (96px) | Standard content sections |
+| `section-lg` | `py-20` (80px) | `py-32` (128px) | Hero sections, major transitions |
+| `section-xl` | `py-24` (96px) | `py-40` (160px) | Landing/editorial climax sections |
+
+The **Our Ideal** page uses `section-xl` throughout. The Home hero uses `section-lg`.
+
+#### Internal component spacing
+
+All internal spacing follows the **8px grid** (multiples of 8: 8, 16, 24, 32, 40, 48, 64, 80, 96).
+The one exception is micro-spacing within components: 4px (`gap-1`) for tight icon–label pairs.
+
+### 4a.2 Enhanced Typography Application
+
+The font tokens (`Lora` / `DM Sans`) are defined in §4.2. This section specifies **how** they are applied
+across component types to create editorial authority and depth.
+
+#### Type role mapping
+
+| Role | Font | Weight | Size (desktop) | Line-height | Letter-spacing | Use |
+|------|------|--------|----------------|-------------|----------------|-----|
+| Hero display | Lora | 700 | `clamp(2.75rem, 5vw, 4rem)` | 1.1 | −0.02em | Home H1, Our Ideal H1 |
+| Section title | Lora | 700 | `2rem – 2.5rem` | 1.2 | −0.01em | Section H2s |
+| Article title | Lora | 600 | `1.75rem – 2.25rem` | 1.25 | −0.01em | Article page H1 |
+| Subsection | Lora | 600 | `1.25rem – 1.5rem` | 1.3 | 0 | H3, pull quote attribution |
+| Pull quote | Lora | 400 italic | `1.25rem – 1.5rem` | 1.6 | 0.01em | `<blockquote>` in Prose |
+| Body prose | DM Sans | 400 | `1.0625rem` (17px) | 1.75 | 0 | Article body |
+| UI body | DM Sans | 400 | `0.9375rem` (15px) | 1.5 | 0 | Cards, descriptions |
+| Label / eyebrow | DM Sans | 600 | `0.6875rem` (11px) | 1.4 | 0.1em | Category badges, section labels |
+| Caption | DM Sans | 400 | `0.8125rem` (13px) | 1.5 | 0 | Image captions, metadata |
+
+**`clamp()` is mandatory for Hero display** — the heading scales fluidly, never jumps at breakpoints.
+
+#### Editorial typography rules
+
+1. **Drop caps** on the first paragraph of every article (CSS `::first-letter`, Lora bold, 3-line drop).
+2. **Pull quotes** (`<blockquote>`) rendered with a left border in `--color-primary`, Lora italic, `1.5× body size`, `max-w-prose`.
+3. **Eyebrow labels** above every section title: `11px`, `font-semibold`, `tracking-[0.1em]`, `text-primary`, all-caps. This single rule creates visual hierarchy that reads as "professional editorial".
+4. **Section titles** are never the first thing the eye sees — the eyebrow label sets context first.
+5. **Prose max-width is 720px always.** On desktop, the article column is centered, never edge-to-edge.
+6. **Reading progress indicator** color matches `--color-primary`; height 2px; no border-radius; sits below the navbar.
+
+### 4a.3 Animation & Motion Strategy (Framer Motion)
+
+The site uses **Framer Motion** for all significant motion. CSS `transition` is used only for micro-states
+(hover color, focus ring). The guiding principle: *motion reveals depth, not decoration*.
+
+#### Motion tokens (defined in `packages/ui/motion.ts`)
+
+```typescript
+export const motionTokens = {
+  // Durations
+  fast:               0.15,  // micro-interactions (hover states)
+  standard:           0.25,  // entrance/exit transitions
+  deliberate:         0.45,  // page section entrances, hero reveals
+  contemplative:      0.7,   // slow-reveal for Our Ideal; exit is 60% (0.42s)
+
+  // Easings
+  easeOut:      [0.16, 1, 0.3, 1],    // all entering elements
+  easeIn:       [0.7, 0, 0.84, 0],    // all exiting elements
+  spring:             { type: 'spring', stiffness: 80, damping: 20 },   // cards, hover
+  contemplativeSpring:{ type: 'spring', stiffness: 35, damping: 18 },  // Our Ideal, CartDrawer
+
+  // Variants (reusable) — pair with a duration from above when defining transition
+  fadeUp:    { hidden: { opacity: 0, y: 24 },   visible: { opacity: 1, y: 0 } },
+  fadeIn:    { hidden: { opacity: 0 },           visible: { opacity: 1 } },
+  slideLeft: { hidden: { opacity: 0, x: -20 },  visible: { opacity: 1, x: 0 } }, // content enters from left
+  scaleUp:   { hidden: { opacity: 0, scale: 0.96 }, visible: { opacity: 1, scale: 1 } },
+} as const;
+```
+
+#### Animation inventory by component
+
+| Component / Context | Animation | Trigger | Duration |
+|---------------------|-----------|---------|----------|
+| **Hero H1** | `fadeUp` (y: 32 → 0) | On mount | `deliberate` (0.45s) |
+| **Hero subtitle** | `fadeUp` with 0.1s stagger | After H1 | `deliberate` |
+| **Hero CTAs** | `fadeUp` with 0.2s stagger | After subtitle | `standard` |
+| **Section titles** | `fadeUp` | Scroll enters viewport (IntersectionObserver) | `deliberate` |
+| **Article cards** | `fadeUp` with 30ms stagger per card | Scroll enters viewport | `standard` |
+| **Category cards** | `scaleUp` with 40ms stagger | Scroll enters viewport | `standard` |
+| **Article body paragraphs** | No scroll animation — loads fully at once (reading flow must not interrupt) | — | — |
+| **Pull quotes** | `slideLeft` | Scroll enters viewport | `deliberate` |
+| **Navbar** | `y: -4 → 0, opacity` on condense-on-scroll | Scroll past 64px | `fast` |
+| **Page transitions** | `fadeIn` on route change | Next.js layout shell | `standard` |
+| **Cart drawer** | `x: 100% → 0` slide-in | Open | `deliberate` spring |
+| **Book covers (store)** | `rotate(−6deg) scale(0.98) → rotate(0) scale(1)` | Hover | `standard` |
+| **Hover on ArticleCard** | `y: 0 → −4px` + shadow deepens | Hover | `fast` |
+| **Our Ideal page** | `fadeUp` with `contemplative` (0.7s) duration for each section | Scroll | `contemplative` |
+
+**Rules:**
+
+- Scroll-triggered animations use Framer Motion's `useInView` hook. Threshold is `0.15` (15% visible). **`once: true` is mandatory** — the reveal fires once and stays; re-triggering on scroll-back breaks the "unveiling" metaphor and reads as twitchy.
+- **Stagger containers** use Framer Motion `variants` with `staggerChildren`. The stagger delay is `0.05s` for grids, `0.08s` for hero sequences.
+- **`prefers-reduced-motion`:** when `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is true, `AnimateOnScroll` renders children unwrapped — no `motion.div`, no variant. This is enforced in the component, not per-call-site.
+- Animations never block interactivity. `willChange: 'transform, opacity'` only on actively animating elements.
+- Exit animations are **60% the duration** of entrance animations (feels responsive).
+- **CSS `transition` is removed** from any element that Framer Motion owns (hover, mount, scroll). Motion owns the property; dual-ownership causes jank.
+
+#### `AnimateOnScroll` wrapper component
+
+A shared `AnimateOnScroll` component wraps any block that should reveal on scroll:
+
+```tsx
+// packages/ui/components/AnimateOnScroll.tsx
+<AnimateOnScroll variant="fadeUp" delay={0.1}>
+  <SectionTitle>Featured Writings</SectionTitle>
+</AnimateOnScroll>
+```
+
+This keeps animation concerns out of page code and ensures consistency.
+
+### 4a.4 Psychological Design Patterns
+
+These patterns are derived from three evidence-based frameworks — **Self-Determination Theory**
+(Deci & Ryan), **Rogerian humanistic psychology**, and **cognitive psychology** (dual-process theory,
+curiosity gap, availability heuristic) — applied to the specific context of a
+**spiritual-philosophical knowledge hub**. The goal is *attraction through depth*, not urgency or
+scarcity.
+
+#### 4a.4.0 Visitor psychology framework
+
+The MasterWithin visitor is operating at Maslow's **Esteem → Self-Actualization boundary**: life
+basics are covered; they feel an unnamed gap and are searching for language to name it. Most are in
+Erikson's Stage 6 (Intimacy vs. Isolation, 20s–40s) or Stage 8 (Integrity vs. Despair, 50s+) — both
+asking *"Does my life mean something?"* The H1 already answers this. Every other design decision
+should support that answer.
+
+**Self-Determination Theory — three visitor needs mapped to design responses:**
+
+| SDT Need | What the visitor feels arriving | Design response |
+| --- | --- | --- |
+| **Autonomy** | "I want to choose my own path — not be sold to" | Invitation-style CTAs only. No countdown timers, no pop-ups, no "limited spots". CTAs pull (invite); they never push. |
+| **Competence** | "Am I intellectual/aware enough for this?" | Drop the barrier immediately — visually inclusive, no gatekeeping language. Article counts signal depth, not difficulty. |
+| **Relatedness** | "Am I alone in seeking this?" | Founder presence, article corpus size, reading-time signals — social proof through *seriousness*, not testimonials. |
+
+**Rogerian principles as design constraints (Unconditional Positive Regard, Empathy, Congruence):**
+
+- **UPR → Visual openness.** Generous whitespace = "there is no rush here." No pop-ups, no
+  urgency-scarcity patterns. Soft border radii (`--radius-lg`) signal non-threat. These are not style
+  choices — they are design decisions that create a psychologically safe container.
+- **Empathy → Copy that reflects the visitor's inner state first.** Every section header and page
+  intro should *name the visitor's feeling* before naming the site's content. The empathic reflection
+  pattern (§4a.4.1, §4a.6) is the primary implementation of this.
+- **Congruence → Founder authenticity visible.** People trust individuals, not institutions. Souvik
+  Ghosh's name, credential, and voice must be present on the Home page (inline credit) and above the
+  fold on `/about`. The founder's presence is not decoration — it is the trust mechanism.
+
+**Cognitive psychology levers:**
+
+- **Dual-Process (Kahneman):** System 1 (fast, emotional) is triggered first by the hero animation
+  reveal, the founder credit, pull quotes, and the book covers. System 2 (slow, logical) engages via
+  article metadata, course structure, and category descriptions. The design triggers System 1 *first*
+  to earn the attention that System 2 needs to evaluate.
+- **Curiosity gap:** Each section title + eyebrow pair should create a *cognitive pull* — a gap
+  between what the visitor knows and what they suspect the content will reveal. Eyebrow: `SCIENCE OF
+  CONSCIOUSNESS` / Title: `Why Your Inner Experience Is Real` creates tension; `Blog Post #4` does not.
+- **Availability heuristic:** What appears first is weighted most heavily. The Hero H1 is the single
+  most important line of copy on the site. Everything else is amplification.
+- **Progressive disclosure:** Each page tier is designed to pull the visitor one layer deeper:
+  Home → "I wonder what's in the Library" → Library → "I wonder what's in this category" →
+  Article → "I wonder what the next paragraph reveals" → Our Ideal → "I wonder who writes all of this."
+
+#### 4a.4.1 Progressive depth revelation (the editorial gradient, §1)
+
+The site is architected as a **visual journey inward**. Each layer of the site is visually and
+typographically denser and more intimate than the last:
+
+| Layer | Pages | Visual cues |
+|-------|-------|-------------|
+| **Outer** | Home, Wisdom Library, Courses, Store | Max whitespace; humanitarian framing; minimal color; friendly body font weight |
+| **Middle** | Article pages, Start Here, About | Reduced whitespace; more Lora display use; pull quotes appear; category depth visible |
+| **Inner** | Our Ideal | Near-maximum text density within `max-w-prose`; generous `section-xl` vertical space; contemplative animation timings; deepest philosophical language |
+
+This gradient is enforced through CSS and component choices, not just copy — a first-time visitor
+*feels* the depth increasing as they go deeper.
+
+#### 4a.4.2 Trust through typography + authority signals
+
+- **No testimonials, no star ratings.** Trust is built through visual seriousness (editorial typography, precise alignment, Lora display), not social proof metrics.
+- **Founder presence on Home** — a one-sentence credit with Souvik Ghosh's name and credential (PhD researcher, author) placed *below the hero CTAs or in the hero subtitle area*. Not buried in the footer. No large photo on Home; full photo and bio on `/about` above the fold.
+- **Empathic reflection block** — immediately below the hero section and before the Featured Articles grid, a single sentence in Lora italic that names the visitor's unspoken feeling back to them (e.g. *"If you've ever felt that the answers must go deeper than what you've been given — you're in the right place."*). This is the Rogerian "empathy" move in design form: the visitor feels seen before any content is consumed. See §4a.6 for placement spec.
+- **"X articles in the library"** counter on the Wisdom Library page header — social proof through corpus size, not reviews.
+- **Publication date + reading time** on every article — signals curation and respect for reader's time.
+- **Attribution link to Substack** on every article — transparency builds trust.
+
+#### 4a.4.3 Attention architecture (F-pattern and Z-pattern)
+
+- **Home page:** Z-pattern layout. Hero → Featured Articles (left-right grid) → Full-width YouTube → Course teaser (left text, right CTA) → Store teaser.
+- **Wisdom Library:** F-pattern. Category grid at top (wide), then article list (left-dominant).
+- **Article page:** Single-column reading column, centered, max 720px. No sidebars. Nothing competes with the text.
+- **The above patterns mean:** on mobile, everything stacks correctly without cognitive cost.
+
+#### 4a.4.4 Scarcity and exclusivity (depth-appropriate)
+
+- **Depth signals, not urgency.** The site never uses countdown timers, "limited spots", or "don't miss out". Instead: subtle signals that this is a curated, considered body of work.
+- **Category article counts** (`12 articles` under a category) signal a substantial library without overwhelming.
+- **"Start Here" as a guide** — this page's entire function is psychological: it meets the visitor where they are emotionally and routes them to their first relevant experience.
+
+#### 4a.4.5 Micro-copy and emotional resonance
+
+Section eyebrow labels, CTAs, and empty states use vocabulary from the philosophy of the site — not
+generic marketing. This is enforced site-wide; every occurrence of the "avoid" column must be replaced
+with the "use" column.
+
+| Context | Use | Avoid |
+| --- | --- | --- |
+| Section eyebrow | `Insights` | `Blog` |
+| Article collection | `Writings` | `Posts`, `Articles` |
+| Library CTA | `Explore the Library` | `See all`, `View more`, `Read more` |
+| Entry path | `Guided Entry` | `Get Started`, `Onboarding` |
+| About page | `The Foundation` | `About Us`, `Our Team` |
+| Subscribe prompt | `Stay in the stream` | `Subscribe`, `Sign up` |
+| Book purchase | `Bring this home` | `Add to cart`, `Buy now` |
+| Empty cart | `Your shelf is waiting.` | `Your cart is empty` |
+| Empty search | `The library is quiet here. Try a different path.` | `No results found` |
+| Empty category | `The library is growing. Return soon.` | `No articles yet` |
+| Course enroll | `Begin this path` | `Enroll now`, `Sign up` |
+| Contact submit | `Send your message` | `Submit`, `Send` |
+| Reading time | `6 min` | `6 min read` (redundant) |
+| Start Here paths | Question-form headline in Lora italic (e.g. *"I feel lost and need direction"*) | Descriptive label (e.g. "Beginner path") |
+
+**Anti-patterns never permitted:**
+
+- Countdown timers, "limited spots", "don't miss out", "only X left" — any scarcity/urgency language.
+- Pop-up modals requesting email subscription on first visit.
+- "Sign up now" or "Register" as a CTA on any public page (the site is anonymous-by-default, §2).
+- Star ratings or testimonial blocks (trust is built through editorial seriousness, not metrics).
+
+### 4a.5 Component Visual Enhancement Specifications
+
+These specs govern how the key visual components must be implemented. They supplement the functional
+specs in §11.
+
+#### ArticleCard
+
+- **Aspect ratio:** cover image is `aspect-[16/9]` on hover, transitions from `aspect-[4/3]` on idle (Framer Motion layout animation).
+- **Hover state:** `y: −4px`, shadow deepens from `shadow-sm` to `shadow-md`, cover image subtle `scale(1.03)` (overflow hidden on card).
+- **Typography treatment:** title is Lora `font-semibold`; category badge left-aligned above title; reading time + date in `caption` role right-aligned.
+- **No truncation on excerpt** — use `line-clamp-3` (3 lines), never 1-line truncation.
+- **Required metadata row:** `[CategoryBadge] · [ReadingTime] · [PublishedDate]`
+
+#### CategoryCard
+
+- **Icon:** SVG icon at 32px, `text-primary`, with a `bg-primary/8` circle behind it (40px circle).
+- **Layout:** icon + title + description + article count. Never just icon + title.
+- **Hover:** `scaleUp` spring animation, background shifts from `bg-surface` to `bg-primary/5`.
+
+#### HeroSection
+
+- **Background:** subtle radial gradient from `--color-primary` at 3% opacity at top-center, fading to `--color-bg`. No heavy gradients. No stock photo backgrounds.
+- **Texture:** very-low-opacity grid lines (`0.025` opacity) for tactile depth without visual noise.
+- **H1:** uses `clamp(2.75rem, 5vw, 4rem)`, Lora bold, tracking `-0.02em`. The word "Source Within" or equivalent philosophical phrase is in `text-primary` — one phrase, not the whole title.
+- **Eyebrow:** above H1, 11px, DM Sans 600, `tracking-widest`, `text-primary`, pill shape with `bg-primary/10`.
+- **Subtitle:** max-width `560px`, DM Sans 400, 17–18px, `text-text/80`, `leading-relaxed`.
+- **CTA pair:** primary + secondary. Primary is `bg-primary text-white` with `shadow-sm`. Secondary is `border border-border bg-surface`. Gap between them `gap-4`. Both min-height 44px (touch target).
+- **Founder credit:** one sentence in DM Sans 400, 14px, `text-text/60`, placed below the CTA pair with `mt-6`. Format: *"Founded by Souvik Ghosh, PhD — researcher, author, and practitioner."* No photo in the hero; the text alone signals human presence and authority.
+
+#### Prose (article body)
+
+- **Drop cap:** `::first-letter` selector on the first `<p>` in `.prose`. Lora bold, font-size 4.5em, float left, line-height 0.8, padding-right 0.12em.
+- **Pull quotes:** `<blockquote>` gets left border 3px `--color-primary`, Lora 400 italic, 1.4× body size, padded, max-width `prose`.
+- **Inline images:** centered, max 100% width, `rounded-lg`, with optional caption in `caption` role below.
+- **Link styling:** `text-primary`, no underline by default, underline on hover with `text-decoration-color: --color-primary/40`.
+- **Inter-paragraph spacing:** `1.75em` (generous — contemplative pace).
+
+#### Navbar
+
+- **Scroll behaviour:** transparent (no `bg-surface`) when at top, transitions to `bg-surface/90 backdrop-blur-md` with `border-b border-border/40` after 64px scroll. Transition: 0.2s ease-out.
+- **Height:** 64px desktop, 56px mobile.
+- **Logo:** Lora font for the wordmark "Master Within", 15px, `tracking-tight`. An icon mark (lotus or circular SVG) 24px left of wordmark.
+- **Nav links:** DM Sans 500, 14px, `text-text/80` idle, `text-text` hover with underline `text-decoration-color: --color-primary`.
+- **Cart indicator:** badge with item count, bg `--color-primary`, white text, 18×18px, `rounded-full`, positioned at top-right of cart icon.
+- **Mobile:** slide-in sheet from right, full-height, with the nav links stacked at 18px DM Sans 500.
+
+#### Footer
+
+- **Four-column layout** on desktop: Brand column (logo + tagline + socials), Navigation, Library (categories list), Subscribe (Substack embed link + brief copy).
+- **Divider:** 1px `--color-border` line above footer, `section-sm` padding above.
+- **Legal row:** 12px DM Sans 400, `text-text/50`. Substack attribution link.
+- **No heavy backgrounds** — footer uses `bg-surface` or `bg-bg` (same as page). The separator line provides the visual distinction.
+
+#### Button
+
+- **Variants (all defined in `packages/ui/primitives/Button.tsx`):**
+  - `primary`: `bg-primary text-white` shadow-sm, hover `bg-deep` (not opacity — true darkening to `--color-deep`).
+  - `secondary`: `border border-border bg-surface text-text`, hover `bg-primary/5 border-primary/30`.
+  - `ghost`: `text-primary`, no background, no border, hover `bg-primary/8 text-primary`.
+  - `danger`: `bg-danger text-white`.
+- **Size:** `sm` (32px height), `md` (40px height), `lg` (48px height). All meet WCAG touch target when used with adequate spacing.
+- **Shape:** `rounded-lg` (`--radius-md`, 10px). Never pill shape on primary CTAs.
+- **Icon+label:** icon always 16px, gap between icon and label `gap-2`.
+
+### 4a.6 Page-Specific Visual Specifications
+
+#### Home page visual hierarchy
+
+The Home page must communicate three things in the first 3 seconds: (1) this is a serious, deep
+resource, (2) it is about consciousness / inner mastery, (3) there are two clear paths (Library and
+Start Here). Any design that obscures these three signals should be changed.
+
+- **Hero:** `section-lg` padding. H1 no wider than `max-w-3xl`. H1 must include a philosophical phrase in `text-primary`. No stock photos. Background texture only. Founder credit below CTAs (see §4a.5 HeroSection spec).
+- **Empathic reflection block:** between the Hero and the Featured Articles section — a single sentence in Lora 400 italic, `text-text/70`, centered, `max-w-xl mx-auto`, no background, no border. This sentence names the visitor's unspoken feeling (e.g. *"If you've ever felt that the answers must go deeper than what you've been given — you're in the right place."*). It is the psychological bridge between the mission statement above and the content below. Animate with `fadeIn` on mount, 0.3s delay after hero CTAs. Do not make this a prominent UI element — it should read as a quiet whisper, not a banner.
+- **Featured Articles section:** 3-column card grid on desktop, single column on mobile. `section-md` padding. Section eyebrow `INSIGHTS` before title.
+- **YouTube section:** alternating background (`bg-surface/40`). Lite-embed players in a 3-col grid. Section eyebrow `MEDIA` or `CONVERSATIONS`.
+- **Course Teaser:** full-width banner inside `max-w-content`. Subtle gradient background (`from-primary/5`). Left-heavy layout with image or icon on right.
+- **Store Teaser:** Two-column — left is text, right is the book covers stack. Book covers use the 3-card rotated stack pattern already in the code; enhance with Framer Motion spring on hover.
+
+#### Wisdom Library visual hierarchy
+
+- **Category grid:** 4-column on desktop, 2-column on tablet, 1-column on mobile. Each `CategoryCard` has icon + article count. The 8 categories are always shown together — never paginated.
+- **Article list below:** full-width cards in single column, or 2-column on wide desktop.
+- **Search bar:** centered, `max-w-xl`, generous padding, `rounded-xl`, subtle `shadow-sm`, focus-visible ring.
+
+#### Article page
+
+- **Reading column:** `max-w-prose` (720px), centered with `mx-auto`.
+- **Above the fold:** Title (Lora 2rem+), byline with author + date + reading time (small caps DM Sans), cover image full-width of the reading column.
+- **Floating share buttons** on desktop: fixed left side at `top-50%`, vertical stack of 3 (Twitter/X, WhatsApp, copy-link). Fade in after 500px scroll.
+- **Related articles:** 3-card grid below the article body, inside `max-w-content`. "You might also enjoy" heading.
+
+#### Our Ideal page
+
+This is the deepest, most contemplative page. Special rules:
+- **Reading column:** `max-w-prose` with extra side padding (`md:px-8 lg:px-16`). This makes the column feel more like a printed book page.
+- **Section anchors:** styled as small `text-primary` dots (•) in the left margin on desktop.
+- **Pull quotes throughout** — every 400–600 words, a pull quote breaks the prose.
+- **`contemplative` animation timing** (0.7s) for all scroll-reveals.
+- **No categories, no tags, no share buttons** — this page is meant to be experienced, not catalogued.
+
+---
+
 ## 5. Information Architecture & Routing
 
 Routes map directly to Next.js App Router segments. SEO-critical routes are statically generated; the

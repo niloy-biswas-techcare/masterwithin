@@ -99,8 +99,8 @@ export function CartPageClient() {
       <div className="mx-auto max-w-content px-6 py-16">
         <EmptyState
           icon={<ShoppingBag className="h-12 w-12" />}
-          title="Your cart is empty"
-          description="Browse the store and add physical books to place an order."
+          title="Your shelf is waiting."
+          description="Browse the bookstore and bring a book home."
           action={
             <Link
               href="/store"

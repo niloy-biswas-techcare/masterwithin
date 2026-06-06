@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 
+/**
+ * 2px reading progress bar fixed below the navbar (§4a.2, §4a.6).
+ * bg-primary, no border-radius, no layout shift.
+ */
 export function ReadingProgress() {
   const [progress, setProgress] = useState(0);
 
@@ -9,21 +13,18 @@ export function ReadingProgress() {
     const handleScroll = () => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight > 0) {
-        const scrollPercent = (window.scrollY / scrollHeight) * 100;
-        setProgress(Math.min(scrollPercent, 100));
+        setProgress(Math.min((window.scrollY / scrollHeight) * 100, 100));
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Run once initially to handle direct anchor navigation page loads
     handleScroll();
-    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div
-      className="fixed left-0 top-14 md:top-16 z-50 h-1 w-full bg-border/20"
+      className="fixed left-0 top-16 z-50 h-0.5 w-full bg-transparent"
       role="progressbar"
       aria-valuenow={Math.round(progress)}
       aria-valuemin={0}
@@ -31,8 +32,8 @@ export function ReadingProgress() {
       aria-label="Reading progress"
     >
       <div
-        className="h-full bg-primary transition-all duration-100 ease-out"
-        style={{ width: `${progress}%` }}
+        className="h-full bg-primary"
+        style={{ width: `${progress}%`, transition: 'width 100ms linear' }}
       />
     </div>
   );

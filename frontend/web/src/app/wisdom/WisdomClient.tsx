@@ -257,8 +257,8 @@ export function WisdomClient() {
             </div>
           ) : (
             <EmptyState
-              title="No articles found"
-              description="Try adjusting your keywords or category filters."
+              title="The library is quiet here."
+              description="Try a different path — adjust your keywords or category filters."
               action={
                 <button
                   onClick={clearAllFilters}

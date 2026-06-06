@@ -11,8 +11,8 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Designed empty state for lists (search, category, cart) — never a blank page
- * (§11, §18).
+ * Contemplative empty state (§4a.4.5, §11, §18). Uses the philosophical vocabulary
+ * from the micro-copy spec. Never blank.
  */
 export function EmptyState({
   title,
@@ -25,19 +25,23 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-surface px-6 py-12 text-center',
+        'flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-surface/50 px-8 py-14 text-center',
         className,
       )}
       {...props}
     >
       {icon ? (
-        <span className="text-muted" aria-hidden="true">
+        <span className="text-muted mb-1" aria-hidden="true">
           {icon}
         </span>
       ) : null}
       <h3 className="font-display text-xl text-text">{title}</h3>
-      {description ? <p className="max-w-md text-base text-text/70">{description}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
+      {description ? (
+        <p className="max-w-md text-[0.9375rem] text-text/60 leading-relaxed font-body italic">
+          {description}
+        </p>
+      ) : null}
+      {action ? <div className="mt-3">{action}</div> : null}
     </div>
   );
 }

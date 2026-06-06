@@ -25,6 +25,15 @@
 
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
+
+  /* Named container widths (§4a.1) */
+  --max-w-prose: 720px;
+  --max-w-content: 1120px;
+  --max-w-wide: 1320px;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -40,6 +49,71 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Section vertical rhythm scale (§4a.1) */
+@layer utilities {
+  .section-sm {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  .section-md {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  .section-lg {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  .section-xl {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  @layer utilities {
+    .section-sm {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+    .section-md {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+    .section-lg {
+      padding-top: 8rem;
+      padding-bottom: 8rem;
+    }
+    .section-xl {
+      padding-top: 10rem;
+      padding-bottom: 10rem;
+    }
+  }
+}
+
+/* Drop cap for first paragraph in article prose (§4a.2) */
+.prose-drop-cap > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 4.5em;
+  line-height: 0.8;
+  float: left;
+  padding-right: 0.12em;
+  color: var(--color-text);
+}
+
+/* Pull quote styling for blockquotes in prose (§4a.2) */
+.prose-pull-quote blockquote {
+  border-left: 3px solid var(--color-primary);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  padding: 1rem 1.5rem;
+  margin: 2rem 0;
+  max-width: 720px;
+  color: var(--color-text);
 }
 
 /* Disable non-essential animations when user prefers reduced motion (§4.3) */

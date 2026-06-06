@@ -18,7 +18,7 @@ export interface CategoryCardProps {
   className?: string;
 }
 
-/** Wisdom Library category card with title, description, and article count (§7.2). */
+/** Wisdom Library category card (§7.2, §4a.5). Icon circle + title + description + count. */
 export function CategoryCard({
   category,
   href,
@@ -28,23 +28,35 @@ export function CategoryCard({
   className,
 }: CategoryCardProps) {
   return (
-    <Card className={cn('transition-shadow hover:shadow-md', className)}>
+    <Card
+      className={cn(
+        'transition-all duration-200 hover:shadow-md hover:bg-primary/5',
+        className,
+      )}
+    >
       <a
         href={href}
-        className="group flex flex-col gap-2 p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="group flex flex-col gap-3 p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         {...anchorProps}
       >
+        {/* 40px icon circle with bg-primary/8 (§4a.5) */}
         {icon ? (
-          <span className="text-deep" aria-hidden="true">
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/8 text-primary shrink-0"
+            aria-hidden="true"
+          >
             {icon}
           </span>
         ) : null}
-        <h3 className="font-display text-xl leading-tight text-text group-hover:text-deep">
+
+        <h3 className="font-display text-xl leading-tight text-text group-hover:text-deep transition-colors">
           {category.title}
         </h3>
-        <p className="text-base text-text/80">{category.description}</p>
+        <p className="text-[0.9375rem] text-text/70 leading-relaxed">{category.description}</p>
+
+        {/* Article count — competence signal, not gatekeeping (§4a.4.0) */}
         {typeof count === 'number' ? (
-          <span className="mt-1 text-sm text-text/70">
+          <span className="mt-1 text-[13px] font-body font-medium text-primary">
             {count} {count === 1 ? 'article' : 'articles'}
           </span>
         ) : null}

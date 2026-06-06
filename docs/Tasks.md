@@ -246,6 +246,106 @@ folders hold **composition only** (§9). Editorial gradient enforced (§1).
 
 ---
 
+## Phase 6a — UI/UX Excellence: Visual Design, Motion & Psychological Depth  🔁
+
+Goal: elevate `frontend/web` from functional to **emotionally compelling** — correct all spacing and
+margin issues, implement the full Framer Motion animation system, and apply the psychological design
+patterns that make a spiritual-philosophical knowledge hub feel authoritative, inviting, and deep.
+Every task here maps to §4a of [Project.md](./Project.md). These tasks are **acceptance criteria**
+for the public site, not post-launch polish; they must be complete before the site goes live.
+
+> **Priority note:** 6a.1 (layout/spacing) and 6a.2 (typography) are the highest-impact fixes for
+> the "doesn't look professional" problem. Start here. Motion (6a.3) amplifies quality once the
+> foundation is right.
+
+### 6a.1 Layout Grid & Spacing System (§4a.1)  ⛔
+
+- [x] Define the three container widths (`max-w-prose` 720px, `max-w-content` 1120px, `max-w-wide` 1320px) as Tailwind custom values in `packages/config/tailwind.preset.ts` and as CSS tokens.
+- [x] Build the shared `Container` component in `packages/ui` with `variant` prop (`prose` | `content` | `wide`) that applies the correct `max-w-*` and the breakpoint-aware horizontal padding (`px-5` → `px-8` → `px-10` → `px-12`). **All page sections must use `<Container>` — remove all inline `px-6` from page files.**
+- [x] Define the vertical rhythm scale (`section-sm` / `section-md` / `section-lg` / `section-xl`) as Tailwind spacing utilities in the shared preset. Each maps to a mobile + desktop `py-*` pair per §4a.1.
+- [x] Audit every section on every public page (`/`, `/wisdom`, `/wisdom/[category]`, `/wisdom/[category]/[slug]`, `/start-here`, `/our-ideal`, `/courses`, `/courses/[slug]`, `/store`, `/about`, `/contact`) and replace raw `py-*` values with the named rhythm classes. 🧪 (visual regression)
+- [x] Verify **no horizontal scroll on mobile** (375px viewport) on any public route. 🧪
+- [x] Verify content never touches viewport edges — all gutters respected at 360px, 768px, 1024px, 1440px. 🧪
+
+### 6a.2 Typography Refinements (§4a.2)  ⛔
+
+- [x] Expand the type role mapping in `packages/ui/styles/tokens.css`: add CSS custom properties for `--text-hero`, `--text-section`, `--text-article-title`, `--text-body-prose`, `--text-ui-body`, `--text-label` with the sizes and line-heights from §4a.2. These become Tailwind text utilities via the shared preset.
+- [x] Apply `clamp(2.75rem, 5vw, 4rem)` to all Hero H1 elements — fluid scaling, no breakpoint jump.
+- [x] Add **eyebrow label pattern** as a reusable `Eyebrow` component in `packages/ui`: 11px, DM Sans 600, `tracking-[0.1em]`, `text-primary`, all-caps. Audit all section headers and replace ad-hoc `<span>` eyebrow labels with `<Eyebrow>`.
+- [x] Add **drop cap** CSS rule in `packages/ui/styles/prose.css`: `::first-letter` on `.prose > p:first-of-type` — Lora bold, 4.5em, float left, 3-line drop, `padding-right: 0.12em`.
+- [x] Add **pull quote** CSS in `packages/ui/styles/prose.css`: `blockquote` gets 3px left border `--color-primary`, Lora 400 italic, 1.4× body size, `max-w-prose`, generous vertical margin.
+- [x] Verify `Prose` component applies drop cap and pull quote styles; test with a real article body.
+- [x] Set `max-w-prose` (720px) as the reading column on article pages — verify no prose ever goes edge-to-edge on any viewport. 🧪
+
+### 6a.3 Framer Motion Animation System (§4a.3)  🧪
+
+- [x] Install `framer-motion` in `frontend/web` (if not present) and create `src/lib/motion.ts` exporting `motionTokens` (durations, easings, variants) per §4a.3.
+- [x] Create `AnimateOnScroll` wrapper component in `packages/ui/components/AnimateOnScroll.tsx` using Framer Motion `useInView` (threshold 0.15, **`once: true`** — fires once on entry, never re-triggers on scroll-back). Accepts `variant` prop (`fadeUp` | `fadeIn` | `slideLeft` | `scaleUp`) and `delay`. When `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is true, renders children unwrapped with no `motion.div` — the check lives in the component, not at each call site.
+- [x] Animate **Hero section**: H1 `fadeUp` (0.45s), subtitle stagger +0.1s, CTA pair stagger +0.2s. All on mount.
+- [x] Animate **section titles** across all public pages: wrap each `<SectionTitle>` in `<AnimateOnScroll variant="fadeUp">`.
+- [x] Animate **ArticleCard grids**: stagger children 50ms per card using Framer Motion `variants.staggerChildren`.
+- [x] Animate **CategoryCard grid**: `scaleUp` with 40ms stagger.
+- [x] Animate **pull quotes** in Prose: `slideLeft` on scroll entry.
+- [x] Implement **Navbar scroll behaviour**: transparent → `bg-surface/90 backdrop-blur-md border-b border-border/40` after 64px scroll, 0.2s ease-out. Use Framer Motion `useScroll` + `useTransform` for opacity/backdrop.
+- [x] Implement **page transition** in `app/layout.tsx`: `AnimatePresence` + `fadeIn` on route change (0.25s). Ensure no layout shift during transition.
+- [x] Animate **CartDrawer**: `x: '100%' → 0` spring slide-in, `x: 0 → '100%'` on close.
+- [x] Animate **ArticleCard hover**: `y: −4px` + shadow deepens via Framer Motion `whileHover`. **Remove all CSS `transition` from this element** — Motion owns the property; dual-ownership causes stuttering.
+- [x] Animate **BookCard hover** (store): cover `rotate(±6deg) → rotate(0) scale(1.02)` on hover, `contemplativeSpring` physics (stiffness 35, damping 18 — organic, not snappy).
+- [x] Apply `contemplative` timing (0.7s) to all scroll-reveal animations on `/our-ideal` — override via a page-level `motion.tsx` context.
+- [x] Add floating **share buttons** on article pages: fixed left side, fade in after 500px scroll, vertical stack of 3. Hidden on mobile.
+- [x] **`prefers-reduced-motion` compliance test:** confirm every Framer Motion animation is skipped when the OS motion preference is "reduce". 🧪 (Playwright a11y check)
+
+### 6a.4 Component Visual Enhancements (§4a.5)
+
+- [x] **ArticleCard** (`packages/ui`): add cover image `aspect-[16/9]`, `overflow-hidden`, subtle `scale(1.03)` on card hover (Framer Motion `whileHover`). Add `line-clamp-3` on excerpt (not 1-line). Required metadata row: `[CategoryBadge] · [ReadingTime] · [PublishedDate]`.
+- [x] **CategoryCard** (`packages/ui`): add 40px icon circle (`bg-primary/8`), article count badge, hover `bg-primary/5` transition. Never icon-only.
+- [x] **Button** (`packages/ui`): implement all four variants (`primary`, `secondary`, `ghost`, `danger`) per §4a.5. `primary` hover uses `bg-deep` (true dark blue), not opacity. All variants `rounded-lg`. Ensure 44px min-height on `md` and `lg` sizes.
+- [x] **Navbar**: implement full scroll-condense behaviour (§4a.5). Logo uses Lora wordmark + icon mark. Cart badge is 18px pill. Mobile menu is a full-height sheet.
+- [x] **Footer**: implement 4-column layout (Brand / Navigation / Library / Subscribe) per §4a.5 spec. Divider line above. Legal row 12px.
+- [x] **HeroSection** (`src/features/home`): background radial gradient at `3% opacity`, grid texture at `0.025 opacity`. H1 uses `clamp`. "Source Within" / key phrase in `text-primary`. Eyebrow above H1.
+
+### 6a.5 Psychological Design & Micro-copy (§4a.4)
+
+- [x] **Progressive depth visual cues**: implement the 3-layer gradient — Home/Library (max whitespace, `section-lg` spacing) → Articles (slightly denser, pull quotes visible) → Our Ideal (`section-xl`, contemplative motion, narrow prose). Verify the visual density increases as the visitor goes deeper.
+- [x] **Wisdom Library article count**: display "X articles" count below each category title on `/wisdom` and in each `CategoryCard`.
+- [x] **"Start Here" emotional framing**: each of the 4 entry-path cards uses a question headline in Lora italic (`"I feel lost and need direction"`, `"I want deeper meaning"`, `"My relationships are struggling"`, `"I want to explore spirituality"`). The card must read as an empathic invitation, not a feature label. No descriptive nouns like "Beginner path" or "Intermediate". 🧪
+- [x] **Micro-copy audit**: search the entire `frontend/web/src` for all button labels, section eyebrows, empty states, and error messages and apply the full §4a.4.5 vocabulary replacement table. Required substitutions: `Writings` not `Posts`; `Explore the Library` not `See all`; `Stay in the stream` not `Subscribe`; `Bring this home` not `Add to cart`; `Begin this path` not `Enroll now`; `Send your message` not `Submit`; `Guided Entry` not `Get Started`; `The Foundation` not `About Us`. 🧪
+- [x] **Anti-pattern audit**: verify no page in `frontend/web` uses countdown timers, "limited spots" / scarcity language, pop-up email-capture modals on first visit, "Sign up now" as a CTA, star-rating / testimonial blocks, or `Buy now` copy. These are prohibited by §4a.4.5 regardless of context. 🧪
+- [x] **Empathic reflection block**: add a single-sentence Lora 400 italic reflection immediately between the Hero section and the Featured Articles section in `src/app/page.tsx`. Example: *"If you've ever felt that the answers must go deeper than what you've been given — you're in the right place."* Styling: `text-text/70`, `max-w-xl mx-auto`, centered, no background. Animate with `fadeIn` 0.3s delay (after hero CTAs settle). Per §4a.4.2 and §4a.6.
+- [x] **Founder presence — Hero**: add the one-sentence founder credit (`"Founded by Souvik Ghosh, PhD — researcher, author, and practitioner."`) below the CTA pair in the Hero section. DM Sans 400, 14px, `text-text/60`, `mt-6`. No photo in the Hero. Per §4a.5 HeroSection spec.
+- [x] **Founder presence — Footer**: add the founder credit sentence in the Footer Brand column (below logo + tagline).
+- [x] **Founder presence — About page**: ensure Souvik Ghosh's photo, PhD credential, and mission statement are above the fold (first screen) on `/about`. 🧪
+- [x] **SDT-informed CTA review**: audit every primary CTA on the public site against Self-Determination Theory (§4a.4.0). Each CTA must satisfy: Autonomy (invites, never pressures), Competence (accessible language, no gatekeeping), Relatedness (signals community/tradition, not isolation). Rewrite any CTA that fails. 🧪
+- [x] **Empty states** for library / search / cart use the contemplative framing from §4a.4.5 — `"The library is quiet here. Try a different path."` (search), `"The library is growing. Return soon."` (empty category), `"Your shelf is waiting."` (empty cart) — not generic "No results found." 🧪
+
+### 6a.6 Scroll Polish & Reading Experience
+
+- [x] Add `scroll-behavior: smooth` to the `<html>` element (already in globals.css; verify it's present and not overridden).
+- [x] **Reading progress indicator** (`ReadingProgress.tsx`): 2px height, `bg-primary`, no border-radius, fixed below navbar (not over it). Ensure it doesn't cause layout shift. 🧪
+- [x] **Article page — Related Articles section**: implement `IntersectionObserver`-based viewport prefetch (§12.2) so related article data is in cache before the reader reaches the bottom.
+- [x] **Floating share buttons** (desktop only): fade-in after 500px scroll, fixed left edge `left-4` at `top-50%`, vertical icon stack. Fade out when footer enters viewport.
+- [x] Verify **zero horizontal overflow** on all public routes at 360px, 375px, 768px, 1024px, 1440px viewport widths. 🧪
+- [x] Verify **no Cumulative Layout Shift (CLS > 0.05)** caused by fonts, images, or animations. 🧪
+
+### 6a.7 Visual QA Checklist (merge-blocking for Phase 6a)  ⛔
+
+- [x] All pages audited at 375px, 768px, 1024px, 1440px — no broken layouts, no horizontal scroll, no clipped content.
+- [x] All section headings use the eyebrow + title pattern.
+- [x] All section content uses the correct named `Container` variant.
+- [x] All Framer Motion animations use `once: true` in `useInView` — no re-trigger on scroll-back.
+- [x] All Framer Motion animations respect `prefers-reduced-motion` — `AnimateOnScroll` renders children unwrapped when reduced motion is active.
+- [x] No element animated by Framer Motion also has a CSS `transition` on the same property.
+- [x] Empathic reflection block is present on the Home page between Hero and Featured Articles.
+- [x] Founder credit is present in the Hero section (below CTAs) and in the Footer Brand column.
+- [x] No prohibited micro-copy exists on any public page: no "Submit", "Sign up now", "Buy now", "No results found", "Your cart is empty", countdown timers, scarcity language, or pop-up email-capture modals.
+- [x] All 4 "Start Here" cards use question-form Lora italic headlines.
+- [x] Color contrast ≥ 4.5:1 on all text in light and dark mode.
+- [x] Touch targets ≥ 44px on all interactive elements (Playwright axe check).
+- [x] Lighthouse Performance ≥ 95, no CLS regression from animations.
+- [x] Lighthouse A11y ≥ 95 on every audited route.
+
+---
+
 ## Phase 7 — Commerce: Cart & WhatsApp Checkout
 
 Goal: the full payment-ready checkout, WhatsApp at launch, behind `OrderProvider`. (§10)

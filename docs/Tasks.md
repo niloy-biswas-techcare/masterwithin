@@ -157,17 +157,17 @@ Goal: the current backend implementation behind the ports, plus the composition 
 Goal: new Substack posts appear on the site automatically — idempotent, sanitized, categorized,
 image-rewritten. (§8, §18, §19)
 
-- [ ] `substackRss` fetch+parse runs **server-side only**; browser never touches RSS (§8). 🔒
-- [ ] Normalize → Zod-validate → derive stable `id` (hash of guid/link) + immutable `slug` (§8).
-- [ ] Auto-categorize via `categories.ts` keywords; respect `categoryLocked`; sensible fallback (§8).
-- [ ] Sanitize body HTML against allowlist **on ingest** (store clean once) (§8, §18). 🔒
-- [ ] Rewrite in-body + cover images to Cloudinary on ingest (§8, §2a).
-- [ ] **Idempotent upsert** by stable id (safe to re-run; no duplicates) (§8, §18). 🧪
-- [ ] Trigger on-demand ISR revalidation for new/changed paths after upsert (§8).
-- [ ] Supabase Edge Function cron (hourly) calling `syncSubstack`; secret-protected (§8, §21.4). 🔒
-- [ ] Vercel-cron fallback route `/api/cron/sync-substack` (secret-protected) (§5.1, §21.4). 🔒
-- [ ] Sync health logging: fetched / new / updated / skipped counts per run (§19).
-- [ ] Retry-safe / partial-failure tolerance (§18).
+- [x] `substackRss` fetch+parse runs **server-side only**; browser never touches RSS (§8). 🔒
+- [x] Normalize → Zod-validate → derive stable `id` (hash of guid/link) + immutable `slug` (§8).
+- [x] Auto-categorize via `categories.ts` keywords; respect `categoryLocked`; sensible fallback (§8).
+- [x] Sanitize body HTML against allowlist **on ingest** (store clean once) (§8, §18). 🔒
+- [x] Rewrite in-body + cover images to Cloudinary on ingest (§8, §2a).
+- [x] **Idempotent upsert** by stable id (safe to re-run; no duplicates) (§8, §18). 🧪
+- [x] Trigger on-demand ISR revalidation for new/changed paths after upsert (§8).
+- [x] Supabase Edge Function cron (hourly) calling `syncSubstack`; secret-protected (§8, §21.4). 🔒
+- [x] Vercel-cron fallback route `/api/cron/sync-substack` (secret-protected) (§5.1, §21.4). 🔒
+- [x] Sync health logging: fetched / new / updated / skipped counts per run (§19).
+- [x] Retry-safe / partial-failure tolerance (§18).
 
 ---
 
@@ -177,29 +177,29 @@ Goal: `frontend/web` boots with the instant-nav, offline-first data layer and SE
 feature pages are built. (§5.1, §12, §13)
 
 ### 5.1 App scaffolding
-- [ ] Next.js 15 App Router app with strict TS, Tailwind preset, fonts, Lucide icons (§3).
-- [ ] `layout.tsx`: providers (QueryClient + persist), `ThemeProvider`, `Navbar`, `Footer` (§9).
-- [ ] Route-tree segments per §5.1 (marketing group, wisdom, courses, store, api, sitemap/robots).
-- [ ] Global boundaries: `not-found.tsx`, `error.tsx`, `global-error.tsx`; per-segment `loading.tsx` (§18).
+- [x] Next.js 15 App Router app with strict TS, Tailwind preset, fonts, Lucide icons (§3).
+- [x] `layout.tsx`: providers (QueryClient + persist), `ThemeProvider`, `Navbar`, `Footer` (§9).
+- [x] Route-tree segments per §5.1 (marketing group, wisdom, courses, store, api, sitemap/robots).
+- [x] Global boundaries: `not-found.tsx`, `error.tsx`, `global-error.tsx`; per-segment `loading.tsx` (§18).
 
 ### 5.2 Data access & offline-first layer (the core requirement) 🧪
-- [ ] `QueryProvider`: TanStack Query client with tuned `staleTime`/`gcTime`/`refetchOnWindowFocus` defaults (§12.2, §12.5).
-- [ ] Structured query keys (`['articles', filters]`, `['article', slug]`) for precise prefetch/invalidate (§12.2).
-- [ ] **Hydration boundary:** RSC fetch via `@mw/backend` → dehydrate → `<HydrationBoundary>` (SEO + cache-warm first nav) (§12.3).
-- [ ] `PrefetchLink` + card handlers: prefetch on `onMouseEnter` / `onMouseDown`/`onTouchStart` / `onFocus` (query + `router.prefetch`) (§12.2).
-- [ ] Viewport prefetch via throttled `IntersectionObserver`, respecting `Save-Data` (§12.2).
-- [ ] **IndexedDB persistence** (`persistQueryClient` + idb persister) — rehydrate offline (§12.3).
-- [ ] **Service worker (Serwist):** app shell + static asset caching; offline reads (§12.3). 🧪 (offline E2E later)
-- [ ] Offline mutation queue + replay-on-reconnect scaffolding (§12.3).
-- [ ] Zustand stores: `cartStore` (persist `localStorage`, §10.4) + `uiStore` (UI state only — no server state) (§3, §12.1).
+- [x] `QueryProvider`: TanStack Query client with tuned `staleTime`/`gcTime`/`refetchOnWindowFocus` defaults (§12.2, §12.5).
+- [x] Structured query keys (`['articles', filters]`, `['article', slug]`) for precise prefetch/invalidate (§12.2).
+- [x] **Hydration boundary:** RSC fetch via `@mw/backend` → dehydrate → `<HydrationBoundary>` (SEO + cache-warm first nav) (§12.3).
+- [x] `PrefetchLink` + card handlers: prefetch on `onMouseEnter` / `onMouseDown`/`onTouchStart` / `onFocus` (query + `router.prefetch`) (§12.2).
+- [x] Viewport prefetch via throttled `IntersectionObserver`, respecting `Save-Data` (§12.2).
+- [x] **IndexedDB persistence** (`persistQueryClient` + idb persister) — rehydrate offline (§12.3).
+- [x] **Service worker (Serwist):** app shell + static asset caching; offline reads (§12.3). 🧪 (offline E2E later)
+- [x] Offline mutation queue + replay-on-reconnect scaffolding (§12.3).
+- [x] Zustand stores: `cartStore` (persist `localStorage`, §10.4) + `uiStore` (UI state only — no server state) (§3, §12.1).
 
 ### 5.3 SEO & metadata foundation
-- [ ] `lib/seo`: `generateMetadata` helpers (title/desc/canonical/OG/Twitter) (§13).
-- [ ] JSON-LD builders: `Organization` (site-wide), reusable `Article`/`BreadcrumbList`/`Course`/`Product` (§13).
-- [ ] Dynamic OG image route via `ImageResponse` (title + category on brand bg) (§13).
-- [ ] `sitemap.ts` (from backend: articles/categories/courses/store) + `robots.ts` (§13).
-- [ ] Slug-redirect map in `next.config.ts` for any immutable-slug changes (§13).
-- [ ] `/api/revalidate` route handler, secret-protected (§5.1, §18). 🔒
+- [x] `lib/seo`: `generateMetadata` helpers (title/desc/canonical/OG/Twitter) (§13).
+- [x] JSON-LD builders: `Organization` (site-wide), reusable `Article`/`BreadcrumbList`/`Course`/`Product` (§13).
+- [x] Dynamic OG image route via `ImageResponse` (title + category on brand bg) (§13).
+- [x] `sitemap.ts` (from backend: articles/categories/courses/store) + `robots.ts` (§13).
+- [x] Slug-redirect map in `next.config.ts` for any immutable-slug changes (§13).
+- [x] `/api/revalidate` route handler, secret-protected (§5.1, §18). 🔒
 
 ---
 
@@ -209,40 +209,40 @@ Goal: every public route from §5.1/§7, composed from Phase 1 components and Ph
 folders hold **composition only** (§9). Editorial gradient enforced (§1).
 
 ### 6.1 Layout & shared
-- [ ] `Navbar` (sticky, condense-on-scroll, cart indicator, mobile slide-in), `Footer` (nav, social, Substack subscribe, legal) (§7.1).
-- [ ] `Container`, `PageHeader`, `Section`, `ThemeToggle`, `ShareButtons`, `ReadingProgress`, `LiteYouTube`, `SeoJsonLd` (§11).
+- [x] `Navbar` (sticky, condense-on-scroll, cart indicator, mobile slide-in), `Footer` (nav, social, Substack subscribe, legal) (§7.1).
+- [x] `Container`, `PageHeader`, `Section`, `ThemeToggle`, `ShareButtons`, `ReadingProgress`, `LiteYouTube`, `SeoJsonLd` (§11).
 
 ### 6.2 Home `/` (§7.1)
-- [ ] `HeroSection` (mission, tagline, two CTAs: Explore Library / Start Here — no carousel).
-- [ ] `FeaturedArticles` (3–6 from backend, kept fresh by sync).
-- [ ] `YouTubeSection` (latest 3, lite-embed poster + click-to-load).
-- [ ] `CourseTeaser` (single calm banner) + `StoreTeaser` (covers → store).
-- [ ] ISR + hydrated client cache.
+- [x] `HeroSection` (mission, tagline, two CTAs: Explore Library / Start Here — no carousel).
+- [x] `FeaturedArticles` (3–6 from backend, kept fresh by sync).
+- [x] `YouTubeSection` (latest 3, lite-embed poster + click-to-load).
+- [x] `CourseTeaser` (single calm banner) + `StoreTeaser` (covers → store).
+- [x] ISR + hydrated client cache.
 
 ### 6.3 Wisdom Library (§7.2, §7.3)
-- [ ] `/wisdom`: `CategoryGrid` (8 cards w/ counts), `SearchBar` + `TagFilter` (client Fuse.js over prebuilt index), `ArticleList`, indexable pagination (`?page=`) + optional "load more".
-- [ ] Build-time/revalidate **search index** JSON (`{id,title,excerpt,tags,category,slug}`) as static asset behind a `SearchProvider` interface (§12.4).
-- [ ] `/wisdom/[category]`: per-category ISR listing.
-- [ ] `/wisdom/[category]/[slug]`: article — title/date/reading-time/category badge/clickable tags, `ReadingProgress`, `Prose` (sanitized HTML), `RelatedArticles` (viewport-prefetched), `ShareButtons`, "Read on Substack", `Article`+`BreadcrumbList` JSON-LD.
-- [ ] Intent-prefetch on cards (hover/touch → article into cache + warm route) (§7.2, §12.2).
+- [x] `/wisdom`: `CategoryGrid` (8 cards w/ counts), `SearchBar` + `TagFilter` (client Fuse.js over prebuilt index), `ArticleList`, indexable pagination (`?page=`) + optional "load more".
+- [x] Build-time/revalidate **search index** JSON (`{id,title,excerpt,tags,category,slug}`) as static asset behind a `SearchProvider` interface (§12.4).
+- [x] `/wisdom/[category]`: per-category ISR listing.
+- [x] `/wisdom/[category]/[slug]`: article — title/date/reading-time/category badge/clickable tags, `ReadingProgress`, `Prose` (sanitized HTML), `RelatedArticles` (viewport-prefetched), `ShareButtons`, "Read on Substack", `Article`+`BreadcrumbList` JSON-LD.
+- [x] Intent-prefetch on cards (hover/touch → article into cache + warm route) (§7.2, §12.2).
 
 ### 6.4 Start Here `/start-here` (§7.4)
-- [ ] Four data-driven entry-path cards from `start_here` config (no hardcoded article lists in JSX).
+- [x] Four data-driven entry-path cards from `start_here` config (no hardcoded article lists in JSX).
 
 ### 6.5 Editorial (MDX) (§7.5, §7.8)
-- [ ] `/our-ideal`: long-form MDX, pull quotes, section anchors, generous spacing (contemplative core).
-- [ ] `/about`: founder page (Souvik Ghosh) in MDX.
-- [ ] MDX pipeline + `content/` versioned in git (§9, §22).
+- [x] `/our-ideal`: long-form MDX, pull quotes, section anchors, generous spacing (contemplative core).
+- [x] `/about`: founder page (Souvik Ghosh) in MDX.
+- [x] MDX pipeline + `content/` versioned in git (§9, §22).
 
 ### 6.6 Courses (§7.6)
-- [ ] `/courses`: `CourseCard` grid + beginner→advanced learning-path visualization.
-- [ ] `/courses/[slug]`: full detail, "who it's for", "what you'll gain", module outline, enrollment CTA; structured so future course-progress attaches without redesign. `Course` JSON-LD.
+- [x] `/courses`: `CourseCard` grid + beginner→advanced learning-path visualization.
+- [x] `/courses/[slug]`: full detail, "who it's for", "what you'll gain", module outline, enrollment CTA; structured so future course-progress attaches without redesign. `Course` JSON-LD.
 
 ### 6.7 Store listing (§7.7) — commerce flow in Phase 7
-- [ ] `/store`: `EbookGrid` (external Play/Kindle links), `FreebieList` (signed-URL download, no account), Physical `BookCard` grid. `Product` JSON-LD for books.
+- [x] `/store`: `EbookGrid` (external Play/Kindle links), `FreebieList` (signed-URL download, no account), Physical `BookCard` grid. `Product` JSON-LD for books.
 
 ### 6.8 Contact (§7.9)
-- [ ] `/contact`: single-column RHF+Zod form → **server action**: validate → `submitContact` use-case → Resend email; honeypot + rate-limit; accessible error/success live regions. 🔒
+- [x] `/contact`: single-column RHF+Zod form → **server action**: validate → `submitContact` use-case → Resend email; honeypot + rate-limit; accessible error/success live regions. 🔒
 
 ---
 

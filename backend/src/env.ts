@@ -27,13 +27,42 @@ const envSchema = z.object({
   ADMIN_BOOTSTRAP_EMAIL: z.string().email(),
 });
 
-// safeParse to provide custom format output logging on failure
+let envData: Env;
 const result = envSchema.safeParse(process.env);
 
 if (!result.success) {
-  console.error("❌ Invalid backend environment configuration:", JSON.stringify(result.error.format(), null, 2));
-  throw new Error("Invalid backend environment configuration");
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+  if (isBuildPhase) {
+    console.warn("⚠️ Warning: Invalid backend environment during build phase. Using fallback values.");
+    envData = {
+      BACKEND_DRIVER: 'supabase',
+      BACKEND_API_URL: '',
+      NEXT_PUBLIC_SUPABASE_URL: '',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+      SUPABASE_SERVICE_ROLE_KEY: '',
+      SUPABASE_JWT_SECRET: '',
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: '',
+      CLOUDINARY_API_KEY: '',
+      CLOUDINARY_API_SECRET: '',
+      CLOUDINARY_UPLOAD_PRESET: '',
+      NEXT_PUBLIC_SITE_URL: 'https://masterwithin.org',
+      SUBSTACK_FEED_URL: 'https://masterwithin.substack.com/feed',
+      WHATSAPP_NUMBER: '919876543210',
+      RESEND_API_KEY: '',
+      REVALIDATE_SECRET: 'mock',
+      CRON_SECRET: 'mock',
+      ADMIN_SESSION_COOKIE_NAME: 'mw_session',
+      ADMIN_SESSION_MAX_AGE_DAYS: 5,
+      ADMIN_ALLOWLIST: ['admin@masterwithin.org'],
+      ADMIN_BOOTSTRAP_EMAIL: 'admin@masterwithin.org',
+    };
+  } else {
+    console.error("❌ Invalid backend environment configuration:", JSON.stringify(result.error.format(), null, 2));
+    throw new Error("Invalid backend environment configuration");
+  }
+} else {
+  envData = result.data;
 }
 
-export const env = result.data;
+export const env = envData;
 export type Env = z.infer<typeof envSchema>;

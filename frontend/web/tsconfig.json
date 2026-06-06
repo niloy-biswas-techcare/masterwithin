@@ -8,9 +8,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@mw/ui/fonts": ["../../packages/ui/src/fonts.ts"],
+      "@mw/ui": ["../../packages/ui/src/index.ts"]
     }
   },
-  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts", "src/sw.ts"],
   "exclude": ["node_modules"]
 }

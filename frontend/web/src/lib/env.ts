@@ -12,6 +12,7 @@ const serverSchema = clientSchema.extend({
   BACKEND_API_URL: z.string().url().optional().or(z.literal("")),
   WHATSAPP_NUMBER: z.string().optional().or(z.literal("")),
   REVALIDATE_SECRET: z.string().optional().or(z.literal("")),
+  CRON_SECRET: z.string().optional().or(z.literal("")),
 });
 
 const isServer = typeof window === "undefined";
@@ -41,6 +42,7 @@ const parseEnv = () => {
       BACKEND_API_URL: undefined,
       WHATSAPP_NUMBER: undefined,
       REVALIDATE_SECRET: undefined,
+      CRON_SECRET: undefined,
     } as unknown as z.infer<typeof serverSchema>;
   }
 };

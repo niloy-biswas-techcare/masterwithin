@@ -3,30 +3,44 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mdx-js/loader": "^3.1.1",
+    "@mdx-js/react": "^3.1.1",
+    "@mw/backend": "workspace:*",
+    "@mw/types": "workspace:*",
+    "@mw/utils": "workspace:^",
+    "@next/mdx": "^16.2.7",
+    "@serwist/next": "^9.5.11",
+    "@serwist/sw": "^9.5.11",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-query-persist-client": "^5.101.0",
+    "fuse.js": "^7.4.2",
+    "idb-keyval": "^6.2.5",
+    "lucide-react": "^0.460.0",
+    "next": "15.5.19",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.19",
+    "serwist": "^9.5.11",
     "zod": "^3.22.0",
-    "@mw/types": "workspace:*",
-    "@mw/backend": "workspace:*"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@mw/config": "workspace:*",
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
+    "@types/mdx": "^2.0.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.19",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

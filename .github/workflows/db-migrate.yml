@@ -19,17 +19,17 @@ jobs:
           version: latest
 
       - name: Link project
-        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+        run: supabase --workdir backend/infra link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
 
       - name: Apply migrations
-        run: supabase db push
+        run: supabase --workdir backend/infra db push
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
       - name: Verify generated types are in sync (drift check)
         run: |
-          supabase gen types typescript --linked > backend/infra/supabase/generated/types.ts
+          supabase --workdir backend/infra gen types typescript --linked > backend/infra/supabase/generated/types.ts
           git diff --exit-code backend/infra/supabase/generated/types.ts || (echo "::error::generated/types.ts is stale — run 'pnpm db:types' and commit" && exit 1)
 
       - name: Deploy Edge Functions (incl. syncSubstack cron)
-        run: supabase functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+        run: supabase --workdir backend/infra functions deploy --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"

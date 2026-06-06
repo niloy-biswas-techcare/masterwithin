@@ -385,21 +385,6 @@ Goal: the §21 pipeline fully live — Actions own gates + Supabase; Vercel owns
 
 ---
 
-## Phase 13 — Post-Launch / Extensibility Backlog (deferred)
-
-Tracked, not built at launch — each is additive per §23.
-
-- [ ] FastAPI backend: implement `backend/adapters/http` against existing ports; run it through the contract suite; flip `BACKEND_DRIVER=fastapi` (§9, §23).
-- [ ] Online payments: implement a payment strategy against `OrderProvider` (Razorpay/Stripe) (§10, §23).
-- [ ] Search at scale: `SearchProvider` with Algolia/Typesense or Postgres FTS (§12.4, §23).
-- [ ] Operator 2FA (TOTP) via Supabase Auth MFA (§17.8, §23).
-- [ ] More granular roles (extend `role` claim + `requireOperator`) (§23).
-- [ ] Visitor accounts + course progress (reuse Supabase Auth foundation) (§23).
-- [ ] Newsletter signup wrapper; blog comments provider; multi-language (Bengali via `next-intl`) (§23).
-- [ ] Full installable PWA (manifest + install prompt; persistence/SW already in place) (§23).
-- [ ] Dark mode flip (token override + `ThemeToggle` already built) (§4.1, §23).
-- [ ] Optional staging environment (`develop` branch + 2nd Supabase project + `staging` env) (§21.5).
-
 ---
 
 ### Definition of Done (applies to every task) (§20)

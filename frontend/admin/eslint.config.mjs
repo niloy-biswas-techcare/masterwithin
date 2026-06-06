@@ -18,6 +18,12 @@ const eslintConfig = [
     },
   },
   {
+    files: ["src/lib/supabase.ts", "src/app/api/upload-sign/route.ts"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
+  {
     ignores: [
       "node_modules/**",
       ".next/**",

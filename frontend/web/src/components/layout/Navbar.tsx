@@ -58,29 +58,32 @@ export function Navbar() {
           <Link
             href="/"
             className="font-display text-xl font-bold tracking-tight text-text hover:text-primary transition-colors flex items-center gap-1.5"
+            aria-label="Master Within Foundation — Home"
           >
             <span>Master Within</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-8 text-sm font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive(link.href) ? 'page' : undefined}
                 className={`transition-colors relative py-1 hover:text-primary ${
                   isActive(link.href) ? 'text-primary' : 'text-text/80'
                 }`}
               >
                 {link.label}
                 {isActive(link.href) && (
-                  <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary rounded-full" />
+                  <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary rounded-full" aria-hidden="true" />
                 )}
               </Link>
             ))}
             <Link
               href="/start-here"
+              aria-current={pathname === '/start-here' ? 'page' : undefined}
               className={`font-semibold transition-colors px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-xs tracking-wider uppercase ${
                 pathname === '/start-here' ? 'bg-primary/20 border-primary' : ''
               }`}
@@ -97,11 +100,14 @@ export function Navbar() {
             <Link
               href="/store/cart"
               className="relative rounded-lg p-2 text-text/80 hover:text-primary transition-all duration-300 hover:bg-surface border border-transparent hover:border-border"
-              aria-label="Shopping Cart"
+              aria-label={cartItemsCount > 0 ? `Shopping Cart — ${cartItemsCount} item${cartItemsCount !== 1 ? 's' : ''}` : 'Shopping Cart'}
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
               {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white leading-none animate-pulse">
+                <span
+                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white leading-none"
+                  aria-hidden="true"
+                >
                   {cartItemsCount}
                 </span>
               )}
@@ -111,9 +117,11 @@ export function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden rounded-lg p-2 text-text/80 hover:text-primary hover:bg-surface border border-transparent hover:border-border transition-all"
-              aria-label="Toggle Navigation Menu"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-nav"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -122,13 +130,18 @@ export function Navbar() {
       {/* Mobile Menu Drawer Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
           onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Mobile Menu Drawer Content */}
       <div
+        id="mobile-nav"
+        role="dialog"
+        aria-label="Navigation menu"
+        aria-modal="true"
         className={`fixed top-0 right-0 bottom-0 z-40 w-[280px] bg-surface border-l border-border px-6 py-20 flex flex-col gap-6 md:hidden transition-transform duration-300 ease-in-out shadow-xl ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -136,16 +149,17 @@ export function Navbar() {
         <button
           onClick={() => setMobileMenuOpen(false)}
           className="absolute top-5 right-6 rounded-lg p-2 text-text/80 hover:text-primary hover:bg-surface border border-transparent hover:border-border"
-          aria-label="Close menu"
+          aria-label="Close navigation menu"
         >
-          <X className="h-5 w-5" />
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <nav className="flex flex-col gap-6 font-display text-lg font-medium">
+        <nav aria-label="Mobile navigation" className="flex flex-col gap-6 font-display text-lg font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              aria-current={isActive(link.href) ? 'page' : undefined}
               className={`hover:text-primary transition-colors ${
                 isActive(link.href) ? 'text-primary' : 'text-text/80'
               }`}
@@ -155,6 +169,7 @@ export function Navbar() {
           ))}
           <Link
             href="/start-here"
+            aria-current={pathname === '/start-here' ? 'page' : undefined}
             className="text-primary font-semibold border border-primary/20 bg-primary/5 hover:bg-primary/10 rounded-full px-4 py-2.5 text-center text-sm tracking-wider uppercase mt-4"
           >
             Start Here

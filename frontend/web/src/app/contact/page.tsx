@@ -46,7 +46,7 @@ export default function ContactPage() {
         <form action={formAction} className="flex flex-col gap-6" noValidate>
           
           {/* Honeypot Spam Prevention field (§18) 🔒 */}
-          <div className="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute -left-2499.75 -top-2499.75 opacity-0 pointer-events-none" aria-hidden="true">
             <input
               type="text"
               name="website"
@@ -69,12 +69,15 @@ export default function ContactPage() {
               Name
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" />
+              <User className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" aria-hidden="true" />
               <input
                 type="text"
                 id="name"
                 name="name"
                 required
+                aria-required="true"
+                aria-describedby={state?.errors?.name ? 'name-error' : undefined}
+                aria-invalid={state?.errors?.name ? 'true' : undefined}
                 className={`w-full rounded-lg border bg-surface pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary ${
                   state?.errors?.name
                     ? 'border-danger/80 focus:border-danger'
@@ -85,7 +88,7 @@ export default function ContactPage() {
               />
             </div>
             {state?.errors?.name && (
-              <p className="text-xs text-danger font-medium mt-1" role="alert">
+              <p id="name-error" className="text-xs text-danger font-medium mt-1" role="alert" aria-live="polite">
                 {state.errors.name}
               </p>
             )}
@@ -97,12 +100,15 @@ export default function ContactPage() {
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" />
+              <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" aria-hidden="true" />
               <input
                 type="email"
                 id="email"
                 name="email"
                 required
+                aria-required="true"
+                aria-describedby={state?.errors?.email ? 'email-error' : undefined}
+                aria-invalid={state?.errors?.email ? 'true' : undefined}
                 className={`w-full rounded-lg border bg-surface pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary ${
                   state?.errors?.email
                     ? 'border-danger/80 focus:border-danger'
@@ -113,7 +119,7 @@ export default function ContactPage() {
               />
             </div>
             {state?.errors?.email && (
-              <p className="text-xs text-danger font-medium mt-1" role="alert">
+              <p id="email-error" className="text-xs text-danger font-medium mt-1" role="alert" aria-live="polite">
                 {state.errors.email}
               </p>
             )}
@@ -125,11 +131,14 @@ export default function ContactPage() {
               Message
             </label>
             <div className="relative">
-              <MessageSquare className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" />
+              <MessageSquare className="absolute left-3.5 top-3.5 h-4 w-4 text-text/40" aria-hidden="true" />
               <textarea
                 id="message"
                 name="message"
                 required
+                aria-required="true"
+                aria-describedby={state?.errors?.message ? 'message-error' : undefined}
+                aria-invalid={state?.errors?.message ? 'true' : undefined}
                 rows={5}
                 className={`w-full rounded-lg border bg-surface pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary ${
                   state?.errors?.message
@@ -141,7 +150,7 @@ export default function ContactPage() {
               />
             </div>
             {state?.errors?.message && (
-              <p className="text-xs text-danger font-medium mt-1" role="alert">
+              <p id="message-error" className="text-xs text-danger font-medium mt-1" role="alert" aria-live="polite">
                 {state.errors.message}
               </p>
             )}

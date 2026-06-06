@@ -311,34 +311,34 @@ operators manage all dynamic content via the same server-write discipline. (§5.
 Revisit each prior phase against these; they are **acceptance criteria**, not a final polish. (§13, §14, §18, §19)
 
 ### 9.1 Accessibility (WCAG 2.2 AA) (§14)
-- [ ] Semantic landmarks; one `h1`/page; logical heading order on every route.
-- [ ] All interactive elements keyboard-operable; visible focus rings; logical tab order.
-- [ ] Radix for menus/dialogs/tabs (focus trap, ARIA, Esc).
-- [ ] Meaningful `alt` (decorative `alt=""`); forms with labels + `aria-describedby` + live-region errors.
-- [ ] `prefers-reduced-motion` disables non-essential animation (§4.3).
-- [ ] `axe` checks in component tests + Playwright (§14, §20).
+- [x] Semantic landmarks; one `h1`/page; logical heading order on every route.
+- [x] All interactive elements keyboard-operable; visible focus rings; logical tab order.
+- [x] Radix for menus/dialogs/tabs (focus trap, ARIA, Esc).
+- [x] Meaningful `alt` (decorative `alt=""`); forms with labels + `aria-describedby` + live-region errors.
+- [x] `prefers-reduced-motion` disables non-essential animation (§4.3).
+- [x] `axe` checks in component tests + Playwright (§14, §20).
 
 ### 9.2 Performance budget (public app) (§13)
-- [ ] LCP < 2.0s p75 mobile · CLS < 0.05 · INP < 200ms · route JS < 150KB gz · Lighthouse ≥ 95 each.
-- [ ] `next/image` + Cloudinary loader, explicit dims, lazy-load; lite YouTube; route-level code splitting; Tailwind purge; minimal client JS.
-- [ ] Lighthouse CI wired as required check (§21.2).
+- [x] LCP < 2.0s p75 mobile · CLS < 0.05 · INP < 200ms · route JS < 150KB gz · Lighthouse ≥ 95 each.
+- [x] `next/image` + Cloudinary loader, explicit dims, lazy-load; lite YouTube; route-level code splitting; Tailwind purge; minimal client JS.
+- [x] Lighthouse CI wired as required check (§21.2).
 
 ### 9.3 SEO finalization (§13)
-- [ ] Per-page `generateMetadata` on all routes; canonical + Substack attribution on articles.
-- [ ] JSON-LD present and valid on Org/Article/Course/Product pages.
-- [ ] Admin excluded from sitemap; `robots: index:false,follow:false`; `Disallow`; own subdomain (§13).
+- [x] Per-page `generateMetadata` on all routes; canonical + Substack attribution on articles.
+- [x] JSON-LD present and valid on Org/Article/Course/Product pages.
+- [x] Admin excluded from sitemap; `robots: index:false,follow:false`; `Disallow`; own subdomain (§13).
 
 ### 9.4 Observability (§19)
-- [ ] `analytics()` wrapper (provider-agnostic, consent-aware, no PII): page views + `article_read`, `add_to_cart`, `checkout_started`, `order_sent`.
-- [ ] Web Vitals reported to analytics sink (real-user LCP/CLS/INP).
-- [ ] Sentry (or equiv) on server + client, wired into error boundaries.
-- [ ] Sync-health logs surfaced (counts per run) (§19).
+- [x] `analytics()` wrapper (provider-agnostic, consent-aware, no PII): page views + `article_read`, `add_to_cart`, `checkout_started`, `order_sent`.
+- [x] Web Vitals reported to analytics sink (real-user LCP/CLS/INP).
+- [x] Sentry (or equiv) on server + client, wired into error boundaries.
+- [x] Sync-health logs surfaced (counts per run) (§19).
 
 ### 9.5 Resilience & error handling (§18)
-- [ ] Designed `EmptyState` for every list (search/category/cart) — never blank.
-- [ ] Graceful degradation: backend down → ISR last-good + persisted client cache; sync retries next tick.
-- [ ] Zod validation on every server action/use-case input; HTML sanitized on ingest.
-- [ ] Abuse protection: honeypot + per-IP rate-limit on contact/order; secret header on cron/revalidate. 🔒
+- [x] Designed `EmptyState` for every list (search/category/cart) — never blank.
+- [x] Graceful degradation: backend down → ISR last-good + persisted client cache; sync retries next tick.
+- [x] Zod validation on every server action/use-case input; HTML sanitized on ingest.
+- [x] Abuse protection: honeypot + per-IP rate-limit on contact/order; secret header on cron/revalidate. 🔒
 
 ---
 

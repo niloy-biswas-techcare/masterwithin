@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import { CATEGORIES } from '@mw/types';
-import { ArticleCard, CategoryCard, Pagination, Spinner } from '@mw/ui';
+import { ArticleCard, CategoryCard, EmptyState, Pagination, Spinner } from '@mw/ui';
 import * as LucideIcons from 'lucide-react';
 import type { Article } from '@mw/types';
 
@@ -256,16 +256,18 @@ export function WisdomClient() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-2xl bg-surface/10">
-              <p className="text-text/75 text-lg font-display font-medium">No articles found</p>
-              <p className="text-text/50 text-sm mt-1">Try adjusting your keywords or category filters</p>
-              <button
-                onClick={clearAllFilters}
-                className="mt-4 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/95 transition-colors"
-              >
-                Reset Filters
-              </button>
-            </div>
+            <EmptyState
+              title="No articles found"
+              description="Try adjusting your keywords or category filters."
+              action={
+                <button
+                  onClick={clearAllFilters}
+                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/95 transition-colors"
+                >
+                  Reset Filters
+                </button>
+              }
+            />
           )}
 
           {/* Pagination */}

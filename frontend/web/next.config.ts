@@ -18,6 +18,10 @@ const withMDX = withMDXInit({
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  // Enable instrumentation.ts for server-side error monitoring (§19)
+  experimental: {
+    instrumentationHook: true,
+  },
   async redirects() {
     return [
       // Stub for future immutable-slug redirect mappings (§13)

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { listArticles } from '@mw/backend';
@@ -6,6 +7,7 @@ import { CATEGORIES, getCategoryBySlug } from '@mw/types';
 import { ArticleCard } from '@mw/ui';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
 import type { Article } from '@mw/types';
+import { generateSiteMetadata } from '@/lib/seo';
 
 export const revalidate = 3600; // Cache for 1 hour (ISR)
 
@@ -18,6 +20,18 @@ export async function generateStaticParams() {
   return CATEGORIES.map((c) => ({
     category: c.slug,
   }));
+}
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { category: categorySlug } = await params;
+  const category = getCategoryBySlug(categorySlug);
+  if (!category) return generateSiteMetadata({ title: 'Category Not Found' });
+
+  return generateSiteMetadata({
+    title: category.title,
+    description: `${category.description} Browse all articles in the ${category.title} category from Master Within Foundation.`,
+    path: `/wisdom/${categorySlug}`,
+  });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

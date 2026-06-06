@@ -1,11 +1,20 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getStartHere, listArticles } from '@mw/backend';
 import { Card } from '@mw/ui';
 import { Compass, HelpCircle, Heart, ArrowRight, BookOpen } from 'lucide-react';
 import type { StartHereConfig, Article } from '@mw/types';
+import { generateSiteMetadata } from '@/lib/seo';
 
 export const revalidate = 3600; // Cache for 1 hour (ISR)
+
+export const metadata: Metadata = generateSiteMetadata({
+  title: 'Start Here — Find Your Path',
+  description:
+    'New to Master Within Foundation? Choose your entry path — finding purpose, exploring consciousness, navigating relationships, or beginning a spiritual journey.',
+  path: '/start-here',
+});
 
 export default async function StartHerePage() {
   let config: StartHereConfig = [];

@@ -1,4 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { generateSiteMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = generateSiteMetadata({
+  title: 'Our Ideal — The Contemplative Core',
+  description:
+    "The deepest expression of Master Within Foundation's philosophy. A long-form exploration of consciousness, duty, and the ideal of inner mastery as the foundation of all outer contribution.",
+  path: '/our-ideal',
+});
 
 export default function OurIdealLayout({ children }: { children: React.ReactNode }) {
   return (

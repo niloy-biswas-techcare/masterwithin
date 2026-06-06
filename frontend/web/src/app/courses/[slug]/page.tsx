@@ -1,10 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { listCourses } from '@mw/backend';
 import { Badge, Card } from '@mw/ui';
 import { ChevronRight, ArrowLeft, Target, Award, ListChecks, ArrowUpRight } from 'lucide-react';
-import { getCourseJsonLd } from '@/lib/seo';
+import { generateSiteMetadata, getCourseJsonLd } from '@/lib/seo';
 import type { Course } from '@mw/types';
 
 export const revalidate = 3600; // Cache for 1 hour (ISR)
@@ -23,6 +24,22 @@ export async function generateStaticParams() {
   } catch (err) {
     console.error('[course-detail] Failed to generate static params:', err);
     return [];
+  }
+}
+
+export async function generateMetadata({ params }: CourseDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const courses = await listCourses();
+    const course = courses.find((c) => c.slug === slug && c.published);
+    if (!course) return generateSiteMetadata({ title: 'Course Not Found' });
+    return generateSiteMetadata({
+      title: course.title,
+      description: course.description,
+      path: `/courses/${slug}`,
+    });
+  } catch {
+    return generateSiteMetadata({ title: 'Course' });
   }
 }
 

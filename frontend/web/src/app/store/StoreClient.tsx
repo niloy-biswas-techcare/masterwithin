@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookCard } from '@mw/ui';
+import { BookCard, EmptyState } from '@mw/ui';
 import { useCartStore } from '@/store/cartStore';
 import { Book, Ebook, Freebie } from '@mw/types';
 import { BookOpen, Smartphone, FileDown, ExternalLink, Download } from 'lucide-react';
@@ -55,7 +55,7 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text/50 italic py-4">No physical books available at the moment.</p>
+          <EmptyState title="No books available" description="Check back soon — new titles are added regularly." />
         )}
       </section>
 
@@ -116,7 +116,7 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text/50 italic py-4">No eBook editions available at the moment.</p>
+          <EmptyState title="No eBooks available" description="Digital editions will appear here when published." />
         )}
       </section>
 
@@ -160,7 +160,7 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text/50 italic py-4">No free guides available at the moment.</p>
+          <EmptyState title="No free guides available" description="Free resources will appear here when published." />
         )}
       </section>
     </div>

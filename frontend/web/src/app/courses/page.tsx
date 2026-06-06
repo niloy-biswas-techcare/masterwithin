@@ -1,11 +1,20 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { listCourses } from '@mw/backend';
 import { CourseCard } from '@mw/ui';
 import { ArrowRight, Layers } from 'lucide-react';
 import type { Course } from '@mw/types';
+import { generateSiteMetadata } from '@/lib/seo';
 
 export const revalidate = 3600; // Cache for 1 hour (ISR)
+
+export const metadata: Metadata = generateSiteMetadata({
+  title: 'Guided Courses',
+  description:
+    'Structured, self-paced philosophical courses from Master Within Foundation — from foundational discipline and habit-building to conscious inquiry and first principles of metaphysics.',
+  path: '/courses',
+});
 
 export default async function CoursesPage() {
   let courses: Course[] = [];

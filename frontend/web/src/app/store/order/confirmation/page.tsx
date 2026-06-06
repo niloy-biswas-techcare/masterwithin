@@ -1,10 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { ConfirmationClient } from './ConfirmationClient';
+
+export const metadata: Metadata = {
+  title: 'Order Sent — Master Within',
+  description: 'Your order has been sent via WhatsApp. We will confirm and arrange delivery.',
+  robots: { index: false, follow: false },
+};
 
 export default function OrderConfirmationPage() {
-  return (
-    <div className="mx-auto max-w-content py-12 px-6 text-center">
-      <h1 className="font-display text-3xl font-bold text-success">Order Received!</h1>
-      <p className="mt-4 text-text/80">Thank you for your request. We have initiated the process.</p>
-    </div>
-  );
+  return <ConfirmationClient />;
 }

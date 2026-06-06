@@ -1,10 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { CartPageClient } from './CartPageClient';
+
+export const metadata: Metadata = {
+  title: 'Your Cart — Master Within',
+  description: 'Review your order and send it via WhatsApp.',
+  robots: { index: false, follow: false },
+};
 
 export default function CartPage() {
-  return (
-    <div className="mx-auto max-w-content py-12 px-6">
-      <h1 className="font-display text-3xl font-bold">Your Cart</h1>
-      <p className="mt-4 text-text/80">Scaffolded shopping cart page</p>
-    </div>
-  );
+  return <CartPageClient />;
 }

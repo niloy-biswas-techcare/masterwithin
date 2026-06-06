@@ -250,15 +250,15 @@ folders hold **composition only** (§9). Editorial gradient enforced (§1).
 
 Goal: the full payment-ready checkout, WhatsApp at launch, behind `OrderProvider`. (§10)
 
-- [ ] `cartStore` add/remove/updateQty/clear + totals (already scaffolded §5.2; finalize) (§10.4).
-- [ ] `CartDrawer` + `/store/cart`: review items/qty/subtotal; `EmptyState` when empty (§10.3, §18).
-- [ ] `OrderForm` (RHF+Zod): Full Name, Mobile, Address (line1/2, city, state, PIN) (§10.3).
-- [ ] `whatsAppOrderProvider.submit()` builds deep link server-side from `WHATSAPP_NUMBER` (§10.2). 🔒
-- [ ] **Authoritative price re-read** from backend at order construction (stale cart can't misquote) (§10.4). 🧪
-- [ ] Optional `placeOrder` write for history/analytics (pseudonymous, no login) (§10.3).
-- [ ] Payment note copy on page (QR/Bank/GPay/PhonePe after confirmation) (§10.3).
-- [ ] `/store/order/confirmation`: clear cart + confirmation screen (§5.1, §10.3).
-- [ ] Keep checkout UI agnostic — provider swap (Razorpay/Stripe) never touches form/cart (§10.1, §23).
+- [x] `cartStore` add/remove/updateQty/clear + totals (already scaffolded §5.2; finalize) (§10.4).
+- [x] `CartDrawer` + `/store/cart`: review items/qty/subtotal; `EmptyState` when empty (§10.3, §18).
+- [x] `OrderForm` (native HTML form + Zod server-side validation): Full Name, Mobile, Address (line1/2, city, state, PIN) (§10.3).
+- [x] `whatsAppOrderProvider.submit()` builds deep link server-side from `WHATSAPP_NUMBER` (§10.2). 🔒
+- [x] **Authoritative price re-read** from backend at order construction (stale cart can't misquote) (§10.4). 🧪
+- [x] Optional `placeOrder` write for history/analytics (pseudonymous, no login) (§10.3).
+- [x] Payment note copy on page (QR/Bank/GPay/PhonePe after confirmation) (§10.3).
+- [x] `/store/order/confirmation`: clear cart + confirmation screen (§5.1, §10.3).
+- [x] Keep checkout UI agnostic — provider swap (Razorpay/Stripe) never touches form/cart (§10.1, §23).
 
 ---
 
@@ -268,41 +268,41 @@ Goal: `frontend/admin` — separate app, own subdomain, `noindex`, zero admin JS
 operators manage all dynamic content via the same server-write discipline. (§5.2, §17)
 
 ### 8.1 App shell, auth & RBAC  🔒 ⛔
-- [ ] Separate Next.js app, dynamic (never cached/ISR), `noindex` site-wide, own Tailwind/query setup (§17.1, §13).
-- [ ] `/login` + `LoginForm`: Supabase Auth handshake → `session.actions.ts` server action → httpOnly/Secure/SameSite cookie via `@supabase/ssr`; discard client session (§17.2).
-- [ ] `middleware.ts` (edge): redirect non-`/login` routes without cookie → `/login` (UX bounce, not the boundary) (§17.3).
-- [ ] `app/layout.tsx`: `verifySession()` → redirect if invalid; load operator into shell context (§17.3).
-- [ ] `requireOperator(role?)` as the **first statement** of every action/loader — re-verify cookie + role (§17.3). ⛔
-- [ ] Allowlist + role-claim gate; reject valid Supabase users not in `ADMIN_ALLOWLIST` / without role (§17.8).
-- [ ] Login rate-limiting (per-IP + per-email), generic errors (no enumeration) (§17.8).
-- [ ] `AdminShell` + `AdminSidebar`; `loading.tsx`/`error.tsx` (§9, §11).
+- [x] Separate Next.js app, dynamic (never cached/ISR), `noindex` site-wide, own Tailwind/query setup (§17.1, §13).
+- [x] `/login` + `LoginForm`: Supabase Auth handshake → `session.actions.ts` server action → httpOnly/Secure/SameSite cookie via `@supabase/ssr`; discard client session (§17.2).
+- [x] `middleware.ts` (edge): redirect non-`/login` routes without cookie → `/login` (UX bounce, not the boundary) (§17.3).
+- [x] `app/layout.tsx`: `verifySession()` → redirect if invalid; load operator into shell context (§17.3).
+- [x] `requireOperator(role?)` as the **first statement** of every action/loader — re-verify cookie + role (§17.3). ⛔
+- [x] Allowlist + role-claim gate; reject valid Supabase users not in `ADMIN_ALLOWLIST` / without role (§17.8).
+- [x] Login rate-limiting (per-IP + per-email), generic errors (no enumeration) (§17.8).
+- [x] `AdminShell` + `AdminSidebar`; `loading.tsx`/`error.tsx` (§9, §11).
 
 ### 8.2 Shared admin write pattern (§17.4) ⛔
-- [ ] One canonical server-action pipeline: `requireOperator` → Zod parse → use-case (service-role write) → `writeAuditLog` → `revalidatePath(affected)` → typed `ActionResult` (§17.4). 🔒
-- [ ] `EntityForm` (RHF+Zod, schema-driven), `DataTable` (sortable/searchable/paginated `@tanstack/react-table`), `ReorderableList` (`dnd-kit`), `ConfirmDialog`, `PublishToggle`, `StatCard`, `ActivityFeed`, `sonner` toasts (§3, §11).
-- [ ] Optimistic updates (`onMutate`/rollback/settle) on admin mutations (§12.2).
+- [x] One canonical server-action pipeline: `requireOperator` → Zod parse → use-case (service-role write) → `writeAuditLog` → `revalidatePath(affected)` → typed `ActionResult` (§17.4). 🔒
+- [x] `EntityForm` (RHF+Zod, schema-driven), `DataTable` (sortable/searchable/paginated `@tanstack/react-table`), `ReorderableList` (`dnd-kit`), `ConfirmDialog`, `PublishToggle`, `StatCard`, `ActivityFeed`, `sonner` toasts (§3, §11).
+- [x] Optimistic updates (`onMutate`/rollback/settle) on admin mutations (§12.2).
 
 ### 8.3 Uploads — direct-to-provider, signed (§17.7) 🔒
-- [ ] `/api/upload-sign` (auth-gated): short-lived Cloudinary signed params **and** Supabase Storage signed upload URLs.
-- [ ] `ImageUploader`: browser → Cloudinary direct; save secure URL via server action; preview, explicit dims (no CLS).
-- [ ] `FileUploader`: browser → Supabase Storage direct (signed); save download URL on freebie row.
-- [ ] Storage policies allow writes only via signed URLs.
+- [x] `/api/upload-sign` (auth-gated): short-lived Cloudinary signed params **and** Supabase Storage signed upload URLs.
+- [x] `ImageUploader`: browser → Cloudinary direct; save secure URL via server action; preview, explicit dims (no CLS).
+- [x] `FileUploader`: browser → Supabase Storage direct (signed); save download URL on freebie row.
+- [x] Storage policies allow writes only via signed URLs.
 
 ### 8.4 Screens (§17.5)
-- [ ] **Dashboard `/`**: counts (books/articles/orders), `ActivityFeed` from `audit_logs`, last sync result, quick actions (Add book / Sync now).
-- [ ] **Books / eBooks** (`/books*`, `/ebooks*`): full CRUD per §16 shape, `published` toggle, Cloudinary cover, drag-reorder; eBooks add Play/Kindle links.
-- [ ] **Courses** (`/courses*`): CRUD (title, level, description, who-it's-for, what-you'll-gain, module outline, enrollment CTA).
-- [ ] **Freebies** (`/freebies*`): CRUD + Supabase Storage file upload → save download URL.
-- [ ] **Articles (curation only)** (`/articles*`): toggle `featured`; override `category` (sets `categoryLocked`); edit tags/excerpt; attach/correct `substackUrl`; **import single post by URL**; **"Sync now"** (secret-protected). Never hand-create articles (§8, §17.5).
-- [ ] **Start Here** (`/start-here`): edit the 4 paths → `start_here` row (data-driven, no JSX edits).
-- [ ] **Orders** (`/orders`): read-only, paginated, searchable + CSV export. No editing.
-- [ ] **Settings** (`/settings`, `admin` only): `site_config` (WhatsApp #, socials, YouTube, featured) + **operator management** (invite/grant/revoke via Supabase Admin API; revoke ends sessions) (§17.5, §17.6). 🔒
+- [x] **Dashboard `/`**: counts (books/articles/orders), `ActivityFeed` from `audit_logs`, last sync result, quick actions (Add book / Sync now).
+- [x] **Books / eBooks** (`/books*`, `/ebooks*`): full CRUD per §16 shape, `published` toggle, Cloudinary cover, drag-reorder; eBooks add Play/Kindle links.
+- [x] **Courses** (`/courses*`): CRUD (title, level, description, who-it's-for, what-you'll-gain, module outline, enrollment CTA).
+- [x] **Freebies** (`/freebies*`): CRUD + Supabase Storage file upload → save download URL.
+- [x] **Articles (curation only)** (`/articles*`): toggle `featured`; override `category` (sets `categoryLocked`); edit tags/excerpt; attach/correct `substackUrl`; **import single post by URL**; **"Sync now"** (secret-protected). Never hand-create articles (§8, §17.5).
+- [x] **Start Here** (`/start-here`): edit the 4 paths → `start_here` row (data-driven, no JSX edits).
+- [x] **Orders** (`/orders`): read-only, paginated, searchable + CSV export. No editing.
+- [x] **Settings** (`/settings`, `admin` only): `site_config` (WhatsApp #, socials, YouTube, featured) + **operator management** (invite/grant/revoke via Supabase Admin API; revoke ends sessions) (§17.5, §17.6). 🔒
 
 ### 8.5 Admin hardening (§17.8) 🔒
-- [ ] Append-only, server-only audit log; destructive actions require explicit confirm.
-- [ ] Session cookie rotated on privilege change; finite lifetime (`ADMIN_SESSION_MAX_AGE_DAYS`).
-- [ ] CSRF posture: server actions origin-checked; `SameSite` cookie verified.
-- [ ] Admin app a11y meets WCAG 2.2 AA even though exempt from public perf budget (§14, §26).
+- [x] Append-only, server-only audit log; destructive actions require explicit confirm.
+- [x] Session cookie rotated on privilege change; finite lifetime (`ADMIN_SESSION_MAX_AGE_DAYS`).
+- [x] CSRF posture: server actions origin-checked; `SameSite` cookie verified.
+- [x] Admin app a11y meets WCAG 2.2 AA even though exempt from public perf budget (§14, §26).
 
 ---
 

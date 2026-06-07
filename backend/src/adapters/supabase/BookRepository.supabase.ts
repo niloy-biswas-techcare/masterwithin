@@ -65,4 +65,13 @@ export class SupabaseBookRepository implements BookRepository {
     if (error) throw error;
     return toDomain(data);
   }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from('books')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
 }

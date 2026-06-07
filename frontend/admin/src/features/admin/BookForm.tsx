@@ -23,6 +23,7 @@ export function BookForm({ book }: BookFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<BookFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,9 +41,14 @@ export function BookForm({ book }: BookFormProps) {
     },
   });
 
+  const handleCoverImageChange = (url: string) => {
+    setCoverImage(url);
+    setValue("coverImage", url, { shouldValidate: true });
+  };
+
   const submit = (data: BookFormData) => {
     startTransition(async () => {
-      const result = await upsertBookAction({ ...data, coverImage });
+      const result = await upsertBookAction(data);
       if (result.ok) {
         toast.success(book ? "Book updated" : "Book created");
         router.push("/books");
@@ -97,10 +103,11 @@ export function BookForm({ book }: BookFormProps) {
         <div className="col-span-2">
           <ImageUploader
             value={coverImage}
-            onChange={setCoverImage}
+            onChange={handleCoverImageChange}
             folder="masterwithin/covers"
             label="Cover image"
           />
+          {errors.coverImage && <p className="field-error">{errors.coverImage.message}</p>}
         </div>
 
         <div className="col-span-2 flex items-center gap-2">

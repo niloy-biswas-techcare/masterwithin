@@ -24,6 +24,7 @@ import {
   makeImportBySubstackUrl,
   makeListBooks,
   makeUpsertBook,
+  makeDeleteBook,
   makeListEbooks,
   makeUpsertEbook,
   makeListFreebies,
@@ -92,6 +93,7 @@ export const importBySubstackUrl = makeImportBySubstackUrl(ports, ports.auditLog
 
 export const listBooks = makeListBooks(ports.books);
 export const upsertBook = makeUpsertBook(ports.books, ports.auditLogs);
+export const deleteBook = makeDeleteBook(ports.books, ports.auditLogs);
 
 export const listEbooks = makeListEbooks(ports.ebooks);
 export const upsertEbook = makeUpsertEbook(ports.ebooks, ports.auditLogs);

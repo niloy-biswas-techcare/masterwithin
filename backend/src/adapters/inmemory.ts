@@ -156,6 +156,10 @@ export class InMemoryBookRepository implements BookRepository {
     }
     return clone(cloned);
   }
+
+  async delete(id: string): Promise<void> {
+    this.books = this.books.filter((b) => b.id !== id);
+  }
 }
 
 export class InMemoryEbookRepository implements EbookRepository {

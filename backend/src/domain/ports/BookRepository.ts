@@ -11,4 +11,6 @@ export interface BookRepository {
   getById(id: string): Promise<Book | null>;
   /** Create or update a book by id. */
   upsert(book: Book): Promise<Book>;
+  /** Delete a book by its stable id. */
+  delete(id: string): Promise<void>;
 }

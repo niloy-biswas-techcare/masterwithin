@@ -63,7 +63,8 @@ export function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/wisdom', label: 'Wisdom Library' },
     { href: '/media', label: 'Media' },
-    { href: '/courses', label: 'Courses' },
+    // TODO: Uncomment when Courses feature is available
+    // { href: '/courses', label: 'Courses' },
     { href: '/store', label: 'Store' },
     { href: '/about', label: 'The Foundation' },
     { href: '/contact', label: 'Contact' },

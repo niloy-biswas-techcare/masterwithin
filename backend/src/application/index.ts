@@ -18,6 +18,7 @@ export * from './articles/importBySubstackUrl';
 // Store
 export * from './store/listBooks';
 export * from './store/upsertBook';
+export * from './store/deleteBook';
 export * from './store/listEbooks';
 export * from './store/upsertEbook';
 export * from './store/listFreebies';

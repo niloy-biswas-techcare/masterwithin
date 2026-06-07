@@ -1,15 +1,15 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { getVideo, listVideos, listArticles } from '@mw/backend';
-import { VideoPlayer, Container } from '@mw/ui';
+import { VideoPlayer, Container, Badge, Eyebrow } from '@mw/ui';
 import { generateSiteMetadata } from '@/lib/seo';
 import { videoKey, videosListKey, articlesListKey } from '@/lib/queries';
 import { RelatedVideosClient } from '@/features/media/RelatedVideosClient';
 import { RelatedArticlesClient } from '@/features/media/RelatedArticlesClient';
-import { Badge } from '@mw/ui';
-import { Eyebrow } from '@mw/ui';
+import { BackButton } from '@/features/media/BackButton';
 
 export const revalidate = 3600;
 
@@ -57,7 +57,6 @@ export default async function VideoPage({ params }: Props) {
     }),
   ]);
 
-  // VideoObject JSON-LD (§7b.2)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
@@ -72,6 +71,21 @@ export default async function VideoPage({ params }: Props) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      {/* Navigation bar */}
+      <div className="border-b border-border/40 bg-bg/95 backdrop-blur-sm sticky top-16 z-10">
+        <Container variant="content" className="py-3 flex items-center justify-between gap-4">
+          <BackButton href="/media" label="Back to Library" />
+          <div className="flex items-center gap-2 text-sm font-body text-text/40 truncate min-w-0">
+            <Link href="/media" className="hover:text-primary transition-colors shrink-0">
+              Media Library
+            </Link>
+            <span className="shrink-0">/</span>
+            <span className="truncate text-text/60">{video.title}</span>
+          </div>
+        </Container>
+      </div>
+
       <Container variant="content" className="section-md flex flex-col gap-12">
         {/* Video player */}
         <VideoPlayer videoId={video.id} thumbnail={video.thumbnail} title={video.title} />
@@ -99,7 +113,7 @@ export default async function VideoPage({ params }: Props) {
           </a>
         </div>
 
-        {/* Related Videos (§7b.2) */}
+        {/* Related Videos */}
         <section aria-labelledby="related-videos-heading">
           <Eyebrow>More Talks</Eyebrow>
           <h2 id="related-videos-heading" className="font-display font-bold text-2xl text-text mt-2 mb-6">
@@ -108,7 +122,7 @@ export default async function VideoPage({ params }: Props) {
           <RelatedVideosClient currentVideoId={video.id} category={video.category} />
         </section>
 
-        {/* Related Articles — cross-pillar depth bridge (§7b.2) */}
+        {/* Related Articles */}
         <section aria-labelledby="related-articles-heading">
           <Eyebrow>From the Written Library</Eyebrow>
           <h2 id="related-articles-heading" className="font-display font-bold text-2xl text-text mt-2 mb-6">

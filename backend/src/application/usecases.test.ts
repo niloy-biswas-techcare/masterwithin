@@ -707,6 +707,7 @@ describe('Application Use-Cases Unit Tests', () => {
       const submitContact = makeSubmitContact(ports.contacts);
 
       const contact: ContactInput = {
+        channel: 'email',
         name: 'Souvik Ghosh',
         email: 'souvik@test.com',
         message: 'Hello World',
@@ -721,6 +722,7 @@ describe('Application Use-Cases Unit Tests', () => {
       const submitContact = makeSubmitContact(ports.contacts);
 
       const spamBotInput: ContactInput = {
+        channel: 'email',
         name: 'Spammer Bot',
         email: 'bot@spam.com',
         message: 'Click this link!',

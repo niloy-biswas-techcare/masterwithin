@@ -192,28 +192,37 @@ describe('OrderSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('ContactSchema', () => {
-  const valid = { name: 'Souvik', email: 'souvik@example.com', message: 'Hello!' };
+  const validEmail = { channel: 'email' as const, name: 'Souvik', email: 'souvik@example.com', message: 'Hello!' };
+  const validWa = { channel: 'whatsapp' as const, name: 'Souvik', phone: '919876543210', message: 'Hello!' };
 
-  it('parses valid contact input', () => {
-    expect(() => ContactSchema.parse(valid)).not.toThrow();
+  it('parses valid email contact input', () => {
+    expect(() => ContactSchema.parse(validEmail)).not.toThrow();
+  });
+
+  it('parses valid whatsapp contact input', () => {
+    expect(() => ContactSchema.parse(validWa)).not.toThrow();
   });
 
   it('rejects an invalid email', () => {
-    expect(() => ContactSchema.parse({ ...valid, email: 'not-an-email' })).toThrow();
+    expect(() => ContactSchema.parse({ ...validEmail, email: 'not-an-email' })).toThrow();
+  });
+
+  it('rejects a whatsapp phone that is too short', () => {
+    expect(() => ContactSchema.parse({ ...validWa, phone: '123' })).toThrow();
   });
 
   it('rejects an empty name', () => {
-    expect(() => ContactSchema.parse({ ...valid, name: '' })).toThrow();
+    expect(() => ContactSchema.parse({ ...validEmail, name: '' })).toThrow();
   });
 
-  it('honeypot: rejects any non-empty website value', () => {
+  it('honeypot: rejects any non-empty website value (email)', () => {
     expect(() =>
-      ContactSchema.parse({ ...valid, website: 'http://spam.com' }),
+      ContactSchema.parse({ ...validEmail, website: 'http://spam.com' }),
     ).toThrow();
   });
 
   it('honeypot: accepts empty string website (not triggered)', () => {
-    expect(() => ContactSchema.parse({ ...valid, website: '' })).not.toThrow();
+    expect(() => ContactSchema.parse({ ...validEmail, website: '' })).not.toThrow();
   });
 });
 

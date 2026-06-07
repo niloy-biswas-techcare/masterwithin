@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Settings,
   Video,
+  MessageCircle,
 } from "lucide-react";
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/media", label: "Media", icon: Video },
   { href: "/start-here", label: "Start Here", icon: Map },
   { href: "/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/contacts", label: "Messages", icon: MessageCircle },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

@@ -39,6 +39,9 @@ import {
   makeGetStartHere,
   makeUpdateStartHere,
   makeSubmitContact,
+  makeListContacts,
+  makeUpdateContactStatus,
+  makeDeleteContact,
   makeDeleteArticle,
   makeRequireOperator,
   makeWriteAuditLog,
@@ -117,6 +120,9 @@ export const getStartHere = makeGetStartHere(ports.startHere);
 export const updateStartHere = makeUpdateStartHere(ports.startHere, ports.auditLogs);
 
 export const submitContact = makeSubmitContact(ports.contacts);
+export const listContacts = makeListContacts(ports.contacts);
+export const updateContactStatus = makeUpdateContactStatus(ports.contacts);
+export const deleteContact = makeDeleteContact(ports.contacts);
 
 export const requireOperator = makeRequireOperator(ports.auth);
 export const writeAuditLog = makeWriteAuditLog(ports.auditLogs);

@@ -1,47 +1,59 @@
 import { env } from '../../env';
-import type { ContactRepository, Contact, ContactInput } from '../../domain';
+import type { ContactRepository, Contact } from '../../domain';
 import { ValidationError } from '../errors';
 import { ContactSchema } from '@mw/types';
+import type { ContactInput } from '@mw/types';
 
 export type EmailSender = (contact: {
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
   message: string;
+  channel: 'email' | 'whatsapp';
 }) => Promise<void>;
 
 export type SubmitContact = (input: ContactInput) => Promise<Contact>;
 
-/**
- * Sends a notification email via Resend's REST API.
- */
 async function sendNotificationEmail(contact: {
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
   message: string;
+  channel: 'email' | 'whatsapp';
 }): Promise<void> {
   if (process.env.NODE_ENV === 'test' || !env.RESEND_API_KEY) {
     return;
   }
 
+  const isWhatsApp = contact.channel === 'whatsapp';
+  const contactLine = isWhatsApp
+    ? `<p><strong>WhatsApp:</strong> ${contact.phone}</p>`
+    : `<p><strong>Email:</strong> ${contact.email}</p>`;
+
+  const channelBadge = isWhatsApp
+    ? `<span style="background:#25D366;color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;">WhatsApp</span>`
+    : `<span style="background:#2563EB;color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;">Email</span>`;
+
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/body',
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
         from: 'Master Within Website <website@masterwithin.org>',
         to: [env.ADMIN_BOOTSTRAP_EMAIL],
-        subject: `New Contact Submission from ${contact.name}`,
+        subject: `[${isWhatsApp ? 'WhatsApp' : 'Email'}] New contact from ${contact.name}`,
         html: `
-          <p>You have received a new contact submission:</p>
+          <p>${channelBadge} You have a new contact submission:</p>
           <p><strong>Name:</strong> ${contact.name}</p>
-          <p><strong>Email:</strong> ${contact.email}</p>
+          ${contactLine}
           <p><strong>Message:</strong></p>
-          <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; margin-left: 0;">
+          <blockquote style="border-left:4px solid #ccc;padding-left:10px;margin-left:0;">
             ${contact.message.replace(/\n/g, '<br/>')}
           </blockquote>
+          ${isWhatsApp ? `<p><a href="https://wa.me/${contact.phone?.replace(/\D/g, '')}?text=Hi+${encodeURIComponent(contact.name)}%2C+thank+you+for+reaching+out+to+Master+Within." style="background:#25D366;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;">Reply on WhatsApp</a></p>` : ''}
         `,
       }),
     });
@@ -62,25 +74,29 @@ export function makeSubmitContact(
   const sendEmail = customEmailSender || sendNotificationEmail;
 
   return async (input) => {
-    // 1. Zod Validation
+    // 1. Zod Validation (discriminated union — channel required)
     const parsed = ContactSchema.safeParse(input);
     if (!parsed.success) {
       throw new ValidationError('Invalid contact submission', parsed.error.flatten().fieldErrors);
     }
 
-    const { name, email, message, website } = parsed.data;
-
-    // 2. Honeypot Anti-Spam Check (§18) 🔒
-    if (website && website.trim().length > 0) {
+    // 2. Honeypot Anti-Spam Check 🔒
+    if (parsed.data.website && parsed.data.website.trim().length > 0) {
       console.warn('[backend] Spam submission blocked via honeypot field');
       throw new ValidationError('Spam detected');
     }
 
-    // 3. Save to Repository
-    const saved = await contacts.create({ name, email, message });
+    const { channel, name, website: _hp, ...rest } = parsed.data;
 
-    // 4. Send Email Notification
-    await sendEmail({ name, email, message });
+    const email = 'email' in rest ? rest.email : undefined;
+    const phone = 'phone' in rest ? rest.phone : undefined;
+    const { message } = rest;
+
+    // 3. Save to Repository
+    const saved = await contacts.create({ name, email, phone, message, channel });
+
+    // 4. Send notification email to admin
+    await sendEmail({ name, email, phone, message, channel });
 
     return saved;
   };

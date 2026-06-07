@@ -37,6 +37,9 @@ export * from './config/updateStartHere';
 
 // Contacts
 export * from './contacts/submitContact';
+export * from './contacts/listContacts';
+export * from './contacts/updateContactStatus';
+export * from './contacts/deleteContact';
 
 // Content helpers (Pure, backend-agnostic)
 export * from './content';

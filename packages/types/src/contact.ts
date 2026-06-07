@@ -1,11 +1,7 @@
 import { z } from 'zod';
 
-/**
- * Contact submission (§7.9). Validated by the contact server action before being
- * persisted via the `contacts` use-case and emailed via Resend. The `website` field
- * is a honeypot — it must be empty for a human (§18); bots that fill it are rejected.
- */
-export const ContactSchema = z.object({
+export const ContactEmailSchema = z.object({
+  channel: z.literal('email'),
   name: z.string().min(1, 'Please enter your name.'),
   email: z.string().email('Please enter a valid email address.'),
   message: z.string().min(1, 'Please enter a message.'),
@@ -13,11 +9,40 @@ export const ContactSchema = z.object({
   website: z.string().max(0).optional(),
 });
 
-export type ContactInput = z.infer<typeof ContactSchema>;
+export const ContactWhatsAppSchema = z.object({
+  channel: z.literal('whatsapp'),
+  name: z.string().min(1, 'Please enter your name.'),
+  phone: z
+    .string()
+    .min(7, 'Please enter a valid WhatsApp number (7–15 digits, no spaces).')
+    .max(15, 'Phone number too long.'),
+  message: z.string().min(1, 'Please enter a message.'),
+  /** Honeypot: must stay empty. */
+  website: z.string().max(0).optional(),
+});
 
-/** A persisted contact record (§16). */
-export const ContactSchemaRecord = ContactSchema.omit({ website: true }).extend({
+/** Unified submission schema — discriminated on `channel`. */
+export const ContactSchema = z.discriminatedUnion('channel', [
+  ContactEmailSchema,
+  ContactWhatsAppSchema,
+]);
+
+export type ContactEmailInput = z.infer<typeof ContactEmailSchema>;
+export type ContactWhatsAppInput = z.infer<typeof ContactWhatsAppSchema>;
+export type ContactInput = z.infer<typeof ContactSchema>;
+export type ContactChannel = 'email' | 'whatsapp';
+export type ContactStatus = 'unread' | 'read' | 'replied' | 'forwarded';
+
+/** A persisted contact record. */
+export const ContactSchemaRecord = z.object({
   id: z.string(),
+  name: z.string(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  message: z.string(),
+  channel: z.enum(['email', 'whatsapp']).default('email'),
+  status: z.enum(['unread', 'read', 'replied', 'forwarded']).default('unread'),
+  repliedAt: z.string().optional(),
   createdAt: z.string(), // ISO
 });
 

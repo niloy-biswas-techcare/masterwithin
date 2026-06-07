@@ -290,15 +290,33 @@ export class InMemoryContactRepository implements ContactRepository {
   private contacts: Contact[] = [];
   private contactCounter = 0;
 
-  async create(contact: Omit<Contact, 'id' | 'createdAt'>): Promise<Contact> {
+  async create(contact: Omit<Contact, 'id' | 'createdAt' | 'status' | 'repliedAt'>): Promise<Contact> {
     this.contactCounter++;
     const created: Contact = {
       ...clone(contact),
       id: `contact-${this.contactCounter}`,
+      status: 'unread',
       createdAt: new Date().toISOString(),
     };
     this.contacts.push(created);
     return clone(created);
+  }
+
+  async list(): Promise<Contact[]> {
+    return [...this.contacts]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map(clone);
+  }
+
+  async updateStatus(id: string, status: import('../domain').ContactStatus, repliedAt?: string): Promise<Contact> {
+    const idx = this.contacts.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error(`Contact ${id} not found`);
+    this.contacts[idx] = { ...this.contacts[idx], status, ...(repliedAt ? { repliedAt } : {}) };
+    return clone(this.contacts[idx]);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.contacts = this.contacts.filter((c) => c.id !== id);
   }
 }
 

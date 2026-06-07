@@ -20,6 +20,8 @@ export type {
   OrderResult,
   OrderProvider,
   ContactInput,
+  ContactChannel,
+  ContactStatus,
   Contact,
   SiteConfig,
   StartHerePath,

@@ -74,14 +74,13 @@ export function HeroSection() {
             </Link>
           </motion.div>
 
-          {/* Founder credit (§4a.5 HeroSection spec) */}
           <motion.p
             initial={motionTokens.fadeIn.hidden}
             animate={motionTokens.fadeIn.visible}
             transition={{ duration: motionTokens.standard, ease: motionTokens.easeOut, delay: 0.38 }}
-            className="mt-6 text-sm text-text/60 font-body"
+            className="mt-6 text-sm text-text/50 font-body tracking-wide"
           >
-            Founded by Souvik Ghosh, PhD — researcher, author, and practitioner.
+            Science-backed · Wisdom-rooted · Application-first
           </motion.p>
         </div>
       </section>

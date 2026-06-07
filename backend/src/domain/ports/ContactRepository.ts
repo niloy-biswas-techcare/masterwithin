@@ -1,10 +1,18 @@
-import type { Contact } from '../entities';
+import type { Contact, ContactStatus } from '../entities';
 
 /**
- * ContactRepository port (§9, §16). Contact submissions are private (no public
- * read) and written only via the validated server action (§7.9, §16).
+ * ContactRepository port. Contacts are private — only accessible to admin.
  */
 export interface ContactRepository {
-  /** Persist a contact submission; the adapter assigns `id` and `createdAt`. */
-  create(contact: Omit<Contact, 'id' | 'createdAt'>): Promise<Contact>;
+  /** Persist a new contact submission. Adapter assigns `id`, `createdAt`, and default `status`. */
+  create(contact: Omit<Contact, 'id' | 'createdAt' | 'status' | 'repliedAt'>): Promise<Contact>;
+
+  /** List all contacts, newest first. */
+  list(): Promise<Contact[]>;
+
+  /** Update the status (read, replied, forwarded) of a contact. Returns updated record. */
+  updateStatus(id: string, status: ContactStatus, repliedAt?: string): Promise<Contact>;
+
+  /** Hard-delete a contact by id. */
+  delete(id: string): Promise<void>;
 }

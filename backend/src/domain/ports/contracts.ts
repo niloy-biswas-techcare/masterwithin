@@ -279,14 +279,50 @@ export function runContactRepositoryContractTests(createRepo: () => Promise<Port
       repo = await createRepo();
     });
 
-    it('should persist contacts', async () => {
+    it('should persist an email contact and default status to unread', async () => {
       const saved = await repo.create({
+        channel: 'email',
         name: 'Souvik',
         email: 'souvik@test.com',
         message: 'Hello!',
       });
       expect(saved.id).toBeDefined();
       expect(saved.createdAt).toBeDefined();
+      expect(saved.status).toBe('unread');
+      expect(saved.channel).toBe('email');
+    });
+
+    it('should persist a whatsapp contact', async () => {
+      const saved = await repo.create({
+        channel: 'whatsapp',
+        name: 'Rina',
+        phone: '919876543210',
+        message: 'Hi via WA',
+      });
+      expect(saved.channel).toBe('whatsapp');
+      expect(saved.phone).toBe('919876543210');
+      expect(saved.status).toBe('unread');
+    });
+
+    it('should list all contacts', async () => {
+      await repo.create({ channel: 'email', name: 'First', email: 'a@test.com', message: 'A' });
+      await repo.create({ channel: 'email', name: 'Second', email: 'b@test.com', message: 'B' });
+      const list = await repo.list();
+      expect(list).toHaveLength(2);
+      expect(list.map((c) => c.name).sort()).toEqual(['First', 'Second']);
+    });
+
+    it('should update contact status', async () => {
+      const saved = await repo.create({ channel: 'email', name: 'User', email: 'u@test.com', message: 'Msg' });
+      const updated = await repo.updateStatus(saved.id, 'read');
+      expect(updated.status).toBe('read');
+    });
+
+    it('should delete a contact', async () => {
+      const saved = await repo.create({ channel: 'email', name: 'User', email: 'u@test.com', message: 'Msg' });
+      await repo.delete(saved.id);
+      const list = await repo.list();
+      expect(list).toHaveLength(0);
     });
   });
 }

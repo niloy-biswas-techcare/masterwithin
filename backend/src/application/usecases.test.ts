@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createInMemoryPorts } from '../adapters/inmemory';
 import {
   makeListArticles,
@@ -19,9 +19,20 @@ import {
   makeGetStartHere,
   makeUpdateStartHere,
   makeSubmitContact,
+  makeListVideos,
+  makeGetVideo,
+  makeListPlaylists,
+  makeGetPlaylist,
+  makeFeatureVideo,
+  makeHideVideo,
+  makeOverrideVideoCategory,
+  makeFeaturePlaylist,
+  makeHidePlaylist,
+  makeSyncYoutube,
 } from './index';
-import type { Ports, Article, Book, Ebook, Course, Freebie, Order, ContactInput, SiteConfig } from '../domain';
+import type { Ports, Article, Book, Ebook, Course, Freebie, Order, ContactInput, SiteConfig, Video, Playlist } from '../domain';
 import { ValidationError } from './errors';
+import { NotFoundError } from './errors';
 
 describe('Application Use-Cases Unit Tests', () => {
   let ports: Ports;
@@ -489,6 +500,205 @@ describe('Application Use-Cases Unit Tests', () => {
       const updatedSH = await updateStartHere(adminActor, startHereData);
       expect(updatedSH).toHaveLength(1);
       expect(await getStartHere()).toEqual(updatedSH);
+    });
+  });
+
+  describe('YouTube Media Use-Cases', () => {
+    const sampleVideo: Video = {
+      id: 'vid-1',
+      title: 'The Art of Stillness',
+      description: 'A guided meditation on silence.',
+      thumbnail: 'https://res.cloudinary.com/mock-cloud/image/upload/youtube/thumb1.jpg',
+      duration: 320,
+      publishedAt: '2026-06-01T00:00:00Z',
+      channelId: 'UC_en',
+      language: 'en',
+      category: 'science-of-consciousness',
+      categoryLocked: false,
+      playlistIds: [],
+      featured: false,
+      hidden: false,
+      isShort: false,
+      youtubeUrl: 'https://www.youtube.com/watch?v=vid-1',
+    };
+
+    const sampleShort: Video = {
+      ...sampleVideo,
+      id: 'short-1',
+      title: 'Quick Reflection',
+      duration: 45,
+      isShort: true,
+    };
+
+    const samplePlaylist: Playlist = {
+      id: 'pl-1',
+      title: 'Journey to Peace',
+      description: 'A curated series for inner peace.',
+      thumbnail: 'https://res.cloudinary.com/mock-cloud/image/upload/youtube/playlists/pl1.jpg',
+      videoCount: 5,
+      channelId: 'UC_en',
+      language: 'en',
+      publishedAt: '2026-06-01T00:00:00Z',
+      featured: false,
+      hidden: false,
+    };
+
+    beforeEach(async () => {
+      await ports.videos.upsert(sampleVideo);
+      await ports.videos.upsert(sampleShort);
+      await ports.playlists.upsert(samplePlaylist);
+    });
+
+    it('listVideos — defaults exclude Shorts', async () => {
+      const listVideos = makeListVideos(ports.videos);
+      const { videos, total } = await listVideos();
+      expect(total).toBe(1);
+      expect(videos[0].id).toBe('vid-1');
+      expect(videos.every((v) => !v.isShort)).toBe(true);
+    });
+
+    it('listVideos — isShort:true returns only Shorts', async () => {
+      const listVideos = makeListVideos(ports.videos);
+      const { videos } = await listVideos({ isShort: true });
+      expect(videos).toHaveLength(1);
+      expect(videos[0].id).toBe('short-1');
+    });
+
+    it('getVideo — returns video by id', async () => {
+      const getVideo = makeGetVideo(ports.videos);
+      const found = await getVideo('vid-1');
+      expect(found.title).toBe('The Art of Stillness');
+    });
+
+    it('getVideo — throws NotFoundError for unknown id', async () => {
+      const getVideo = makeGetVideo(ports.videos);
+      await expect(getVideo('nonexistent')).rejects.toThrow(NotFoundError);
+    });
+
+    it('listPlaylists — returns all non-hidden playlists', async () => {
+      const listPlaylists = makeListPlaylists(ports.playlists);
+      const { playlists, total } = await listPlaylists();
+      expect(total).toBe(1);
+      expect(playlists[0].id).toBe('pl-1');
+    });
+
+    it('getPlaylist — returns playlist by id', async () => {
+      const getPlaylist = makeGetPlaylist(ports.playlists);
+      const found = await getPlaylist('pl-1');
+      expect(found.title).toBe('Journey to Peace');
+    });
+
+    it('getPlaylist — throws NotFoundError for unknown id', async () => {
+      const getPlaylist = makeGetPlaylist(ports.playlists);
+      await expect(getPlaylist('nonexistent')).rejects.toThrow(NotFoundError);
+    });
+
+    it('featureVideo — sets featured and writes audit log', async () => {
+      const featureVideo = makeFeatureVideo(ports.videos, ports.auditLogs);
+      const updated = await featureVideo('vid-1', true, adminActor);
+      expect(updated.featured).toBe(true);
+
+      const logs = await ports.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].action).toBe('update');
+      expect(logs[0].entity).toBe('video');
+      expect(logs[0].diff.featured).toEqual({ from: false, to: true });
+    });
+
+    it('hideVideo — sets hidden and writes audit log', async () => {
+      const hideVideo = makeHideVideo(ports.videos, ports.auditLogs);
+      const updated = await hideVideo('vid-1', true, adminActor);
+      expect(updated.hidden).toBe(true);
+
+      const logs = await ports.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].action).toBe('update');
+      expect(logs[0].diff.hidden).toEqual({ from: false, to: true });
+    });
+
+    it('overrideVideoCategory — overrides category, sets categoryLocked, writes audit log', async () => {
+      const overrideVideoCategory = makeOverrideVideoCategory(ports.videos, ports.auditLogs);
+      const updated = await overrideVideoCategory('vid-1', 'optimal-living', adminActor);
+      expect(updated.category).toBe('optimal-living');
+      expect(updated.categoryLocked).toBe(true);
+
+      const logs = await ports.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].diff.category).toEqual({
+        from: 'science-of-consciousness',
+        to: 'optimal-living',
+      });
+      expect(logs[0].diff.categoryLocked).toEqual({ from: false, to: true });
+    });
+
+    it('featurePlaylist — sets featured and writes audit log', async () => {
+      const featurePlaylist = makeFeaturePlaylist(ports.playlists, ports.auditLogs);
+      const updated = await featurePlaylist('pl-1', true, adminActor);
+      expect(updated.featured).toBe(true);
+
+      const logs = await ports.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].entity).toBe('playlist');
+    });
+
+    it('hidePlaylist — sets hidden and writes audit log', async () => {
+      const hidePlaylist = makeHidePlaylist(ports.playlists, ports.auditLogs);
+      const updated = await hidePlaylist('pl-1', true, adminActor);
+      expect(updated.hidden).toBe(true);
+    });
+
+    it('syncYoutube — upserts videos and playlists, writes audit log', async () => {
+      const newPorts = createInMemoryPorts();
+
+      const mockFetchVideos = vi.fn().mockResolvedValue([
+        {
+          id: 'yt-v1',
+          title: 'Consciousness Talk',
+          description: 'On the nature of mind.',
+          thumbnailUrl: 'https://i.ytimg.com/vi/yt-v1/hqdefault.jpg',
+          durationSeconds: 420,
+          publishedAt: '2026-06-01T00:00:00Z',
+          channelId: 'UC_test_en',
+        },
+      ]);
+      const mockFetchPlaylists = vi.fn().mockResolvedValue([
+        {
+          id: 'yt-pl1',
+          title: 'Inner Journey',
+          description: 'A series.',
+          thumbnailUrl: 'https://i.ytimg.com/vi/yt-pl1/hqdefault.jpg',
+          itemCount: 3,
+          channelId: 'UC_test_en',
+          publishedAt: '2026-06-01T00:00:00Z',
+        },
+      ]);
+
+      const syncYoutube = makeSyncYoutube(newPorts, newPorts.auditLogs, {
+        fetchChannelVideos: mockFetchVideos,
+        fetchChannelPlaylists: mockFetchPlaylists,
+        apiKey: 'test-key',
+        channelMap: { UC_test_en: 'en' },
+      });
+      const result = await syncYoutube(adminActor);
+
+      expect(result.totalNew).toBe(1);
+      expect(result.totalFetched).toBe(1);
+
+      // Use repository directly — .list() returns Video[], not { videos }
+      const videos = await newPorts.videos.list();
+      expect(videos).toHaveLength(1);
+      expect(videos[0].id).toBe('yt-v1');
+      expect(videos[0].isShort).toBe(false);
+      expect(videos[0].language).toBe('en');
+
+      const playlists = await newPorts.playlists.list();
+      expect(playlists).toHaveLength(1);
+      expect(playlists[0].id).toBe('yt-pl1');
+
+      const logs = await newPorts.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].action).toBe('youtube_sync');
+
     });
   });
 

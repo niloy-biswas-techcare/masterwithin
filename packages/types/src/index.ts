@@ -7,6 +7,7 @@
 
 // Content
 export * from './article.schema';
+export * from './video.schema';
 export * from './categories';
 export * from './start-here';
 

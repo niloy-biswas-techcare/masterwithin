@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { Ports, Article, Book, Ebook, Course, Freebie, Order, SiteConfig, StartHereConfig, AuditLog, Operator } from '../../domain';
+import type { Ports, Article, Book, Ebook, Course, Freebie, Order, SiteConfig, StartHereConfig, AuditLog, Operator, Video, Playlist } from '../../domain';
 
 export function runArticleRepositoryContractTests(createRepo: () => Promise<Ports['articles']>) {
   describe('ArticleRepository Contract', () => {
@@ -435,6 +435,155 @@ export function runStorageGatewayContractTests(createGateway: () => Promise<Port
       const mirrored = await gw.uploadImage('https://substack.com/image.png');
       expect(mirrored).toContain('res.cloudinary.com');
       expect(mirrored).toContain('image.png');
+    });
+  });
+}
+
+export function runVideoRepositoryContractTests(createRepo: () => Promise<Ports['videos']>) {
+  describe('VideoRepository Contract', () => {
+    let repo: Ports['videos'];
+
+    const video1: Video = {
+      id: 'vid-1',
+      title: 'Consciousness Explained',
+      description: 'A deep dive into consciousness',
+      thumbnail: 'https://res.cloudinary.com/test/image/upload/vid1.jpg',
+      duration: 1800,
+      publishedAt: '2026-01-01T10:00:00Z',
+      channelId: 'UCenglish',
+      language: 'en',
+      category: 'science-of-consciousness',
+      categoryLocked: false,
+      playlistIds: [],
+      featured: false,
+      hidden: false,
+      isShort: false,
+      youtubeUrl: 'https://youtube.com/watch?v=vid-1',
+    };
+
+    const video2: Video = {
+      id: 'vid-2',
+      title: 'Quick Meditation Tip',
+      description: 'Short tip',
+      thumbnail: 'https://res.cloudinary.com/test/image/upload/vid2.jpg',
+      duration: 45,
+      publishedAt: '2026-01-02T10:00:00Z',
+      channelId: 'UCenglish',
+      language: 'en',
+      category: 'optimal-living',
+      categoryLocked: false,
+      playlistIds: [],
+      featured: true,
+      hidden: false,
+      isShort: true,
+      youtubeUrl: 'https://youtube.com/watch?v=vid-2',
+    };
+
+    beforeEach(async () => {
+      repo = await createRepo();
+      await repo.upsert(video1);
+      await repo.upsert(video2);
+    });
+
+    it('should retrieve a video by id', async () => {
+      const found = await repo.getById('vid-1');
+      expect(found).toBeDefined();
+      expect(found!.title).toBe('Consciousness Explained');
+      expect(await repo.getById('non-existent')).toBeNull();
+    });
+
+    it('should exclude Shorts by default', async () => {
+      const list = await repo.list();
+      expect(list.every((v) => !v.isShort)).toBe(true);
+      expect(list.some((v) => v.id === 'vid-1')).toBe(true);
+      expect(list.some((v) => v.id === 'vid-2')).toBe(false);
+    });
+
+    it('should include Shorts when explicitly requested', async () => {
+      const shorts = await repo.list({ isShort: true });
+      expect(shorts.some((v) => v.id === 'vid-2')).toBe(true);
+    });
+
+    it('should filter by language and category', async () => {
+      const enVideos = await repo.list({ isShort: false, language: 'en' });
+      expect(enVideos.every((v) => v.language === 'en')).toBe(true);
+
+      const byCategory = await repo.list({ isShort: false, category: 'science-of-consciousness' });
+      expect(byCategory.length).toBeGreaterThan(0);
+      expect(byCategory.every((v) => v.category === 'science-of-consciousness')).toBe(true);
+    });
+
+    it('should support curation mutations', async () => {
+      const featured = await repo.setFeatured('vid-1', true);
+      expect(featured.featured).toBe(true);
+
+      const hidden = await repo.setHidden('vid-1', true);
+      expect(hidden.hidden).toBe(true);
+
+      const overridden = await repo.overrideCategory('vid-1', 'optimal-living');
+      expect(overridden.category).toBe('optimal-living');
+      expect(overridden.categoryLocked).toBe(true);
+    });
+
+    it('should idempotently upsert by video id', async () => {
+      const updated = await repo.upsert({ ...video1, title: 'Updated Title' });
+      expect(updated.title).toBe('Updated Title');
+      const found = await repo.getById('vid-1');
+      expect(found!.title).toBe('Updated Title');
+    });
+  });
+}
+
+export function runPlaylistRepositoryContractTests(createRepo: () => Promise<Ports['playlists']>) {
+  describe('PlaylistRepository Contract', () => {
+    let repo: Ports['playlists'];
+
+    const playlist1: Playlist = {
+      id: 'pl-1',
+      title: 'Journey to Consciousness',
+      description: 'A 12-video series',
+      thumbnail: 'https://res.cloudinary.com/test/image/upload/pl1.jpg',
+      videoCount: 12,
+      channelId: 'UCenglish',
+      language: 'en',
+      publishedAt: '2026-01-01T10:00:00Z',
+      featured: false,
+      hidden: false,
+    };
+
+    beforeEach(async () => {
+      repo = await createRepo();
+      await repo.upsert(playlist1);
+    });
+
+    it('should retrieve a playlist by id', async () => {
+      const found = await repo.getById('pl-1');
+      expect(found).toBeDefined();
+      expect(found!.title).toBe('Journey to Consciousness');
+      expect(await repo.getById('non-existent')).toBeNull();
+    });
+
+    it('should list playlists excluding hidden by default', async () => {
+      await repo.upsert({ ...playlist1, id: 'pl-hidden', hidden: true });
+      const list = await repo.list();
+      expect(list.every((p) => !p.hidden)).toBe(true);
+    });
+
+    it('should support curation mutations', async () => {
+      const featured = await repo.setFeatured('pl-1', true);
+      expect(featured.featured).toBe(true);
+
+      const hidden = await repo.setHidden('pl-1', true);
+      expect(hidden.hidden).toBe(true);
+
+      const updated = await repo.updateDescription('pl-1', 'New description');
+      expect(updated.description).toBe('New description');
+    });
+
+    it('should idempotently upsert by playlist id', async () => {
+      await repo.upsert({ ...playlist1, videoCount: 15 });
+      const found = await repo.getById('pl-1');
+      expect(found!.videoCount).toBe(15);
     });
   });
 }

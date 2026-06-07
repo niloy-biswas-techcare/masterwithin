@@ -13,3 +13,6 @@ export * from './Eyebrow';
 export * from './Prose';
 export * from './Pagination';
 export * from './CldImage';
+export * from './VideoCard';
+export * from './PlaylistCard';
+export * from './VideoPlayer';

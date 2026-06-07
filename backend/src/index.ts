@@ -12,6 +12,8 @@ import { SupabaseStartHereRepository } from './adapters/supabase/StartHereReposi
 import { SupabaseAuditLogRepository } from './adapters/supabase/AuditLogRepository.supabase';
 import { SupabaseAuthGateway } from './adapters/supabase/auth.supabase';
 import { SupabaseStorageGateway } from './adapters/supabase/storage';
+import { SupabaseVideoRepository } from './adapters/supabase/VideoRepository.supabase';
+import { SupabasePlaylistRepository } from './adapters/supabase/PlaylistRepository.supabase';
 import type { Ports } from './domain';
 import {
   makeListArticles,
@@ -37,6 +39,16 @@ import {
   makeDeleteArticle,
   makeRequireOperator,
   makeWriteAuditLog,
+  makeListVideos,
+  makeGetVideo,
+  makeListPlaylists,
+  makeGetPlaylist,
+  makeSyncYoutube,
+  makeFeatureVideo,
+  makeHideVideo,
+  makeOverrideVideoCategory,
+  makeFeaturePlaylist,
+  makeHidePlaylist,
 } from './application';
 
 // Composition Root (§9, §3.4) ⛔
@@ -59,6 +71,8 @@ if (env.BACKEND_DRIVER === 'supabase') {
     auditLogs: new SupabaseAuditLogRepository(),
     auth: new SupabaseAuthGateway(),
     storage: new SupabaseStorageGateway(),
+    videos: new SupabaseVideoRepository(),
+    playlists: new SupabasePlaylistRepository(),
   };
 } else if (env.BACKEND_DRIVER === 'fastapi') {
   // Fallback to in-memory during Phase 2
@@ -101,10 +115,23 @@ export const submitContact = makeSubmitContact(ports.contacts);
 export const requireOperator = makeRequireOperator(ports.auth);
 export const writeAuditLog = makeWriteAuditLog(ports.auditLogs);
 
+// YouTube Media Library use-cases
+export const listVideos = makeListVideos(ports.videos);
+export const getVideo = makeGetVideo(ports.videos);
+export const listPlaylists = makeListPlaylists(ports.playlists);
+export const getPlaylist = makeGetPlaylist(ports.playlists);
+export const syncYoutube = makeSyncYoutube(ports, ports.auditLogs);
+export const featureVideo = makeFeatureVideo(ports.videos, ports.auditLogs);
+export const hideVideo = makeHideVideo(ports.videos, ports.auditLogs);
+export const overrideVideoCategory = makeOverrideVideoCategory(ports.videos, ports.auditLogs);
+export const featurePlaylist = makeFeaturePlaylist(ports.playlists, ports.auditLogs);
+export const hidePlaylist = makeHidePlaylist(ports.playlists, ports.auditLogs);
+
 // Re-export domain models & errors for frontend type safety
 export * from './domain';
 export * from './application/errors';
 export type { SyncResult } from './application/articles/syncSubstack';
+export type { SyncYoutubeResult } from './application/youtube/syncYoutube';
 export type { RequireOperator } from './application/auth/requireOperator';
 export type { WriteAuditLog } from './application/audit/writeAuditLog';
 export type { EmailSender } from './application/contacts/submitContact';

@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { listArticles, listCourses } from '@mw/backend';
+import { listArticles, listCourses, listVideos, listPlaylists } from '@mw/backend';
 import { CATEGORIES } from '@mw/types';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://masterwithin.org';
@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
     '/wisdom',
+    '/media',
     '/courses',
     '/store',
     '/start-here',
@@ -60,5 +61,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('[sitemap] Failed to fetch courses for sitemap:', err);
   }
 
-  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...courseRoutes];
+  // 5. Dynamic videos
+  let videoRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { videos } = await listVideos();
+    videoRoutes = videos.map((v) => ({
+      url: `${SITE_URL}/media/${v.id}`,
+      lastModified: new Date(v.publishedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }));
+  } catch (err) {
+    console.error('[sitemap] Failed to fetch videos for sitemap:', err);
+  }
+
+  // 6. Dynamic playlists
+  let playlistRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { playlists } = await listPlaylists();
+    playlistRoutes = playlists.map((p) => ({
+      url: `${SITE_URL}/media/playlists/${p.id}`,
+      lastModified: new Date(p.publishedAt),
+      changeFrequency: 'weekly' as const,
+      priority: 0.65,
+    }));
+  } catch (err) {
+    console.error('[sitemap] Failed to fetch playlists for sitemap:', err);
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...courseRoutes, ...videoRoutes, ...playlistRoutes];
 }

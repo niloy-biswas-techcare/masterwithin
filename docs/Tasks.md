@@ -478,6 +478,115 @@ author's intent. (§8b, §7.3, §4a.5)
 
 ---
 
+## Phase 6d — Media Library: YouTube Integration  🧪
+
+Goal: three YouTube channels (English `@MasterWithinOfficial`, Bengali `@MasterWithinBangla`,
+Hindi `@MasterWithinHindi`) are automatically mirrored into a curated Media Library section at
+`/media`. Visitors discover playlists ("Journeys"), watch talks in their preferred language, and
+navigate seamlessly to related written articles. Shorts are psychologically deprioritized
+(hidden by default). The feature follows the same ports-and-adapters, sync-on-ingest, and
+admin-curation patterns already established for Substack articles. (§7b, §8c, §11, §16)
+
+> **Psychological design mandate** (§7b): No autoplay. Lite-embeds only. Shorts never featured.
+> Language filter is first-class. Every video page cross-links to related articles — this is the
+> core engagement goal: video draws the visitor in; the written library retains them at depth.
+
+### 6d.1 Types & backend ports
+
+- [x] Add `VideoSchema` (+ inferred `Video`) and `PlaylistSchema` (+ `Playlist`) to `packages/types` per §8c field list.
+- [x] Add `VideoRepository` port to `backend/domain/ports`: `listVideos(filters)`, `getVideo(id)`, `upsertVideo`, `setFeatured`, `overrideCategory`, `hideVideo`.
+- [x] Add `PlaylistRepository` port: `listPlaylists(filters)`, `getPlaylist(id)`, `upsertPlaylist`, `setFeatured`, `hidePlaylist`.
+- [x] Extend in-memory adapter to implement both new ports; add to the Phase 2 contract suite. 🧪
+
+### 6d.2 Supabase adapter & migrations  🔒
+
+- [x] Add Supabase migrations for `videos` and `playlists` tables per §16 row shapes; enable RLS with `public read (hidden = false)` policies.
+- [x] Add indexes: `videos(channel_id)`, `videos(category)`, `videos(language)`, `videos(featured)`, `videos(is_short)`, `playlists(language)`.
+- [x] Implement `VideoRepository.supabase.ts` and `PlaylistRepository.supabase.ts`.
+- [x] Run both adapters through the Phase 2 contract suite (interchangeability proof). 🧪 ⛔
+- [ ] `supabase gen types` → regenerate `backend/infra/supabase/generated/types.ts`; wire `pnpm db:types`.
+- [x] Update `backend/index.ts` (composition root) to export `listVideos`, `getVideo`, `listPlaylists`, `getPlaylist`, and admin video/playlist use-cases.
+
+### 6d.3 YouTube sync pipeline (§8c)
+
+- [x] Add `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_EN`, `YOUTUBE_CHANNEL_BN`, `YOUTUBE_CHANNEL_HI` to `.env.example` and all `env.ts` Zod schemas (fail-fast). 🔒
+- [x] Implement `backend/application/content/youtubeApi.ts` (server-only): YouTube Data API v3 client — `fetchChannelVideos(channelId, publishedAfter?)`, `fetchPlaylists(channelId)`, `fetchPlaylistItems(playlistId)`. Handles pagination via `nextPageToken`.
+- [x] Implement `syncYoutube` use-case in `backend/application/youtube/syncYoutube.ts`: per-channel incremental fetch → normalize → Zod validate → language tag from channelId → auto-categorize (§8c) → `isShort` detection (`duration < 60`) → thumbnail rewrite to Cloudinary → idempotent upsert → health log (fetched/new/updated/skipped per channel).
+- [x] Add Supabase Edge Function for daily YouTube sync (same pattern as syncSubstack Edge Function); protect with `CRON_SECRET`. 🔒
+- [x] Add Vercel-cron fallback route `/api/cron/sync-youtube` — `CRON_SECRET`-protected server route handler. 🔒
+- [x] Unit-test `syncYoutube` use-case against in-memory adapter: idempotency (re-run = no duplicates), `isShort` detection, language assignment by channelId, category fallback, `categoryLocked` respect, thumbnail rewrite call. 🧪
+- [ ] Update `db-migrate.yml` path filter to include `backend/infra/supabase/functions/syncYoutube/**`.
+
+### 6d.4 Backend use-cases
+
+- [x] `listVideos(filters?: { language, category, isShort, featured, hidden })` — paginated, Shorts excluded by default (`isShort: false`).
+- [x] `getVideo(id)` — single video with resolved `playlistIds`.
+- [x] `listPlaylists(filters?: { language, featured, hidden })` — paginated.
+- [x] `getPlaylist(id)` — playlist with ordered video list (via YouTube playlist-item order).
+- [x] `featureVideo(id, featured)` + `overrideVideoCategory(id, category)` (sets `categoryLocked`) + `hideVideo(id, hidden)` — admin use-cases, same authz pattern as `featureArticle`.
+- [x] `featurePlaylist(id, featured)` + `hidePlaylist(id, hidden)`.
+
+### 6d.5 `packages/ui` — VideoCard & PlaylistCard components
+
+- [x] `VideoCard`: `CldImage` thumbnail (`aspect-[16/9]`, `overflow-hidden`, `rounded-t-lg`), title (Lora `font-semibold`, `line-clamp-2`), duration pill (`"Xm Ys"`), language badge (`Badge`), category badge. Same-height grid format as `ArticleCard` (flex layout, `flex-1`). Intent-prefetch on hover/focus/touch via `anchorProps`. `linkComponent` prop (default `'a'`). 🧪 a11y
+- [x] `PlaylistCard`: thumbnail, title (`line-clamp-2`), video count badge (`"X talks"`), language badge, Lora italic `"Begin this journey"` hover affordance. Same-height constraint. `linkComponent` prop. 🧪 a11y
+- [x] `VideoPlayer`: lite-embed — renders `CldImage` thumbnail + SVG play-button overlay; on click replaces with `<iframe src="...?rel=0&autoplay=1&modestbranding=1">`. `aspect-[16/9]`, `rounded-lg`. No autoplay on page load. `prefers-reduced-motion` respected (no hover animation on the play overlay). 🧪
+
+### 6d.6 Public site — Media Library pages (`frontend/web`)
+
+- [x] Build `/media` page (`src/app/media/page.tsx`): RSC fetch → `listVideos` + `listPlaylists` → `<HydrationBoundary>`; hero section (`SPOKEN WISDOM` eyebrow, Lora H1, stats line); `LanguageFilter` sticky pill-bar; content-type filter; Featured Journeys `PlaylistCard` grid; Latest Talks `VideoCard` grid (Framer Motion stagger); bottom CTA to `/wisdom`. ISR (daily `revalidate`). `generateMetadata`.
+- [x] Build `/media/[videoId]` page: `getVideo(id)` → `VideoPlayer` + title/metadata header + description + Related Videos (same category) + Related Articles cross-link (same category — the critical engagement bridge). ISR per video. `VideoObject` JSON-LD. `generateMetadata`.
+- [x] Build `/media/playlists/[id]` page: `getPlaylist(id)` → playlist header + ordered `VideoCard` list + `"Begin this journey"` CTA → first video. ISR per playlist. `ItemList` JSON-LD. `generateMetadata`.
+- [x] Add `loading.tsx` skeleton to each media route segment (matches VideoCard/PlaylistCard layout to prevent CLS). 🧪
+- [x] Pass `next/link` `Link` as `linkComponent` to all `VideoCard` and `PlaylistCard` usages (soft nav, no hard reloads — same pattern as §6b). Wire intent-prefetch via `anchorProps`. 🧪
+- [x] Add `VideoObject` and `ItemList` JSON-LD builders to `frontend/web/src/lib/seo`.
+- [x] Add `/media`, `/media/[videoId]`, `/media/playlists/[id]` to `sitemap.ts`.
+- [x] Verify no autoplay on any page; verify `rel=0` on all `<iframe>` embeds. 🧪
+
+### 6d.7 Home page — live YouTube section
+
+- [x] Update `YouTubeSection` in `src/features/home/` to pull featured video data from the backend (TanStack Query + hydration boundary) instead of static `site_config` video IDs.
+- [x] Show 3 featured `VideoCard`s with language badges; add `"Explore all talks →"` link to `/media`.
+- [x] Verify Home page ISR revalidates when a video's `featured` flag changes in admin. 🧪
+
+### 6d.8 Navigation, cross-linking & SEO
+
+- [x] Add `"Media"` nav link to `Navbar` (between `"Courses"` and `"Store"`); warm query + route on intent-hover.
+- [x] Add Media Library entry to `Footer` Library column (or a new Media column): `"Spoken Wisdom"` label + `"Explore Talks"` + `"Journeys"` links.
+- [x] Add `"Related Videos"` section (3 `VideoCard`s, same category) to article pages `/wisdom/[category]/[slug]` — placed after `RelatedArticles`. Viewport-prefetched. `"From the Media Library"` eyebrow.
+- [x] Add `"Related Articles"` section (3 `ArticleCard`s, same category) to `/media/[videoId]` pages — the cross-pillar depth bridge. `"From the Written Library"` eyebrow.
+- [x] Update `/api/cron/sync-youtube` to trigger on-demand ISR revalidation of `/media` after each sync run.
+- [x] Add media routes to `robots.ts` (allow crawling); confirm no `noindex` on media pages.
+
+### 6d.9 Admin — media management screen (`frontend/admin`)
+
+- [x] Add `/media` and `/media/playlists` routes to `frontend/admin/app/`.
+- [x] Video list `DataTable`: columns — thumbnail (40px), title, language badge, category, duration, featured toggle, hidden toggle, category-override select (sets `categoryLocked`); filterable by language/category/isShort/featured/hidden; searchable title.
+- [x] Playlist list `DataTable`: thumbnail, title, language, video count, featured toggle, hidden toggle, description edit (inline `Textarea`).
+- [x] `"Sync now"` button triggers `POST /api/cron/sync-youtube` (with `CRON_SECRET` header) and shows sync result toast.
+- [ ] Admin Dashboard: add video count, playlist count, last YouTube sync timestamp to `StatCard` row.
+- [x] Server actions in `frontend/admin/app/actions/media.actions.ts`: `featureVideo`, `hideVideo`, `overrideVideoCategory`, `featurePlaylist`, `hidePlaylist` — all follow `requireOperator → validate → use-case → writeAuditLog → revalidatePath → ActionResult` pattern. 🔒
+- [x] Extend `audit_logs` `action` enum to include `youtube_sync` for sync-run log entries.
+
+### 6d.10 Env vars & site_config update
+
+- [x] Extend `site_config.youtube` field to include `channels: { en: string, bn: string, hi: string }` (channel IDs editable in Admin → Settings as a fallback/override to the env vars).
+- [ ] Update `SiteConfigRepository` port + Supabase adapter + migration to include `channels` field.
+- [ ] Document `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_EN/BN/HI` in `.github/SETUP.md` (where to get YouTube API key + how to find channel IDs).
+
+### 6d.11 Testing (§20) 🧪
+
+- [x] **Unit (Vitest):** `syncYoutube` — idempotency, `isShort` detection, language tagging, category fallback, thumbnail rewrite; `VideoRepository` + `PlaylistRepository` port-contract tests.
+- [ ] **Component (Vitest + RTL + axe):** `VideoCard`, `PlaylistCard`, `VideoPlayer` — render, a11y, lite-embed swap-to-iframe behaviour, no-autoplay assertion.
+- [ ] **E2E (Playwright):** browse `/media` → apply language filter → open video page → verify `"From the Written Library"` related articles → navigate to article → verify `"From the Media Library"` related videos; verify back-nav is soft (no reload).
+- [ ] **E2E:** Admin → "Sync now" → new video appears in `/media` within seconds (on-demand ISR revalidation).
+- [ ] **E2E:** Admin hides a video → verify it disappears from `/media` immediately.
+- [x] Verify Shorts hidden from default `/media` view; visible only via `"Brief Reflections"` tab.
+- [ ] Lighthouse audit on `/media` and `/media/[videoId]` — perf ≥ 95, no CLS regression (explicit image dims on thumbnails, lite-embed avoids layout shift). 🧪
+- [ ] Verify `prefers-reduced-motion` respected on `LanguageFilter` pill transitions and `VideoCard` hover animations.
+
+---
+
 ## Phase 7 — Commerce: Cart & WhatsApp Checkout
 
 Goal: the full payment-ready checkout, WhatsApp at launch, behind `OrderProvider`. (§10)

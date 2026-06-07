@@ -21,6 +21,8 @@ export type {
   SignedImageUpload,
   SignedFileUpload,
 } from './StorageGateway';
+export type { VideoRepository, VideoListFilter } from './VideoRepository';
+export type { PlaylistRepository, PlaylistListFilter } from './PlaylistRepository';
 
 import type { ArticleRepository } from './ArticleRepository';
 import type { BookRepository } from './BookRepository';
@@ -34,6 +36,8 @@ import type { StartHereRepository } from './StartHereRepository';
 import type { AuditLogRepository } from './AuditLogRepository';
 import type { AuthGateway } from './AuthGateway';
 import type { StorageGateway } from './StorageGateway';
+import type { VideoRepository } from './VideoRepository';
+import type { PlaylistRepository } from './PlaylistRepository';
 
 /**
  * The full set of ports an adapter must provide. The composition root (§9) builds one
@@ -53,4 +57,6 @@ export interface Ports {
   auditLogs: AuditLogRepository;
   auth: AuthGateway;
   storage: StorageGateway;
+  videos: VideoRepository;
+  playlists: PlaylistRepository;
 }

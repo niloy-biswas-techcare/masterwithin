@@ -20,6 +20,11 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional().or(z.literal("")),
   REVALIDATE_SECRET: z.string(),
   CRON_SECRET: z.string(),
+
+  YOUTUBE_API_KEY: z.string().optional().or(z.literal("")),
+  YOUTUBE_CHANNEL_EN: z.string().optional().or(z.literal("")),
+  YOUTUBE_CHANNEL_BN: z.string().optional().or(z.literal("")),
+  YOUTUBE_CHANNEL_HI: z.string().optional().or(z.literal("")),
   
   ADMIN_SESSION_COOKIE_NAME: z.string().default("mw_session"),
   ADMIN_SESSION_MAX_AGE_DAYS: z.coerce.number().default(5),
@@ -51,6 +56,10 @@ if (!result.success) {
       RESEND_API_KEY: '',
       REVALIDATE_SECRET: 'mock',
       CRON_SECRET: 'mock',
+      YOUTUBE_API_KEY: '',
+      YOUTUBE_CHANNEL_EN: '',
+      YOUTUBE_CHANNEL_BN: '',
+      YOUTUBE_CHANNEL_HI: '',
       ADMIN_SESSION_COOKIE_NAME: 'mw_session',
       ADMIN_SESSION_MAX_AGE_DAYS: 5,
       ADMIN_ALLOWLIST: ['admin@masterwithin.org'],

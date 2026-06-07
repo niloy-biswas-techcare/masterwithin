@@ -1,29 +1,36 @@
 import React from 'react';
 import Link from 'next/link';
-import { getSiteConfig, listArticles } from '@mw/backend';
+import { getSiteConfig, listArticles, listVideos } from '@mw/backend';
 import { SmartArticleCard } from '@/components/shared/SmartCards';
-import { LiteYouTube } from '@/components/shared/LiteYouTube';
+import { VideoCard } from '@mw/ui';
 import { AnimateOnScroll } from '@/components/shared/AnimateOnScroll';
 import { HeroSection } from '@/features/home/HeroSection';
 import { ArrowRight, BookOpen, GraduationCap, ShoppingBag } from 'lucide-react';
-import type { Article, SiteConfig } from '@mw/types';
+import type { Article, SiteConfig, Video } from '@mw/types';
 
 export const revalidate = 3600;
 
 export default async function Home() {
   let articles: Article[] = [];
   let siteConfig: SiteConfig | null = null;
+  let featuredVideos: Video[] = [];
 
   try {
-    articles = await listArticles();
-    siteConfig = await getSiteConfig();
+    [articles, siteConfig] = await Promise.all([listArticles(), getSiteConfig()]);
   } catch (err) {
     console.error('[home] Failed to fetch server data:', err);
   }
 
-  const featuredVideoIds = siteConfig?.youtube?.featuredVideoIds?.length
-    ? siteConfig.youtube.featuredVideoIds
-    : ['dQw4w9WgXcQ', 'tVzXRx9612s', 'KxQ_B7Jd-10'];
+  try {
+    const { videos } = await listVideos({ featured: true });
+    featuredVideos = videos.slice(0, 3);
+    if (featuredVideos.length === 0) {
+      const { videos: recent } = await listVideos();
+      featuredVideos = recent.slice(0, 3);
+    }
+  } catch {
+    // Videos not available yet — section renders empty state
+  }
 
   const displayedArticles = articles.length
     ? articles.slice(0, 3)
@@ -98,44 +105,47 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 3. Conversations — section-md */}
+      {/* 3. Conversations — section-md (6d.7: VideoCard from backend) */}
       <section className="section-md bg-surface/30 border-b border-border/20">
         <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10">
-          <AnimateOnScroll variant="fadeUp">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="block text-[11px] font-body font-semibold tracking-widest text-primary uppercase mb-1">
-                Conversations
-              </span>
-              <h2 className="font-display text-[2rem] font-bold tracking-[-0.01em] text-text leading-[1.2]">
-                Spiritual Inquiries
-              </h2>
-              <p className="mt-3 text-text/70 font-body text-[0.9375rem]">
-                Discussions, guided reflections, and research breakdowns on our channel.
-              </p>
-            </div>
-          </AnimateOnScroll>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredVideoIds.slice(0, 3).map((vidId, i) => (
-              <AnimateOnScroll key={vidId} variant="fadeUp" delay={i * 0.05}>
-                <div className="flex flex-col gap-3">
-                  <LiteYouTube videoId={vidId} title={`Inquiry Episode ${i + 1}`} />
-                  <span className="text-xs text-text/60 px-1 font-body">Featured Inquiry #{i + 1}</span>
-                </div>
-              </AnimateOnScroll>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <a
-              href={siteConfig?.socials?.youtube ?? 'https://youtube.com'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-text hover:bg-primary/5 hover:border-primary/30 transition-colors"
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-12">
+            <AnimateOnScroll variant="fadeUp">
+              <div>
+                <span className="block text-[11px] font-body font-semibold tracking-widest text-primary uppercase mb-1">
+                  Conversations
+                </span>
+                <h2 className="font-display text-[2rem] font-bold tracking-[-0.01em] text-text leading-[1.2]">
+                  Spiritual Inquiries
+                </h2>
+                <p className="mt-2 text-text/70 max-w-md font-body text-[0.9375rem]">
+                  Discussions, guided reflections, and research breakdowns on our channel.
+                </p>
+              </div>
+            </AnimateOnScroll>
+            <Link
+              href="/media"
+              className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline shrink-0"
             >
-              <YoutubeIcon className="h-4 w-4 text-red-500" aria-hidden="true" /> Visit YouTube Channel
-            </a>
+              Explore all talks <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
           </div>
+
+          {featuredVideos.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredVideos.map((video, i) => (
+                <AnimateOnScroll key={video.id} variant="fadeUp" delay={i * 0.05} className="h-full">
+                  <VideoCard video={video} href={`/media/${video.id}`} linkComponent={Link} className="h-full" />
+                </AnimateOnScroll>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-text/50 font-body">
+              <p>Talks will appear here after the first YouTube sync.</p>
+              <Link href="/media" className="mt-4 inline-block text-primary font-medium hover:underline">
+                Browse the Media Library
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -218,21 +228,3 @@ export default async function Home() {
   );
 }
 
-function YoutubeIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
-      <polygon points="10 15 15 12 10 9" />
-    </svg>
-  );
-}

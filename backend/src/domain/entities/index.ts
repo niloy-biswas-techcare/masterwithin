@@ -29,4 +29,6 @@ export type {
   Operator,
   OperatorRole,
   Category,
+  Video,
+  Playlist,
 } from '@mw/types';

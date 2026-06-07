@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
-import { getSiteConfig } from "@mw/backend";
+import { redirect, notFound } from "next/navigation";
+import { getSiteConfig, ForbiddenError } from "@mw/backend";
 import { verifyOperator } from "@/lib/auth";
 import { SiteConfigForm } from "@/features/admin/SiteConfigForm";
 import { OperatorManagement } from "@/features/admin/OperatorManagement";
@@ -8,9 +8,14 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   // Settings requires admin role (§17.5) 🔒
-  const operator = await verifyOperator("admin").catch(() => null);
-  if (!operator) {
-    redirect("/");
+  let operator;
+  try {
+    operator = await verifyOperator("admin");
+  } catch (e) {
+    if (e instanceof ForbiddenError) {
+      notFound();
+    }
+    redirect("/login");
   }
 
   const config = await getSiteConfig().catch(() => null);

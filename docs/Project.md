@@ -32,6 +32,7 @@ copy, design density, and information architecture, not just intent.
 3. **Courses** — structured learning paths.
 4. **Store** — physical books (primary), eBooks, and free downloads, with a frictionless WhatsApp-first checkout.
 5. **The founder & the ideal** — *About* and *Our Ideal* anchor trust and depth.
+6. **Media Library** — YouTube videos and playlists auto-synced from three channels (English, Bengali, Hindi), organized by category and language; Shorts deprioritized; cross-linked to written articles for depth continuity.
 
 ---
 
@@ -638,8 +639,12 @@ subdomain (e.g. `admin.masterwithin.org`).
 | `/store/order/confirmation` | Order confirmation | Client |
 | `/about` | Founder page | Static |
 | `/contact` | Contact form | Static shell + server action |
+| `/media` | Media Library (videos & playlists, all channels) | ISR + client filtering |
+| `/media/[videoId]` | Individual video page | ISR (per video) |
+| `/media/playlists/[id]` | Playlist detail | ISR (per playlist) |
 | `/api/revalidate` | On-demand ISR webhook | Route handler |
 | `/api/cron/sync-substack` | Scheduled content sync (if hosted on Vercel) | Route handler (cron) |
+| `/api/cron/sync-youtube` | Scheduled YouTube sync (if hosted on Vercel) | Route handler (cron) |
 | `/sitemap.xml`, `/robots.txt` | Generated | `sitemap.ts`, `robots.ts` |
 
 ### 5.2 Admin Console (`frontend/admin`)
@@ -763,6 +768,100 @@ personal. Authored in MDX.
 Single-column form: Name, Email, Message. Submitted via a **server action** that (a) validates with
 Zod, (b) persists through the backend `contacts` use-case, (c) sends a transactional email via Resend.
 Honeypot + rate-limit instead of CAPTCHA clutter. Accessible error/success states.
+
+---
+
+## 7b. Media Library — `/media`, `/media/[videoId]`, `/media/playlists/[id]`
+
+The Media Library surfaces YouTube content from three channels (English, Bengali, Hindi) as a
+first-class knowledge pillar — not a widget, but a curated, contemplative space for spoken wisdom.
+
+### Psychological design rationale
+
+The site's visitors are operating at Maslow's Esteem → Self-Actualization boundary. Video can
+deepen engagement when it is **framed as spoken wisdom**, not entertainment — but several psychological
+risks must be actively mitigated:
+
+- **Algorithmic pull** — YouTube's recommended sidebar exposes users to competitor content and
+  trains an algorithmic consumption pattern incompatible with depth-first intent. Mitigation:
+  lite-embed approach (poster + click-to-load), `rel=0` to suppress related videos, our own
+  related-content sections replace YouTube's.
+- **Shorts and dopamine loops** — Shorts (< 60 seconds) are engineered for high-frequency dopamine
+  stimulation (variable-ratio reinforcement). Showing them prominently contradicts the contemplative
+  brand. Mitigation: Shorts are hidden from the default Media Library view; they surface only via
+  an explicit "Brief Reflections" filter tab and are never featured, never autoplay-chained.
+- **Language fragmentation** — Three channels in three languages could feel scattered. Mitigation:
+  language filter tabs (not separate URL trees) keep a single browsing experience with a clear
+  language affordance; default is "All".
+- **Platform feel** — Embedding raw YouTube UI cheapens the editorial atmosphere. Mitigation:
+  all embeds are lite (thumbnail + play-button overlay); video pages are built inside our design
+  system with Lora title, DM Sans metadata, and our related-content recommendations.
+
+### Psychological positives the feature provides
+
+- **Multi-modal learning**: some visitors process philosophy more deeply through audio/visual than
+  text. Extending the Library into video broadens reach without diluting depth.
+- **Founder's voice (Congruence)**: Seeing and hearing Souvik Ghosh speak activates the
+  Rogerian Congruence trust mechanism more powerfully than text alone.
+- **Language as Relatedness (SDT)**: Serving content in Bengali or Hindi immediately signals
+  "this community speaks your language" — a powerful Relatedness response.
+- **Playlists as structured journeys (Competence, SDT)**: A "12-video series on Consciousness"
+  maps the same SDT Competence need as a Course — visitors can see a manageable path through
+  a complex topic.
+- **Cross-pillar bridging**: linking a video to its related Wisdom Library articles and vice versa
+  creates a web of depth — visitors who arrive via video are drawn deeper into the written library,
+  and article readers discover spoken elaborations.
+
+### 7b.1 `/media` — Media Library landing
+
+- **Hero:** ambient radial gradient, `SPOKEN WISDOM` eyebrow label (DM Sans 600, `tracking-widest`,
+  `text-primary`), Lora H1 (`"Wisdom in Every Language"`), sub-headline, stats line
+  (`"X talks · X journeys · 3 channels"`). Framer Motion staggered `fadeUp` entrance.
+- **Language filter tabs:** `"All · English · বাংলা · हिंदी"` — sticky pill-bar identical in
+  pattern to the Wisdom Library category filter (§7.2). Defaults to "All". Updates the video and
+  playlist grids below without a page reload.
+- **Content-type filter:** `"All · Journeys · Talks · Brief Reflections"` — where "Journeys" =
+  playlists, "Talks" = regular videos, "Brief Reflections" = Shorts. "Brief Reflections" is last
+  and unlabelled by default; Shorts never appear in the "All" or "Talks" views.
+- **Featured Journeys:** 2–3 `PlaylistCard` components. Framed as "structured paths of inquiry"
+  in section eyebrow copy (`GUIDED JOURNEYS`), never "video series" or "playlist".
+- **Latest Talks:** 3-col `VideoCard` grid on desktop, 2-col tablet, 1-col mobile. Framer Motion
+  stagger entrance (`staggerChildren: 0.06`). Intent-prefetch on hover/focus/touch.
+- **Bottom CTA:** `"Explore the written library"` link to `/wisdom` — cross-pillar bridge, framed
+  as deepening the inquiry, not as an unrelated link.
+- ISR with daily revalidation. TanStack Query hydration boundary for client filtering without
+  page reload.
+
+### 7b.2 `/media/[videoId]` — Video page
+
+- **Video embed:** lite-embed — renders Cloudinary-rewritten thumbnail + custom play-button overlay.
+  On click, swaps to `<iframe>` with `?rel=0&autoplay=1&modestbranding=1`. `aspect-[16/9]`,
+  `rounded-lg`. **No autoplay on page load** — autoplay triggers only on the play-button click.
+- **Above the fold (our design system):** video title (Lora, `text-2xl md:text-3xl`), channel badge
+  (language abbreviation), duration pill, category badge (`Badge` primitive), publish date (DM Sans
+  caption). Reading-time equivalent shown as `"X min watch"`.
+- **Description:** formatted (line-breaks preserved). Long descriptions truncated at 3 lines with
+  Lora italic `"Read more ↓"` expand. `DM Sans 400 text-text/80`.
+- **`"Watch on YouTube"` attribution link** — mirrors `"Read on Substack"` on article pages.
+- **Related Videos** (same category + language preference, 3 cards): horizontal row, viewport-
+  prefetched via `IntersectionObserver`. `"More Talks"` eyebrow.
+- **Related Articles** (same category, 3 `ArticleCard`s): the most strategically important section —
+  bridges spoken content to the written Wisdom Library. `"From the Written Library"` eyebrow.
+- Structured data: `VideoObject` JSON-LD (name, description, thumbnailUrl, uploadDate, embedUrl,
+  duration in ISO 8601, channel).
+- `generateMetadata`: title, description, OG image (Cloudinary-rewritten thumbnail), canonical.
+
+### 7b.3 `/media/playlists/[id]` — Playlist page
+
+- **Header:** playlist title (Lora H1), description (DM Sans prose), language badge, video count,
+  total watch time estimate (sum of video durations).
+- **"Begin this journey" CTA:** links to the first video in the playlist. `Button` variant
+  `primary` with min-height 44px. Microcopy: `"Begin this journey"` not `"Play all"`.
+- **Ordered video list:** numbered `VideoCard` list in playlist order. Inline `duration` pill.
+  Framer Motion `fadeUp` stagger on scroll entry.
+- **Related Articles** (same category): cross-pillar bridge.
+- Structured data: `ItemList` JSON-LD (playlist as ordered list of `ListItem` → `VideoObject`).
+- ISR per playlist.
 
 ---
 
@@ -900,6 +999,109 @@ author's intended reading experience. The correct approach is:
   appears on Substack creates trust and consistency for readers who follow the Substack link.
 - **Clear separation of concerns.** Our design system owns the site shell; Substack owns the
   article body. No blurry boundary where both try to style the same elements.
+
+---
+
+## 8c. Content Pipeline — YouTube → Backend (Media Library)
+
+Three YouTube channels are automatically mirrored into the Media Library using the YouTube Data
+API v3. The sync is scheduled, server-side, and idempotent — identical in design philosophy to
+the Substack article sync (§8).
+
+### Channels
+
+| Language | Channel | `language` code |
+|----------|---------|-----------------|
+| English | Master Within Official (`@MasterWithinOfficial`) | `en` |
+| Bengali | Master Within Bangla (`@MasterWithinBangla`) | `bn` |
+| Hindi | Master Within Hindi (`@MasterWithinHindi`) | `hi` |
+
+Channel IDs (`YOUTUBE_CHANNEL_EN`, `YOUTUBE_CHANNEL_BN`, `YOUTUBE_CHANNEL_HI`) are env vars
+(§15). Operators may also edit them via Admin → Settings (`site_config.youtube.channels`).
+
+### Flow
+
+```
+YouTube publishes video on any channel
+  → Scheduled sync (Supabase Edge Function cron, daily — or Vercel Cron → /api/cron/sync-youtube)
+     → YouTube Data API v3 (server-side only; YOUTUBE_API_KEY)
+        → Incremental fetch: videos published since last sync date per channel
+           → Fetch playlist metadata + playlist-item memberships for updated playlists
+              → Normalize + validate (Zod VideoSchema, PlaylistSchema)
+                 → Language tag from channel ID
+                    → Auto-categorize: keywords from categories.ts matched against title + description
+                       → isShort detection: duration < 60 seconds → isShort: true
+                          → Rewrite thumbnails to Cloudinary (fetch + upload)
+                             → Idempotent upsert by YouTube video/playlist ID
+                                → Trigger on-demand ISR revalidation for /media and affected paths
+```
+
+The browser **never** calls the YouTube API. All ingestion is server-side.
+
+### Video schema
+
+```typescript
+// packages/types/video.schema.ts
+export const VideoSchema = z.object({
+  id: z.string(),                        // YouTube video ID (stable; primary key)
+  title: z.string(),
+  description: z.string(),
+  thumbnail: z.string().url(),           // Cloudinary URL (rewritten on ingest)
+  duration: z.number().int().positive(), // seconds
+  publishedAt: z.string(),              // ISO string
+  channelId: z.string(),
+  language: z.enum(['en', 'bn', 'hi']),
+  category: z.string(),                  // one of 8 wisdom category slugs
+  categoryLocked: z.boolean().default(false),
+  playlistIds: z.array(z.string()).default([]),
+  featured: z.boolean().default(false),
+  hidden: z.boolean().default(false),    // admin can remove from library without deleting
+  isShort: z.boolean().default(false),   // duration < 60 seconds
+  youtubeUrl: z.string().url(),
+});
+
+export const PlaylistSchema = z.object({
+  id: z.string(),                        // YouTube playlist ID
+  title: z.string(),
+  description: z.string(),
+  thumbnail: z.string().url(),           // Cloudinary URL
+  videoCount: z.number().int(),
+  channelId: z.string(),
+  language: z.enum(['en', 'bn', 'hi']),
+  publishedAt: z.string(),
+  featured: z.boolean().default(false),
+  hidden: z.boolean().default(false),
+});
+```
+
+### Auto-categorization (YouTube)
+
+Same keyword-match logic as articles (§8): title + description against `categories.ts` keyword
+sets. `categoryLocked = true` once an operator manually overrides the category in Admin → Media,
+preventing future syncs from clobbering the choice.
+
+### Shorts handling
+
+Videos with `duration < 60` seconds are tagged `isShort: true` on ingest. They are excluded from
+`listVideos()` default query (caller passes `isShort: false` unless specifically requesting Shorts).
+The `/media` page surfaces them only via the `"Brief Reflections"` tab. They are never included in
+Featured Journeys, Featured Talks, or the Home page YouTube section. This is a product constraint,
+not a display preference — Shorts train a dopamine-loop consumption pattern incompatible with the
+site's depth-first intent (§7b, §4a.4).
+
+### YouTube thumbnail rewrite
+
+YouTube thumbnail URLs are rewritten to Cloudinary on ingest for consistent CDN delivery,
+format/quality optimisation via `next/image`, and independence from YouTube's thumbnail CDN —
+identical to article cover image handling (§8).
+
+### API quota management
+
+YouTube Data API v3 free quota: 10,000 units/day. A full three-channel sync (videos + playlists)
+costs ~3–5 units per video. At 500 total videos across all channels, a full sync uses ≈ 1,500–2,500
+units. Use **incremental sync** (fetch only videos published since the last successful sync
+timestamp) to stay comfortably within quota. Perform a weekly full-pass sync to catch any drift.
+Sync-health logs capture `fetched / new / updated / skipped` counts per channel per run (§19).
 
 ---
 
@@ -1157,12 +1359,13 @@ Grouped by layer (see §4.4). Shared primitives/UI live in `packages/ui`; featur
 each app. Names are canonical.
 
 - **Primitives (`packages/ui`):** `Button`, `IconButton`, `Dialog`, `Drawer`, `Tabs`, `Input`, `Textarea`, `Select`, `Badge`, `Spinner`, `Skeleton`.
-- **UI (`packages/ui`):** `Card`, `ArticleCard`, `BookCard`, `CourseCard`, `CategoryCard`, `EmptyState`, `Prose` (renders sanitized article HTML in editorial style), `Pagination`, `CldImage` (Cloudinary-backed `next/image`).
+- **UI (`packages/ui`):** `Card`, `ArticleCard`, `BookCard`, `CourseCard`, `CategoryCard`, `VideoCard` (thumbnail 16:9, title line-clamp-2, duration pill, language badge, category badge; same-height grid format as ArticleCard), `PlaylistCard` (thumbnail, title, video count badge, language badge; framed as "journey"), `EmptyState`, `Prose` (renders sanitized article HTML in editorial style), `Pagination`, `CldImage` (Cloudinary-backed `next/image`).
 - **Layout (web):** `Navbar`, `Footer`, `Container`, `PageHeader`, `Section`.
 - **Shared (web):** `ShareButtons`, `ReadingProgress`, `LiteYouTube`, `SeoJsonLd`, `ThemeToggle`, `PrefetchLink` (intent-prefetch wrapper, §12).
 - **Wisdom feature (web):** `CategoryGrid`, `ArticleList`, `TagFilter`, `SearchBar`, `RelatedArticles`.
 - **Store feature (web):** `CartDrawer`, `CartItem`, `OrderForm`, `CheckoutSummary`, `FreebieList`, `EbookGrid`.
-- **Home feature (web):** `HeroSection`, `FeaturedArticles`, `YouTubeSection`, `CourseTeaser`, `StoreTeaser`.
+- **Home feature (web):** `HeroSection`, `FeaturedArticles`, `YouTubeSection` (live-data from backend, 3 featured videos), `CourseTeaser`, `StoreTeaser`.
+- **Media feature (web):** `VideoPlayer` (lite-embed: thumbnail + play-button → `<iframe>` `rel=0&autoplay=1` on click; 16:9 aspect, `rounded-lg`), `LanguageFilter` (sticky pill-bar: All / English / বাংলা / हिंदी), `VideoGrid`, `PlaylistGrid`, `RelatedVideos`, `VideoPageHeader`.
 - **Admin feature (admin app):** `AdminShell`, `AdminSidebar`, `LoginForm`, `DataTable` (sortable/searchable/paginated), `EntityForm` (RHF + Zod, schema-driven), `ImageUploader` (cover art → **Cloudinary** signed upload), `FileUploader` (freebie files → **Supabase Storage**), `ReorderableList` (drag-to-set `order`), `PublishToggle`, `ConfirmDialog`, `StatCard`, `ActivityFeed`. Admin components live only in `frontend/admin` and are never imported by public pages.
 
 ---
@@ -1365,6 +1568,12 @@ RESEND_API_KEY=
 REVALIDATE_SECRET=                   # protects /api/revalidate
 CRON_SECRET=                         # protects sync triggers against public calls
 
+# ── YouTube (Media Library sync) ─────────────────────────────────────────────
+YOUTUBE_API_KEY=                     # server-only; YouTube Data API v3 key
+YOUTUBE_CHANNEL_EN=                  # Master Within Official channel ID (UC...)
+YOUTUBE_CHANNEL_BN=                  # Master Within Bangla channel ID (UC...)
+YOUTUBE_CHANNEL_HI=                  # Master Within Hindi channel ID (UC...)
+
 # ── Admin auth (server-only) ──────────────────────────────────────────────────
 ADMIN_SESSION_COOKIE_NAME=mw_session # name of the httpOnly session cookie
 ADMIN_SESSION_MAX_AGE_DAYS=5         # session cookie lifetime (re-login after expiry)
@@ -1405,9 +1614,11 @@ never in git. `.env.example` documents every key.
 | `courses` | Course listings | yes | service role only |
 | `contacts` | Contact submissions | no | service role only (validated) |
 | `orders` | Pseudonymous order records | no | service role only |
-| `site_config` | Singleton config row (WhatsApp #, socials, YouTube, featured) | yes | service role only |
+| `site_config` | Singleton config row (WhatsApp #, socials, YouTube channels, featured) | yes | service role only |
 | `start_here` | The 4 guided-entry path definitions | yes | service role only |
 | `audit_logs` | Append-only record of every admin mutation | no | service role only |
+| `videos` | YouTube video metadata synced from 3 channels (§8c) | yes | service role only |
+| `playlists` | YouTube playlist metadata synced from 3 channels (§8c) | yes | service role only |
 
 > **Operator identity uses Supabase Auth, not an app table.** Operators are `auth.users` carrying a
 > role in `app_metadata.role` (`'admin' | 'editor'`), set server-side via the Supabase Admin API (§17.6).
@@ -1436,6 +1647,8 @@ create policy "public read"   on freebies    for select using (true);
 create policy "public read"   on courses     for select using (true);
 create policy "public read"   on site_config for select using (true);
 create policy "public read"   on start_here  for select using (true);
+create policy "public read"   on videos      for select using (hidden = false);
+create policy "public read"   on playlists   for select using (hidden = false);
 -- (no insert/update/delete policies → denied for anon & authenticated roles)
 
 -- Private: clients can never read or write (service role bypasses RLS for server writes).
@@ -1576,9 +1789,15 @@ admin works unchanged when the backend becomes FastAPI.
 - **Start Here:** edit the four guided-entry paths (title, blurb, target tags/category, deeper CTA) →
   `start_here` row. Stays data-driven (§7.4) — no JSX edits.
 - **Orders:** read-only, paginated, searchable list + CSV export. No editing (orders are records).
+- **Media** (`/media`, `/media/playlists`): video list (filter by language / channel / category /
+  featured / isShort); **feature toggle**; **category override** (sets `categoryLocked`); **hide
+  toggle** (removes from public library without deleting the row — useful for off-topic or
+  low-quality videos); playlist list with feature toggle and description edit; **"Sync now"** button
+  (triggers the YouTube sync use-case, identical pattern to Article "Sync now"). Admin dashboard
+  shows video/playlist counts and last sync result.
 - **Settings:** `admin`-only. Site config (`site_config` singleton): WhatsApp number, social links,
-  YouTube channel/video IDs, featured selections. Plus **operator management** — invite/grant/revoke
-  roles (17.6).
+  YouTube channel IDs (`YOUTUBE_CHANNEL_EN/BN/HI` overrideable here), featured selections. Plus
+  **operator management** — invite/grant/revoke roles (§17.6).
 
 ### 17.6 Operator provisioning (no public signup)
 
@@ -1638,6 +1857,39 @@ This keeps server functions light and supports large files.
   "entity": "book", "entity_id": "book-1",
   "diff": { "price": { "from": 299, "to": 349 } },
   "at": "<ISO>"
+}
+
+// videos — service-role write, public read (hidden=false)
+{
+  "id": "dQw4w9WgXcQ",               // YouTube video ID (primary key)
+  "title": "Understanding Consciousness",
+  "description": "Full description text...",
+  "thumbnail": "https://res.cloudinary.com/<cloud>/image/upload/.../thumb.jpg",
+  "duration": 1823,                  // seconds; isShort = (duration < 60)
+  "published_at": "2024-01-15T10:00:00Z",
+  "channel_id": "UCxxxxxxxxxxxxxxxx",
+  "language": "en",                  // "en" | "bn" | "hi"
+  "category": "science-of-consciousness",
+  "category_locked": false,
+  "playlist_ids": ["PLxxxxxxx"],
+  "featured": false,
+  "hidden": false,
+  "is_short": false,
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+
+// playlists — service-role write, public read (hidden=false)
+{
+  "id": "PLxxxxxxxxxxxxxxxx",         // YouTube playlist ID (primary key)
+  "title": "The Science of Consciousness — 12-Part Series",
+  "description": "A guided journey through...",
+  "thumbnail": "https://res.cloudinary.com/<cloud>/image/upload/.../playlist.jpg",
+  "video_count": 12,
+  "channel_id": "UCxxxxxxxxxxxxxxxx",
+  "language": "en",
+  "published_at": "2024-01-01T00:00:00Z",
+  "featured": false,
+  "hidden": false
 }
 ```
 
@@ -1876,12 +2128,17 @@ console and no developer required for day-to-day content.
   on the site dynamically. In Admin → Articles, an operator can feature an article, override its
   category (locks it against future syncs), edit tags/excerpt, attach/correct the Substack link, import
   a single post by URL, or hit **"Sync now"**. Articles are never hand-created.
+- **Videos & playlists** — publish on any of the three YouTube channels; the daily sync (§8c) ingests
+  new videos and playlists automatically. In Admin → Media, an operator can: feature a video or
+  playlist (surfaces it in the home YouTube section or the Featured Journeys row); override a video's
+  category (sets `categoryLocked`); hide a video (removes it from the public library without deleting);
+  edit a playlist description; or hit **"Sync now"**. Videos and playlists are never hand-created.
 - **Books / eBooks / courses / freebies** — full CRUD in the Admin Console: create, edit, set price,
   publish/unpublish, drag-to-reorder, **upload covers to Cloudinary**, and (freebies) upload the
   downloadable file to Supabase Storage. Changes publish to the live site within seconds via on-demand
   revalidation.
-- **Site config** — WhatsApp number, social/Substack links, YouTube channel & featured videos, and
-  featured book/article selections are edited in Admin → Settings (`admin` role).
+- **Site config** — WhatsApp number, social/Substack links, YouTube channel IDs & featured video/playlist
+  selections, and featured book/article selections are edited in Admin → Settings (`admin` role).
 - **Operators** — invited and role-managed in Admin → Settings by an `admin`; no public signup (§17.6).
 - **Editorial pages** (*Our Ideal*, *About*) — remain long-form MDX in `frontend/web/content/`,
   authored/reviewed via PR (deliberately code-versioned, not console-edited).
@@ -1905,6 +2162,9 @@ The architecture is designed so each of these is additive, not invasive:
 | Blog comments | Add a comments provider component to the article template; isolated, opt-in. |
 | Dark mode | Already a token override + `ThemeToggle`; flip on when ready. |
 | Full PWA / installable | Persistence + service worker (§12) already in place; add a manifest and install prompt. |
+| Video transcripts | Fetch captions via YouTube API (`captions.list`) or generate via Whisper; store as `transcript` on the `videos` row. Enables full-text search over video content via the existing `SearchProvider` interface; `VideoPage` can render a scrollable transcript below the player. |
+| Cross-lingual content bridging | Articles and videos are currently linked by shared category. A `related_pairs` join table (article_id ↔ video_id, curated or ML-matched) would enable precise cross-modal, cross-language pairings (e.g., a Bengali video linked to an English article on the same concept). |
+| Audio-only player mode | A `?audio=1` flag on video pages can serve a minimal audio-mode player for visitors who prefer listening — zero new infrastructure, just a `VideoPlayer` variant. |
 
 ---
 

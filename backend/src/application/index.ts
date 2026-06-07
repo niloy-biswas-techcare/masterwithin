@@ -37,3 +37,15 @@ export * from './contacts/submitContact';
 
 // Content helpers (Pure, backend-agnostic)
 export * from './content';
+
+// YouTube Media Library
+export * from './youtube/listVideos';
+export * from './youtube/getVideo';
+export * from './youtube/listPlaylists';
+export * from './youtube/getPlaylist';
+export * from './youtube/syncYoutube';
+export * from './youtube/featureVideo';
+export * from './youtube/hideVideo';
+export * from './youtube/overrideVideoCategory';
+export * from './youtube/featurePlaylist';
+export * from './youtube/hidePlaylist';

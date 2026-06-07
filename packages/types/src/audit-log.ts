@@ -6,6 +6,7 @@ export const AuditAction = z.enum([
   'update',
   'delete',
   'sync',
+  'youtube_sync',
   'role_grant',
   'role_revoke',
 ]);

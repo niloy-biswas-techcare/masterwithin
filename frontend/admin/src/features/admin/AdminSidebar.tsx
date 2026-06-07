@@ -11,9 +11,8 @@ import {
   Map,
   ShoppingBag,
   Settings,
-  LogOut,
+  Video,
 } from "lucide-react";
-import { logoutAction } from "@/app/actions/session.actions";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -22,6 +21,7 @@ const NAV = [
   { href: "/courses", label: "Courses", icon: GraduationCap },
   { href: "/freebies", label: "Freebies", icon: Gift },
   { href: "/articles", label: "Articles", icon: FileText },
+  { href: "/media", label: "Media", icon: Video },
   { href: "/start-here", label: "Start Here", icon: Map },
   { href: "/orders", label: "Orders", icon: ShoppingBag },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -69,18 +69,6 @@ export function AdminSidebar() {
         </ul>
       </nav>
 
-      <form
-        action={logoutAction}
-        className="p-4 border-t border-border"
-      >
-        <button
-          type="submit"
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-dark hover:bg-bg hover:text-danger transition-colors"
-        >
-          <LogOut size={16} aria-hidden="true" />
-          Sign Out
-        </button>
-      </form>
     </aside>
   );
 }

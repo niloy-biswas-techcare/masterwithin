@@ -19,7 +19,7 @@ export function SiteConfigForm({ config }: { config: SiteConfig | null }) {
       id: "main",
       whatsappNumber: "",
       socials: { youtube: "", instagram: "", substack: "" },
-      youtube: { channelId: "", featuredVideoIds: [] },
+      youtube: { channelId: "", featuredVideoIds: [], channels: { en: "", bn: "", hi: "" } },
       featured: { articleIds: [], bookIds: [] },
     },
   });
@@ -59,10 +59,26 @@ export function SiteConfigForm({ config }: { config: SiteConfig | null }) {
       </fieldset>
 
       <fieldset className="space-y-3 border border-border rounded-md p-4">
-        <legend className="text-sm font-medium text-text px-1">YouTube</legend>
+        <legend className="text-sm font-medium text-text px-1">YouTube Channels</legend>
+        <p className="text-xs text-muted -mt-1">
+          Enter the channel IDs (e.g. <span className="font-mono text-xs">UCxxxxxxxxxxxxxxxx</span>) used for syncing videos.
+          Find it at youtube.com/channel/&lt;ID&gt; or in YouTube Studio → Settings → Channel → Advanced.
+        </p>
+        <p className="text-xs text-muted">
+          Also ensure <span className="font-mono text-xs">YOUTUBE_API_KEY</span> is set in your{" "}
+          <span className="font-mono text-xs">.env.local</span> (Google Cloud Console → YouTube Data API v3).
+        </p>
         <div>
-          <label htmlFor="yt-channel" className="block text-xs text-muted mb-1">Channel ID</label>
-          <input id="yt-channel" {...register("youtube.channelId")} className="field" placeholder="UC…" />
+          <label htmlFor="yt-channel-en" className="block text-xs text-muted mb-1">English Channel ID</label>
+          <input id="yt-channel-en" {...register("youtube.channels.en")} className="field font-mono" placeholder="UCxxxxxxxxxxxxxxxx" />
+        </div>
+        <div>
+          <label htmlFor="yt-channel-bn" className="block text-xs text-muted mb-1">Bengali Channel ID</label>
+          <input id="yt-channel-bn" {...register("youtube.channels.bn")} className="field font-mono" placeholder="UCxxxxxxxxxxxxxxxx" />
+        </div>
+        <div>
+          <label htmlFor="yt-channel-hi" className="block text-xs text-muted mb-1">Hindi Channel ID</label>
+          <input id="yt-channel-hi" {...register("youtube.channels.hi")} className="field font-mono" placeholder="UCxxxxxxxxxxxxxxxx" />
         </div>
       </fieldset>
 

@@ -16,6 +16,11 @@ export const SiteConfigSchema = z.object({
   youtube: z.object({
     channelId: z.string().optional(),
     featuredVideoIds: z.array(z.string()).default([]),
+    channels: z.object({
+      en: z.string().optional(),
+      bn: z.string().optional(),
+      hi: z.string().optional(),
+    }).optional(),
   }),
   featured: z.object({
     articleIds: z.array(z.string()).default([]),

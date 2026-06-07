@@ -11,6 +11,7 @@ import { ShareButtons } from '@/components/shared/ShareButtons';
 import { FloatingShareButtons } from '@/components/shared/FloatingShareButtons';
 import { generateSiteMetadata, getArticleJsonLd, getBreadcrumbsJsonLd } from '@/lib/seo';
 import { RelatedArticlesClient } from './RelatedArticlesClient';
+import { RelatedVideosClient } from '@/features/media/RelatedVideosClient';
 import { ChevronRight, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import type { Article } from '@mw/types';
 
@@ -219,6 +220,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <RelatedArticlesClient articles={relatedArticles} />
             </div>
           )}
+
+          {/* Related Videos cross-link (6d.8) */}
+          <div className="border-t border-border/40 pt-16 mt-16">
+            <div className="flex items-end justify-between gap-4 mb-8">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-text">
+                Hear It Spoken
+              </h2>
+              <Link
+                href={`/media?category=${categorySlug}`}
+                className="text-sm font-semibold text-primary hover:underline shrink-0"
+              >
+                More talks →
+              </Link>
+            </div>
+            <RelatedVideosClient category={categorySlug} />
+          </div>
         </div>
       </article>
     </>

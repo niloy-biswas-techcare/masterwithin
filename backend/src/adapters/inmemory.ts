@@ -28,6 +28,12 @@ import type {
   StorageGateway,
   SignedImageUpload,
   SignedFileUpload,
+  Video,
+  VideoRepository,
+  VideoListFilter,
+  Playlist,
+  PlaylistRepository,
+  PlaylistListFilter,
   Ports,
 } from '../domain';
 
@@ -415,6 +421,147 @@ export class InMemoryStorageGateway implements StorageGateway {
   }
 }
 
+export class InMemoryVideoRepository implements VideoRepository {
+  private videos: Video[] = [];
+
+  async list(filter?: VideoListFilter): Promise<Video[]> {
+    let result = [...this.videos];
+
+    if (filter) {
+      if (filter.language) result = result.filter((v) => v.language === filter.language);
+      if (filter.category) result = result.filter((v) => v.category === filter.category);
+      if (filter.isShort !== undefined) result = result.filter((v) => v.isShort === filter.isShort);
+      else result = result.filter((v) => !v.isShort);
+      if (filter.featured !== undefined) result = result.filter((v) => v.featured === filter.featured);
+      if (filter.hidden !== undefined) result = result.filter((v) => v.hidden === filter.hidden);
+      else result = result.filter((v) => !v.hidden);
+    } else {
+      // Default: exclude Shorts and hidden
+      result = result.filter((v) => !v.isShort && !v.hidden);
+    }
+
+    result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    if (filter && filter.page && filter.pageSize) {
+      const start = (filter.page - 1) * filter.pageSize;
+      result = result.slice(start, start + filter.pageSize);
+    }
+
+    return result.map(clone);
+  }
+
+  async count(filter?: VideoListFilter): Promise<number> {
+    const list = await this.list(filter);
+    return list.length;
+  }
+
+  async getById(id: string): Promise<Video | null> {
+    const v = this.videos.find((v) => v.id === id);
+    return v ? clone(v) : null;
+  }
+
+  async upsert(video: Video): Promise<Video> {
+    const cloned = clone(video);
+    const idx = this.videos.findIndex((v) => v.id === video.id);
+    if (idx >= 0) {
+      this.videos[idx] = cloned;
+    } else {
+      this.videos.push(cloned);
+    }
+    return clone(cloned);
+  }
+
+  async setFeatured(id: string, featured: boolean): Promise<Video> {
+    const v = this.videos.find((v) => v.id === id);
+    if (!v) throw new Error(`Video not found: ${id}`);
+    v.featured = featured;
+    return clone(v);
+  }
+
+  async setHidden(id: string, hidden: boolean): Promise<Video> {
+    const v = this.videos.find((v) => v.id === id);
+    if (!v) throw new Error(`Video not found: ${id}`);
+    v.hidden = hidden;
+    return clone(v);
+  }
+
+  async overrideCategory(id: string, category: string): Promise<Video> {
+    const v = this.videos.find((v) => v.id === id);
+    if (!v) throw new Error(`Video not found: ${id}`);
+    v.category = category;
+    v.categoryLocked = true;
+    return clone(v);
+  }
+}
+
+export class InMemoryPlaylistRepository implements PlaylistRepository {
+  private playlists: Playlist[] = [];
+
+  async list(filter?: PlaylistListFilter): Promise<Playlist[]> {
+    let result = [...this.playlists];
+
+    if (filter) {
+      if (filter.language) result = result.filter((p) => p.language === filter.language);
+      if (filter.featured !== undefined) result = result.filter((p) => p.featured === filter.featured);
+      if (filter.hidden !== undefined) result = result.filter((p) => p.hidden === filter.hidden);
+      else result = result.filter((p) => !p.hidden);
+    } else {
+      result = result.filter((p) => !p.hidden);
+    }
+
+    result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    if (filter && filter.page && filter.pageSize) {
+      const start = (filter.page - 1) * filter.pageSize;
+      result = result.slice(start, start + filter.pageSize);
+    }
+
+    return result.map(clone);
+  }
+
+  async count(filter?: PlaylistListFilter): Promise<number> {
+    const list = await this.list(filter);
+    return list.length;
+  }
+
+  async getById(id: string): Promise<Playlist | null> {
+    const p = this.playlists.find((p) => p.id === id);
+    return p ? clone(p) : null;
+  }
+
+  async upsert(playlist: Playlist): Promise<Playlist> {
+    const cloned = clone(playlist);
+    const idx = this.playlists.findIndex((p) => p.id === playlist.id);
+    if (idx >= 0) {
+      this.playlists[idx] = cloned;
+    } else {
+      this.playlists.push(cloned);
+    }
+    return clone(cloned);
+  }
+
+  async setFeatured(id: string, featured: boolean): Promise<Playlist> {
+    const p = this.playlists.find((p) => p.id === id);
+    if (!p) throw new Error(`Playlist not found: ${id}`);
+    p.featured = featured;
+    return clone(p);
+  }
+
+  async setHidden(id: string, hidden: boolean): Promise<Playlist> {
+    const p = this.playlists.find((p) => p.id === id);
+    if (!p) throw new Error(`Playlist not found: ${id}`);
+    p.hidden = hidden;
+    return clone(p);
+  }
+
+  async updateDescription(id: string, description: string): Promise<Playlist> {
+    const p = this.playlists.find((p) => p.id === id);
+    if (!p) throw new Error(`Playlist not found: ${id}`);
+    p.description = description;
+    return clone(p);
+  }
+}
+
 export function createInMemoryPorts(initialOperators: Operator[] = []): Ports {
   return {
     articles: new InMemoryArticleRepository(),
@@ -429,5 +576,7 @@ export function createInMemoryPorts(initialOperators: Operator[] = []): Ports {
     auditLogs: new InMemoryAuditLogRepository(),
     auth: new InMemoryAuthGateway(initialOperators),
     storage: new InMemoryStorageGateway(),
+    videos: new InMemoryVideoRepository(),
+    playlists: new InMemoryPlaylistRepository(),
   };
 }

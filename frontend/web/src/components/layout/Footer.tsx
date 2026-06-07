@@ -58,6 +58,7 @@ export function Footer() {
             <h3 className="font-display text-sm font-semibold tracking-wider text-text uppercase">Navigation</h3>
             <ul className="flex flex-col gap-2.5 text-sm">
               <li><Link href="/wisdom" className="hover:text-primary transition-colors">Wisdom Library</Link></li>
+              <li><Link href="/media" className="hover:text-primary transition-colors">Media Library</Link></li>
               <li><Link href="/courses" className="hover:text-primary transition-colors">Courses</Link></li>
               <li><Link href="/store" className="hover:text-primary transition-colors">Bookstore</Link></li>
               <li><Link href="/start-here" className="text-primary font-medium hover:underline">Guided Entry</Link></li>

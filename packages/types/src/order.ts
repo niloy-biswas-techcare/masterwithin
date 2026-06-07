@@ -28,9 +28,23 @@ export const OrderSchema = z.object({
   total: z.number().int().nonnegative(), // INR
   channel: z.enum(['whatsapp']).default('whatsapp'),
   createdAt: z.string().optional(), // ISO
+  // Lifecycle tracking — set server-side by admin, optional so new orders can omit them
+  orderStatus:    z.enum(['pending', 'accepted', 'rejected']).optional(),
+  paymentStatus:  z.enum(['unpaid', 'paid']).optional(),
+  shippingStatus: z.enum(['not_sent', 'sent', 'received']).optional(),
 });
 
 export type Order = z.infer<typeof OrderSchema>;
+
+export type OrderStatus    = NonNullable<Order['orderStatus']>;
+export type PaymentStatus  = NonNullable<Order['paymentStatus']>;
+export type ShippingStatus = NonNullable<Order['shippingStatus']>;
+
+export interface OrderLifecycleUpdate {
+  orderStatus?:   OrderStatus;
+  paymentStatus?: PaymentStatus;
+  shippingStatus?: ShippingStatus;
+}
 
 /** Result of submitting an order through an `OrderProvider` (§10.1). */
 export interface OrderResult {

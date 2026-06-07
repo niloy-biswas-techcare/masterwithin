@@ -1,4 +1,4 @@
-import type { Order, OrderRepository, OrderListFilter } from '../../domain';
+import type { Order, OrderRepository, OrderListFilter, OrderLifecycleUpdate } from '../../domain';
 import { supabaseAdmin } from './client';
 
 function toDomain(row: any): Order {
@@ -8,6 +8,9 @@ function toDomain(row: any): Order {
     customer: row.customer,
     total: row.total,
     channel: row.channel,
+    orderStatus:    row.order_status    ?? 'pending',
+    paymentStatus:  row.payment_status  ?? 'unpaid',
+    shippingStatus: row.shipping_status ?? 'not_sent',
   };
   if (row.created_at) {
     ord.createdAt = new Date(row.created_at).toISOString().replace('.000Z', 'Z');
@@ -22,8 +25,11 @@ function toRow(domain: Order): any {
     total: domain.total,
     channel: domain.channel,
   };
-  if (domain.id) row.id = domain.id;
-  if (domain.createdAt) row.created_at = domain.createdAt;
+  if (domain.id)             row.id              = domain.id;
+  if (domain.createdAt)      row.created_at      = domain.createdAt;
+  if (domain.orderStatus)    row.order_status    = domain.orderStatus;
+  if (domain.paymentStatus)  row.payment_status  = domain.paymentStatus;
+  if (domain.shippingStatus) row.shipping_status = domain.shippingStatus;
   return row;
 }
 
@@ -66,5 +72,31 @@ export class SupabaseOrderRepository implements OrderRepository {
 
     if (error) throw error;
     return count || 0;
+  }
+
+  async updateStatus(id: string, update: OrderLifecycleUpdate): Promise<Order> {
+    const patch: Record<string, string> = {};
+    if (update.orderStatus)    patch.order_status    = update.orderStatus;
+    if (update.paymentStatus)  patch.payment_status  = update.paymentStatus;
+    if (update.shippingStatus) patch.shipping_status = update.shippingStatus;
+
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .update(patch)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return toDomain(data);
+  }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from('orders')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   }
 }

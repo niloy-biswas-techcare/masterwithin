@@ -13,6 +13,7 @@ import type {
   Order,
   OrderRepository,
   OrderListFilter,
+  OrderLifecycleUpdate,
   Contact,
   ContactRepository,
   SiteConfig,
@@ -283,6 +284,17 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   async count(): Promise<number> {
     return this.orders.length;
+  }
+
+  async updateStatus(id: string, update: OrderLifecycleUpdate): Promise<Order> {
+    const idx = this.orders.findIndex((o) => o.id === id);
+    if (idx < 0) throw new Error(`Order ${id} not found`);
+    this.orders[idx] = { ...this.orders[idx], ...update };
+    return clone(this.orders[idx]);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.orders = this.orders.filter((o) => o.id !== id);
   }
 }
 

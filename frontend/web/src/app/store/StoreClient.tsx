@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { BookCard, EmptyState, Eyebrow, Container } from '@mw/ui';
 import { useCartStore } from '@/store/cartStore';
 import { Book, Ebook, Freebie } from '@mw/types';
@@ -280,6 +280,8 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
   const [booksPage, setBooksPage]           = useState(1);
   const [ebooksPage, setEbooksPage]         = useState(1);
   const [freebiesPage, setFreebiesPage]     = useState(1);
+  const [toastBook, setToastBook]           = useState<{ title: string; key: number } | null>(null);
+  const toastKeyRef                         = useRef(0);
 
   // Debounce search + reset pagination
   useEffect(() => {
@@ -299,8 +301,17 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
     setFreebiesPage(1);
   }, []);
 
+  // Auto-dismiss toast after 3 s
+  useEffect(() => {
+    if (!toastBook) return;
+    const t = setTimeout(() => setToastBook(null), 3000);
+    return () => clearTimeout(t);
+  }, [toastBook]);
+
   const handleAddToCart = useCallback((book: Book) => {
     addItem({ id: book.id, title: book.title, price: book.price, coverImage: book.coverImage });
+    toastKeyRef.current += 1;
+    setToastBook({ title: book.title, key: toastKeyRef.current });
   }, [addItem]);
 
   // Fuse instances
@@ -635,6 +646,44 @@ export function StoreClient({ books, ebooks, freebies }: StoreClientProps) {
           </motion.div>
         )}
       </Container>
+
+      {/* ── Cart added toast ─────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {toastBook && (
+          <motion.div
+            key={toastBook.key}
+            initial={{ opacity: 0, y: 32, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0,  scale: 1    }}
+            exit={{    opacity: 0, y: 32, scale: 0.94 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+            className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-3 rounded-2xl border border-primary/20 bg-surface shadow-2xl shadow-primary/10 px-5 py-4 max-w-[320px] w-max"
+            role="status"
+            aria-live="polite"
+          >
+            {/* Progress underline */}
+            <motion.span
+              className="absolute bottom-0 left-0 h-[3px] rounded-b-2xl bg-primary"
+              initial={{ width: '100%' }}
+              animate={{ width: '0%' }}
+              transition={{ duration: 3, ease: 'linear' }}
+            />
+            <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+              <ShoppingBag className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-primary uppercase tracking-wide mb-0.5">Added to cart</p>
+              <p className="text-sm font-medium text-text line-clamp-1">{toastBook.title}</p>
+            </div>
+            <button
+              onClick={() => setToastBook(null)}
+              className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-text/35 hover:text-text hover:bg-muted/50 transition-colors"
+              aria-label="Dismiss notification"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

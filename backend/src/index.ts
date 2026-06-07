@@ -34,6 +34,9 @@ import {
   makeListCourses,
   makeUpsertCourse,
   makePlaceOrder,
+  makeListOrders,
+  makeUpdateOrderStatus,
+  makeDeleteOrder,
   makeGetSiteConfig,
   makeUpdateSiteConfig,
   makeGetStartHere,
@@ -111,7 +114,10 @@ export const deleteFreebie = makeDeleteFreebie(ports.freebies, ports.auditLogs);
 export const listCourses = makeListCourses(ports.courses);
 export const upsertCourse = makeUpsertCourse(ports.courses, ports.auditLogs);
 
-export const placeOrder = makePlaceOrder(ports.books, ports.orders);
+export const placeOrder         = makePlaceOrder(ports.books, ports.orders);
+export const listOrders         = makeListOrders(ports.orders);
+export const updateOrderStatus  = makeUpdateOrderStatus(ports.orders);
+export const deleteOrder        = makeDeleteOrder(ports.orders);
 
 export const getSiteConfig = makeGetSiteConfig(ports.siteConfig);
 export const updateSiteConfig = makeUpdateSiteConfig(ports.siteConfig, ports.auditLogs);
@@ -142,6 +148,7 @@ export const hidePlaylist = makeHidePlaylist(ports.playlists, ports.auditLogs);
 // Re-export domain models & errors for frontend type safety
 export * from './domain';
 export * from './application/errors';
+export type { OrderLifecycleUpdate, OrderStatus, PaymentStatus, ShippingStatus } from '@mw/types';
 export type { SyncResult } from './application/articles/syncSubstack';
 export type { SyncYoutubeResult } from './application/youtube/syncYoutube';
 export type { RequireOperator } from './application/auth/requireOperator';

@@ -28,6 +28,9 @@ export * from './store/deleteFreebie';
 export * from './store/listCourses';
 export * from './store/upsertCourse';
 export * from './store/placeOrder';
+export * from './store/listOrders';
+export * from './store/updateOrderStatus';
+export * from './store/deleteOrder';
 
 // Config
 export * from './config/getSiteConfig';

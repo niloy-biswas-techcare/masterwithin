@@ -11,4 +11,6 @@ export interface EbookRepository {
   getById(id: string): Promise<Ebook | null>;
   /** Create or update an eBook by id. */
   upsert(ebook: Ebook): Promise<Ebook>;
+  /** Delete an eBook by its stable id. */
+  delete(id: string): Promise<void>;
 }

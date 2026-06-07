@@ -11,4 +11,6 @@ export interface FreebieRepository {
   getById(id: string): Promise<Freebie | null>;
   /** Create or update a freebie by id. */
   upsert(freebie: Freebie): Promise<Freebie>;
+  /** Delete a freebie by its stable id. */
+  delete(id: string): Promise<void>;
 }

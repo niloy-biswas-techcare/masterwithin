@@ -27,8 +27,10 @@ import {
   makeDeleteBook,
   makeListEbooks,
   makeUpsertEbook,
+  makeDeleteEbook,
   makeListFreebies,
   makeUpsertFreebie,
+  makeDeleteFreebie,
   makeListCourses,
   makeUpsertCourse,
   makePlaceOrder,
@@ -97,9 +99,11 @@ export const deleteBook = makeDeleteBook(ports.books, ports.auditLogs);
 
 export const listEbooks = makeListEbooks(ports.ebooks);
 export const upsertEbook = makeUpsertEbook(ports.ebooks, ports.auditLogs);
+export const deleteEbook = makeDeleteEbook(ports.ebooks, ports.auditLogs);
 
 export const listFreebies = makeListFreebies(ports.freebies);
 export const upsertFreebie = makeUpsertFreebie(ports.freebies, ports.auditLogs);
+export const deleteFreebie = makeDeleteFreebie(ports.freebies, ports.auditLogs);
 
 export const listCourses = makeListCourses(ports.courses);
 export const upsertCourse = makeUpsertCourse(ports.courses, ports.auditLogs);

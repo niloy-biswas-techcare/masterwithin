@@ -61,4 +61,13 @@ export class SupabaseFreebieRepository implements FreebieRepository {
     if (error) throw error;
     return toDomain(data);
   }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from('freebies')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
 }

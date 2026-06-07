@@ -184,6 +184,10 @@ export class InMemoryEbookRepository implements EbookRepository {
     }
     return clone(cloned);
   }
+
+  async delete(id: string): Promise<void> {
+    this.ebooks = this.ebooks.filter((e) => e.id !== id);
+  }
 }
 
 export class InMemoryCourseRepository implements CourseRepository {
@@ -236,6 +240,10 @@ export class InMemoryFreebieRepository implements FreebieRepository {
       this.freebies.push(cloned);
     }
     return clone(cloned);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.freebies = this.freebies.filter((f) => f.id !== id);
   }
 }
 

@@ -5,6 +5,7 @@ import {
   makeGetArticle,
   makeFeatureArticle,
   makeOverrideCategory,
+  makeDeleteArticle,
   makeSyncSubstack,
   makeImportBySubstackUrl,
   makeListBooks,
@@ -25,27 +26,26 @@ import { ValidationError } from './errors';
 describe('Application Use-Cases Unit Tests', () => {
   let ports: Ports;
   const adminActor = { uid: 'op-1', email: 'admin@test.com' };
+  const sampleArticle: Article = {
+    id: 'art-1',
+    title: 'Sample Post',
+    slug: 'sample-post',
+    category: 'optimal-living',
+    tags: ['habits'],
+    excerpt: 'Post blurb',
+    bodyHtml: '<p>Body text</p>',
+    publishedAt: '2026-06-01T00:00:00Z',
+    readingTime: 2,
+    substackUrl: 'https://substack.com/p/sample',
+    featured: false,
+    categoryLocked: false,
+  };
 
   beforeEach(() => {
     ports = createInMemoryPorts();
   });
 
   describe('Articles Curation Use-Cases', () => {
-    const sampleArticle: Article = {
-      id: 'art-1',
-      title: 'Sample Post',
-      slug: 'sample-post',
-      category: 'optimal-living',
-      tags: ['habits'],
-      excerpt: 'Post blurb',
-      bodyHtml: '<p>Body text</p>',
-      publishedAt: '2026-06-01T00:00:00Z',
-      readingTime: 2,
-      substackUrl: 'https://substack.com/p/sample',
-      featured: false,
-      categoryLocked: false,
-    };
-
     beforeEach(async () => {
       await ports.articles.upsert(sampleArticle);
     });
@@ -100,7 +100,7 @@ describe('Application Use-Cases Unit Tests', () => {
             <category>optimal-living</category>
             <category>Routine</category>
             <description>A simple guide to morning habits.</description>
-            <content:encoded><![CDATA[<p>Morning is key. Here is a picture: <img src="https://substack.com/img1.png" /></p>]]></content:encoded>
+            <content:encoded><![CDATA[<p class="body-markup">Morning is key. Here is a picture: <img src="https://substack.com/img1.png" /></p>]]></content:encoded>
           </item>
         </channel>
       </rss>
@@ -131,6 +131,9 @@ describe('Application Use-Cases Unit Tests', () => {
       expect(article.bodyHtml).toContain('https://res.cloudinary.com/mock-cloud/image/upload/articles/img1.png');
       expect(article.bodyHtml).not.toContain('https://substack.com/img1.png');
 
+      // CSS class preserved through sanitizer (§8b)
+      expect(article.bodyHtml).toContain('class="body-markup"');
+
       // Verify audit trail
       const logs = await ports.auditLogs.list();
       expect(logs).toHaveLength(1);
@@ -156,6 +159,88 @@ describe('Application Use-Cases Unit Tests', () => {
 
       const listAfter = await ports.articles.list();
       expect(listAfter[0].category).toBe('source-code');
+    });
+  });
+
+  describe('deleteArticle Use-Case', () => {
+    it('should delete an existing article and audit it', async () => {
+      const deleteArticle = makeDeleteArticle(ports.articles, ports.auditLogs);
+      const listArticles = makeListArticles(ports.articles);
+
+      // Seed an article
+      await ports.articles.upsert(sampleArticle);
+      expect(await listArticles()).toHaveLength(1);
+
+      // Delete it
+      await deleteArticle(adminActor, sampleArticle.id);
+
+      // Verify it's gone
+      expect(await listArticles()).toHaveLength(0);
+
+      // Verify audit log
+      const logs = await ports.auditLogs.list();
+      expect(logs).toHaveLength(1);
+      expect(logs[0].action).toBe('delete');
+      expect(logs[0].entityId).toBe(sampleArticle.id);
+    });
+
+    it('should throw if article not found', async () => {
+      const deleteArticle = makeDeleteArticle(ports.articles, ports.auditLogs);
+      await expect(deleteArticle(adminActor, 'nonexistent-id')).rejects.toThrow('Article not found');
+    });
+  });
+
+  describe('syncSubstack mirror-delete', () => {
+    it('should delete articles not present in the RSS feed', async () => {
+      const syncSubstack = makeSyncSubstack(ports, ports.auditLogs);
+      const listArticles = makeListArticles(ports.articles);
+
+      // Seed 2 articles directly
+      const article1: Article = {
+        ...sampleArticle,
+        id: 'feed-article-1',
+        slug: 'feed-article-1',
+        title: 'Feed Article',
+        substackUrl: 'https://souvik.substack.com/p/feed-article-1',
+      };
+      const article2: Article = {
+        ...sampleArticle,
+        id: 'orphan-article-2',
+        slug: 'orphan-article-2',
+        title: 'Orphan Article',
+        substackUrl: 'https://souvik.substack.com/p/orphan-article-2',
+      };
+      await ports.articles.upsert(article1);
+      await ports.articles.upsert(article2);
+      expect(await listArticles()).toHaveLength(2);
+
+      // Mock RSS with only article1 (article2 is "deleted" from Substack)
+      const mockRssWithOneItem = `
+        <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+          <channel>
+            <item>
+              <title>Feed Article</title>
+              <link>https://souvik.substack.com/p/feed-article-1</link>
+              <guid>https://souvik.substack.com/p/feed-article-1</guid>
+              <pubDate>Fri, 05 Jun 2026 12:00:00 GMT</pubDate>
+              <description>Desc</description>
+              <content:encoded><![CDATA[<p>Content</p>]]></content:encoded>
+            </item>
+          </channel>
+        </rss>
+      `;
+      const mockFetcher = async () => mockRssWithOneItem;
+
+      const result = await syncSubstack(adminActor, 'https://mock.url/feed', mockFetcher);
+
+      // article1 was updated (skipped — same content), article2 was mirror-deleted
+      expect(result.deletedCount).toBe(1);
+      expect(result.fetched).toBe(1);
+
+      // Only article1 should remain
+      const remaining = await listArticles();
+      expect(remaining).toHaveLength(1);
+      expect(remaining[0].id).toBe('feed-article-1');
     });
   });
 

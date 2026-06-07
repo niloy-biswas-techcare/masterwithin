@@ -12,6 +12,7 @@ export interface SyncResult {
   newCount: number;
   updatedCount: number;
   skippedCount: number;
+  deletedCount: number;
   errors: string[];
 }
 
@@ -105,6 +106,7 @@ export function makeSyncSubstack(
       newCount: 0,
       updatedCount: 0,
       skippedCount: 0,
+      deletedCount: 0,
       errors: [],
     };
 
@@ -115,10 +117,12 @@ export function makeSyncSubstack(
       result.fetched = feedItems.length;
 
       const affectedCategories = new Set<string>();
+      const feedIds = new Set<string>();
 
       for (const item of feedItems) {
         try {
           const draft = normalizeFeedItem(item);
+          feedIds.add(draft.id);
           const existing = await ports.articles.getById(draft.id);
 
           // Resolve category
@@ -201,8 +205,30 @@ export function makeSyncSubstack(
         }
       }
 
+      // Mirror-delete: remove articles in DB that are no longer in the Substack RSS feed.
+      // This makes our article set identical to Substack (§8b).
+      const allExisting = await ports.articles.list();
+      for (const existing of allExisting) {
+        if (!feedIds.has(existing.id)) {
+          await ports.articles.delete(existing.id);
+          result.deletedCount++;
+          affectedCategories.add(existing.category);
+
+          await writeAuditLogHelper(auditLogs, {
+            actorUid: systemActor.uid,
+            actorEmail: systemActor.email,
+            action: 'delete',
+            entity: 'article',
+            entityId: existing.id,
+            diff: { title: { from: existing.title, to: null } },
+          });
+
+          console.log(`[backend] Mirror-deleted article "${existing.title}" (${existing.id}) — no longer in RSS feed`);
+        }
+      }
+
       // Revalidate affected categories if changes occurred
-      if (result.newCount > 0 || result.updatedCount > 0) {
+      if (result.newCount > 0 || result.updatedCount > 0 || result.deletedCount > 0) {
         await revalidatePath('/');
         await revalidatePath('/wisdom');
         for (const cat of affectedCategories) {

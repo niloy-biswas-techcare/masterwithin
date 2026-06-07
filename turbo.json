@@ -1,5 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "BACKEND_DRIVER",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_UPLOAD_PRESET",
+    "NEXT_PUBLIC_SITE_URL",
+    "SUBSTACK_FEED_URL",
+    "WHATSAPP_NUMBER",
+    "RESEND_API_KEY",
+    "REVALIDATE_SECRET",
+    "CRON_SECRET",
+    "ADMIN_SESSION_COOKIE_NAME",
+    "ADMIN_SESSION_MAX_AGE_DAYS",
+    "ADMIN_ALLOWLIST",
+    "ADMIN_BOOTSTRAP_EMAIL"
+  ],
   "tasks": {
     "dev": {
       "cache": false,

@@ -1,11 +1,5 @@
 {
   "buildCommand": "cd ../.. && pnpm turbo run build --filter web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
-  "crons": [
-    {
-      "path": "/api/cron/sync-substack",
-      "schedule": "0 * * * *"
-    }
-  ]
+  "outputDirectory": ".next"
 }

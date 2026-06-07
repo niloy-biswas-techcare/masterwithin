@@ -34,6 +34,7 @@ import {
   makeGetStartHere,
   makeUpdateStartHere,
   makeSubmitContact,
+  makeDeleteArticle,
   makeRequireOperator,
   makeWriteAuditLog,
 } from './application';
@@ -71,6 +72,7 @@ export const listArticles = makeListArticles(ports.articles);
 export const getArticle = makeGetArticle(ports.articles);
 export const featureArticle = makeFeatureArticle(ports.articles, ports.auditLogs);
 export const overrideCategory = makeOverrideCategory(ports.articles, ports.auditLogs);
+export const deleteArticle = makeDeleteArticle(ports.articles, ports.auditLogs);
 export const syncSubstack = makeSyncSubstack(ports, ports.auditLogs);
 export const importBySubstackUrl = makeImportBySubstackUrl(ports, ports.auditLogs);
 

@@ -122,6 +122,10 @@ export class InMemoryArticleRepository implements ArticleRepository {
     art.categoryLocked = true;
     return clone(art);
   }
+
+  async delete(id: string): Promise<void> {
+    this.articles = this.articles.filter((a) => a.id !== id);
+  }
 }
 
 export class InMemoryBookRepository implements BookRepository {

@@ -525,11 +525,23 @@ specs in §11.
 
 #### Prose (article body)
 
-- **Drop cap:** `::first-letter` selector on the first `<p>` in `.prose`. Lora bold, font-size 4.5em, float left, line-height 0.8, padding-right 0.12em.
-- **Pull quotes:** `<blockquote>` gets left border 3px `--color-primary`, Lora 400 italic, 1.4× body size, padded, max-width `prose`.
-- **Inline images:** centered, max 100% width, `rounded-lg`, with optional caption in `caption` role below.
-- **Link styling:** `text-primary`, no underline by default, underline on hover with `text-decoration-color: --color-primary/40`.
-- **Inter-paragraph spacing:** `1.75em` (generous — contemplative pace).
+The `Prose` component has two rendering modes:
+
+**A. `substackNative` mode (default for Substack-sourced articles):**
+
+- Article body preserves **Substack's original fonts, typography, sizes, spacing, and formatting** exactly as authored. Our design system does not override any visual styling within the article body.
+- Layout-only concerns are applied: `max-w-[720px]` reading measure, `mx-auto` centering, responsive padding from the shared Container system.
+- A dark-mode colour reset (`text-text` on the container) ensures readability when the site is in dark mode, since Substack's inline styles may use dark text that would be invisible on a dark background.
+- Drop caps, pull-quote borders, custom heading sizes, and link overrides from the editorial mode are **not applied**.
+- Substack's own `class` attributes and inline `style` attributes on elements are preserved through the sanitizer (§8b).
+
+**B. Editorial mode (for MDX pages like *Our Ideal* and *About*):**
+
+- Drop cap: `::first-letter` selector on the first `<p>` in `.prose`. Lora bold, font-size 4.5em, float left, line-height 0.8, padding-right 0.12em.
+- Pull quotes: `<blockquote>` gets left border 3px `--color-primary`, Lora 400 italic, 1.4× body size, padded, max-width `prose`.
+- Inline images: centered, max 100% width, `rounded-lg`, with optional caption in `caption` role below.
+- Link styling: `text-primary`, no underline by default, underline on hover with `text-decoration-color: --color-primary/40`.
+- Inter-paragraph spacing: `1.75em` (generous — contemplative pace).
 
 #### Navbar
 
@@ -585,8 +597,9 @@ Start Here). Any design that obscures these three signals should be changed.
 #### Article page
 
 - **Reading column:** `max-w-prose` (720px), centered with `mx-auto`.
+- **Article body uses Substack-native styling** (§8b). The `Prose` component renders Substack HTML in `substackNative` mode — only layout (max-width, centering, responsive padding, dark-mode colour reset) is applied; all typography, fonts, spacing, and formatting come from Substack's original HTML. Our design system does not override the article body's visual appearance.
 - **Spacing and Margins:** The side spacing (gutters) and layout margins for both the header banner and the main reading body must strictly match the Home page standard (`px-5 sm:px-8 lg:px-10`). No custom page-specific gutters (such as hardcoded `px-6`) are allowed, to ensure consistency all over the app.
-- **Above the fold:** Title (Lora 2rem+), byline with author + date + reading time (small caps DM Sans), cover image full-width of the reading column.
+- **Above the fold:** Title (Lora 2rem+), byline with author + date + reading time (small caps DM Sans), cover image full-width of the reading column. *These header/banner elements use our design system; the article body below them uses Substack-native styling.*
 - **Floating share buttons** on desktop: fixed left side at `top-50%`, vertical stack of 3 (Twitter/X, WhatsApp, copy-link). Fade in after 500px scroll.
 - **Related articles:** 3-card grid below the article body, inside `max-w-content` (following the standardized same-height ArticleCard grid format). "You might also enjoy" heading.
 
@@ -708,7 +721,7 @@ Intent: orient a first-time visitor and offer two clear next steps without selli
 ### 7.3 Article — `/wisdom/[category]/[slug]`
 - Title, publish date, reading time, category badge, clickable tags.
 - Reading-progress indicator.
-- Sanitized Substack HTML rendered into the editorial prose style (see §8). In-body images are rewritten to Cloudinary URLs on ingest for optimized delivery.
+- Sanitized Substack HTML rendered with **Substack-native styling preserved** (see §8b). The article body retains the original Substack fonts, typography, spacing, and visual formatting exactly as authored on Substack — our design system wraps the article (layout container, header, nav, footer, share buttons) but does not override the article body's own styling. In-body images are rewritten to Cloudinary URLs on ingest for optimized delivery.
 - Related articles (same category + shared tags) — prefetched on viewport.
 - Share buttons: X/Twitter, WhatsApp, copy link.
 - "Read on Substack" attribution link.
@@ -766,7 +779,7 @@ revalidates in the background.
 Substack publishes
    → Scheduled job (Supabase Edge Function cron, hourly — or Vercel Cron → /api/cron/sync-substack)
       → Fetch + parse RSS (server)
-         → Normalize + validate (Zod) + auto-categorize + sanitize HTML
+         → Normalize + validate (Zod) + auto-categorize + sanitize HTML (preserve Substack styles, §8b)
             → Rewrite in-body/cover images to Cloudinary (fetch/upload) for optimized delivery
                → Upsert into backend `articles` (idempotent by stable post id)
                   → Trigger on-demand ISR revalidation for new/changed paths
@@ -781,7 +794,7 @@ The browser **never** fetches or parses RSS. All ingestion is server-side and id
 - **It is fully dynamic.** New Substack posts surface automatically within the sync interval (hourly by
   default; can be tightened, or triggered manually via Admin → "Sync now"). No code change, no redeploy.
 - **Idempotent upsert** by stable Substack post id → safe to run repeatedly, no duplicates.
-- **Sanitization on ingest** (not on render) → store clean, safe HTML once; render is cheap and safe.
+- **Sanitization on ingest** (not on render) → store clean, safe HTML once; render is cheap and safe. The sanitizer preserves Substack's visual styling (CSS classes, inline styles) while stripping security-sensitive attributes (scripts, event handlers, dangerous URLs) — see §8b.
 - **On-demand revalidation** → new articles appear within minutes while pages stay statically cached
   (best SEO + speed). The client's cache-first layer then refreshes lists in the background so a reader
   who is already on the site sees new posts on their next visit/focus without a hard reload.
@@ -824,6 +837,69 @@ On ingest, if `categoryLocked` is false, match keywords from `categories.ts` aga
 assign a category; default to a sensible fallback when ambiguous. An editor can override the category
 in the Admin Console, which sets `categoryLocked = true` so future syncs never clobber the manual
 choice.
+
+### 8b. Substack-Native Article Styling
+
+Articles are authored and published on Substack first; the site mirrors them. Because the content
+originates from Substack's editor, the article body should **preserve Substack's original fonts,
+typography, spacing, and visual formatting exactly as the author intended** — not be restyled into our
+design system's typography.
+
+#### Principle
+
+The article body is the author's voice in visual form. Substack's editor produces styled HTML with
+specific fonts, sizes, spacing, and formatting. Overriding these with our own `Prose` component
+typography (Lora headings, DM Sans body, custom sizes, drop caps, pull-quote borders) alters the
+author's intended reading experience. The correct approach is:
+
+- **Our design system owns the wrapper** — page layout, header banner, breadcrumbs, navigation,
+  reading progress, tags, share buttons, related articles, footer — all use our design tokens
+  and component library.
+- **Substack owns the article body** — the rendered HTML inside the reading column preserves the
+  original Substack fonts, sizes, line-heights, spacing, colours, and inline styles exactly as
+  they appear on the Substack publication.
+
+#### What this means concretely
+
+1. **Sanitizer (`backend/application/content/sanitize.ts`) preserves Substack styles.** The HTML
+   allowlist is extended to pass through Substack-specific CSS classes, `class` attributes on
+   elements, and inline `style` attributes that contribute to the article's visual appearance.
+   Security-sensitive attributes (scripts, event handlers, dangerous URLs) are still stripped;
+   visual styling attributes are kept.
+
+2. **`Prose` component has a `substackNative` mode.** When rendering Substack-sourced article bodies,
+   the Prose component applies only layout concerns (max-width container, horizontal centering,
+   responsive padding) and does **not** apply any typography overrides — no `font-body`/
+   `font-display` classes, no custom `text-[1.0625rem]`, no forced heading sizes, no drop-cap
+   rules, no pull-quote borders, no link colour overrides. The Substack HTML's own styles render
+   as-is.
+
+3. **Only the reading column layout is ours.** The Prose component in `substackNative` mode sets:
+   - `max-w-[720px]` (or the Substack-native reading width) for comfortable line measure
+   - `mx-auto` for centering
+   - Responsive padding from the shared Container system (`px-5 sm:px-8 lg:px-10`)
+   - A basic `text-text` colour reset (so dark mode works — Substack's inline styles may use
+     dark text that would be invisible on our dark background)
+
+4. **The page chrome remains our design system.** Breadcrumbs, article title in the header banner,
+   category badge, date/reading-time metadata, tag pills, share buttons, "Read on Substack" CTA,
+   related articles section — all use our Lora/DM Sans typography and component specs per §4a.
+
+5. **No conflict between our global CSS and Substack styles.** Ensure Tailwind's base/reset layer
+   and our `globals.css` token declarations do not cascade into the Substack article body in a way
+   that breaks Substack's intended styling. The `substackNative` container acts as a styling
+   boundary.
+
+#### Why this is the right approach
+
+- **Author intent is preserved.** The author chose fonts, emphasis, spacing, and formatting on
+  Substack. The reader should see exactly what the author wrote.
+- **Zero maintenance for article styling.** Substack updates their editor and styles — we don't
+  need to chase those changes. Our styling layer is thin and only handles layout.
+- **Authenticity.** The article is a Substack publication; rendering it identically to how it
+  appears on Substack creates trust and consistency for readers who follow the Substack link.
+- **Clear separation of concerns.** Our design system owns the site shell; Substack owns the
+  article body. No blurry boundary where both try to style the same elements.
 
 ---
 

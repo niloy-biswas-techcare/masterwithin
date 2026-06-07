@@ -11,6 +11,7 @@ export * from './articles/listArticles';
 export * from './articles/getArticle';
 export * from './articles/featureArticle';
 export * from './articles/overrideCategory';
+export * from './articles/deleteArticle';
 export * from './articles/syncSubstack';
 export * from './articles/importBySubstackUrl';
 

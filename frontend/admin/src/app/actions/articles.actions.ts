@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import {
   featureArticle,
   overrideCategory,
+  deleteArticle,
   importBySubstackUrl,
   syncSubstack,
   writeAuditLog,
@@ -116,4 +117,19 @@ export async function updateArticleCurationAction(
   });
   revalidatePath("/wisdom");
   return { ok: true };
+}
+
+/** Delete an article permanently. */
+export async function deleteArticleAction(id: string): Promise<ActionResult> {
+  const operator = await verifyOperator("editor").catch(() => null);
+  if (!operator) return { ok: false, error: "Unauthorized" };
+
+  try {
+    await deleteArticle({ uid: operator.uid, email: operator.email }, id);
+    revalidatePath("/");
+    revalidatePath("/wisdom");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed" };
+  }
 }

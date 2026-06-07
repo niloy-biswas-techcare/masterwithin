@@ -35,4 +35,6 @@ export interface ArticleRepository {
   setFeatured(id: string, featured: boolean): Promise<Article>;
   /** Set the category and lock it against future syncs (`categoryLocked = true`, §8). */
   overrideCategory(id: string, category: string): Promise<Article>;
+  /** Delete an article by its stable id. */
+  delete(id: string): Promise<void>;
 }

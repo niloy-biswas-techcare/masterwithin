@@ -148,4 +148,13 @@ export class SupabaseArticleRepository implements ArticleRepository {
     if (error) throw error;
     return toDomain(data);
   }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from('articles')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
 }

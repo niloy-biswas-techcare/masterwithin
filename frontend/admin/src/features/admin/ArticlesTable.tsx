@@ -1,10 +1,43 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
+import { Trash2 } from "lucide-react";
 import type { Article } from "@mw/types";
 import { DataTable } from "./DataTable";
 import { PublishToggle } from "./PublishToggle";
-import { featureArticleAction } from "@/app/actions/articles.actions";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { featureArticleAction, deleteArticleAction } from "@/app/actions/articles.actions";
+
+function DeleteCell({ article }: { article: Article }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <ConfirmDialog
+      trigger={
+        <button
+          className="text-muted hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded p-1"
+          aria-label={`Delete ${article.title}`}
+          disabled={isPending}
+        >
+          <Trash2 size={16} />
+        </button>
+      }
+      title="Delete Article"
+      description={`"${article.title}" will be permanently removed. This cannot be undone.`}
+      confirmLabel="Delete"
+      destructive
+      onConfirm={() => {
+        startTransition(async () => {
+          await deleteArticleAction(article.id);
+          router.refresh();
+        });
+      }}
+    />
+  );
+}
 
 const columns: ColumnDef<Article>[] = [
   {
@@ -38,6 +71,11 @@ const columns: ColumnDef<Article>[] = [
         onToggle={async (id, featured) => featureArticleAction(id, featured)}
       />
     ),
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => <DeleteCell article={row.original} />,
   },
 ];
 

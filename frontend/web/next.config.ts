@@ -18,9 +18,32 @@ const withMDX = withMDXInit({
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  // Enable instrumentation.ts for server-side error monitoring (§19)
   experimental: {
     instrumentationHook: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'substackcdn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.substackcdn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'substack-post-media.s3.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
   },
   async redirects() {
     return [

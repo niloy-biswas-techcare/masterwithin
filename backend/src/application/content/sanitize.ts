@@ -27,6 +27,9 @@ const ALLOWED_ATTRS: Record<string, Set<string>> = {
   img: new Set(['src', 'alt', 'title', 'width', 'height']),
 };
 
+/** Attributes allowed on ALL surviving elements (universal pass-through for §8b). */
+const UNIVERSAL_ATTRS = new Set(['class', 'style']);
+
 /** Tags whose entire contents are discarded, not just unwrapped. */
 const VOID_OF_CONTENT = ['script', 'style', 'iframe', 'object', 'embed', 'noscript'];
 
@@ -39,10 +42,20 @@ function isSafeUrl(value: string): boolean {
   return !/^[a-z][a-z0-9+.-]*:/.test(v);
 }
 
+/** Reject dangerous CSS values that could execute scripts (§8b). */
+function isSafeStyle(value: string): boolean {
+  const v = value.toLowerCase();
+  if (/expression\s*\(/.test(v)) return false;
+  if (/url\s*\(\s*["']?\s*(javascript|data|vbscript)\s*:/.test(v)) return false;
+  if (/-moz-binding\s*:/.test(v)) return false;
+  if (/behavior\s*:/.test(v)) return false;
+  return true;
+}
+
 /** Parse an attribute string into safe, allowlisted `name="value"` pairs. */
 function sanitizeAttributes(tag: string, rawAttrs: string): string {
-  const allowed = ALLOWED_ATTRS[tag];
-  if (!allowed) return '';
+  const tagSpecific = ALLOWED_ATTRS[tag];
+  const allowed = tagSpecific ? new Set([...UNIVERSAL_ATTRS, ...tagSpecific]) : UNIVERSAL_ATTRS;
   const out: string[] = [];
   const attrRe = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
   let m: RegExpExecArray | null;
@@ -53,6 +66,8 @@ function sanitizeAttributes(tag: string, rawAttrs: string): string {
     // Event handlers never pass (defense in depth — they aren't allowlisted anyway).
     if (name.startsWith('on')) continue;
     if ((name === 'href' || name === 'src') && !isSafeUrl(value)) continue;
+    // Block dangerous CSS values in style attributes (§8b).
+    if (name === 'style' && !isSafeStyle(value)) continue;
     const escaped = value.replace(/"/g, '&quot;');
     out.push(`${name}="${escaped}"`);
   }

@@ -176,7 +176,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="mx-auto max-w-280 px-5 sm:px-8 lg:px-10 py-12 md:py-16">
           <div className="mx-auto max-w-3xl flex flex-col gap-12">
             {/* Editorial Prose Content */}
-            <Prose html={article.bodyHtml} />
+            <Prose html={article.bodyHtml} substackNative />
 
             {/* Clickable tags */}
             {article.tags && article.tags.length > 0 && (

@@ -116,6 +116,30 @@ body {
   color: var(--color-text);
 }
 
+/*
+ * Substack-native article body — dark mode text inheritance (§8b).
+ * In dark mode, Substack's inline text colours (e.g., color: #333) would be invisible
+ * on our dark background (#11161D). This rule forces text elements inside the
+ * [data-substack-native] container to inherit the container's colour, which is set to
+ * var(--color-text) (#E6EAF0 in dark mode) by the Prose component's dark:text class.
+ * Elements where Substack explicitly set an inline style="color: ..." are left alone
+ * (inline styles have higher specificity).
+ */
+[data-theme='dark'] [data-substack-native] h1,
+[data-theme='dark'] [data-substack-native] h2,
+[data-theme='dark'] [data-substack-native] h3,
+[data-theme='dark'] [data-substack-native] h4,
+[data-theme='dark'] [data-substack-native] h5,
+[data-theme='dark'] [data-substack-native] h6,
+[data-theme='dark'] [data-substack-native] p,
+[data-theme='dark'] [data-substack-native] li,
+[data-theme='dark'] [data-substack-native] blockquote,
+[data-theme='dark'] [data-substack-native] figcaption,
+[data-theme='dark'] [data-substack-native] td,
+[data-theme='dark'] [data-substack-native] th {
+  color: inherit;
+}
+
 /* Disable non-essential animations when user prefers reduced motion (§4.3) */
 @media (prefers-reduced-motion: reduce) {
   *,

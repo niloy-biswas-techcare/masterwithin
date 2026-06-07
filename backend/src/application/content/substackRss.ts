@@ -19,6 +19,8 @@ export interface SubstackItem {
   publishedAt: string;
   /** Free-form categories/tags declared in the feed. */
   tags: string[];
+  /** Raw XML block — used internally to extract cover images from enclosure/media tags. */
+  _rawBlock?: string;
 }
 
 /** A normalized article draft: stable identity + raw body, ready for sanitize/categorize. */
@@ -91,6 +93,7 @@ export function parseSubstackRss(xml: string): SubstackItem[] {
       contentHtml: content,
       publishedAt: Number.isNaN(Date.parse(pubDate)) && pubDate ? new Date(0).toISOString() : iso,
       tags: categories,
+      _rawBlock: block,
     });
   }
 
@@ -103,6 +106,25 @@ function firstImage(html: string): string | undefined {
   return m ? m[1] : undefined;
 }
 
+/** Pull the cover image URL from enclosure or media tags in the raw RSS block. */
+function extractCoverFromBlock(block: string): string | undefined {
+  // <enclosure url="..." type="image/..."/>
+  const enclosure = block.match(/<enclosure\b[^>]*\burl\s*=\s*["']([^"']+)["'][^>]*type\s*=\s*["']image[^"']*["']/i)
+    ?? block.match(/<enclosure\b[^>]*type\s*=\s*["']image[^"']*["'][^>]*\burl\s*=\s*["']([^"']+)["']/i);
+  if (enclosure) return enclosure[1];
+
+  // <media:thumbnail url="..."/>
+  const mediaThumbnail = block.match(/<media:thumbnail\b[^>]*\burl\s*=\s*["']([^"']+)["']/i);
+  if (mediaThumbnail) return mediaThumbnail[1];
+
+  // <media:content url="..." medium="image"/>
+  const mediaContent = block.match(/<media:content\b[^>]*\burl\s*=\s*["']([^"']+)["'][^>]*medium\s*=\s*["']image["']/i)
+    ?? block.match(/<media:content\b[^>]*medium\s*=\s*["']image["'][^>]*\burl\s*=\s*["']([^"']+)["']/i);
+  if (mediaContent) return mediaContent[1];
+
+  return undefined;
+}
+
 /**
  * Normalize a raw feed item into an `ArticleDraft`: derive the stable id (hash of
  * guid/link), the immutable slug, normalized tags, and a cover-image candidate (§8).
@@ -111,6 +133,9 @@ function firstImage(html: string): string | undefined {
 export function normalizeFeedItem(item: SubstackItem): ArticleDraft {
   const id = stableId(item.guid || item.link);
   const slug = slugify(item.title) || id;
+  const coverImage =
+    (item._rawBlock ? extractCoverFromBlock(item._rawBlock) : undefined)
+    ?? firstImage(item.contentHtml);
   return {
     id,
     title: item.title,
@@ -119,7 +144,7 @@ export function normalizeFeedItem(item: SubstackItem): ArticleDraft {
     tags: normalizeTags(item.tags),
     publishedAt: item.publishedAt,
     substackUrl: item.link,
-    coverImage: firstImage(item.contentHtml),
+    coverImage,
     excerpt: buildExcerpt(item.contentHtml),
   };
 }

@@ -21,6 +21,8 @@
 > 4. Content Pipeline — Substack → Backend (sync, sanitize, categorize)
 > 5. Web App Shell — Next.js, Providers, Data/Offline Layer, SEO Base
 > 6. Public Site — Pages & Features (Home → Wisdom → Store → Editorial)
+> 6b. Routing Performance — Instant Navigation
+> 6c. Substack-Native Article Styling — preserve original Substack fonts & formatting in article body
 > 7. Commerce — Cart & WhatsApp Checkout
 > 8. Admin Console — Auth, RBAC, CRUD, Curation, Uploads
 > 9. Cross-Cutting — A11y, Performance, SEO, Observability, Resilience
@@ -388,6 +390,91 @@ visitor must never wait on a hard reload or stare at an unchanged page after a c
 - [x] Add a lint/test guard against regression: forbid raw internal `<a href="/…">` in `frontend/web` (ESLint `jsx-a11y`/custom rule or a test that greps the build output), so cards can't silently revert to hard links.
 - [x] Confirm `prefers-reduced-motion` and `Save-Data` are both still respected by the prefetch + transition changes (§9.1, §12.2).
 - [x] Re-run Lighthouse on `/`, `/wisdom`, a `/wisdom/[category]/[slug]`, `/store` — no perf/CLS regression; INP within budget (§13).
+
+---
+
+## Phase 6c — Substack-Native Article Styling  🧪
+
+Goal: article detail pages (`/wisdom/[category]/[slug]`) render the article body with **Substack's
+original fonts, typography, spacing, and formatting preserved** — our design system owns the page
+chrome (header, nav, footer, share buttons, related articles) but does not override the article body's
+visual appearance. The article body is the author's voice in visual form; Substack's styling is the
+author's intent. (§8b, §7.3, §4a.5)
+
+### 6c.1 Sanitizer — preserve Substack visual styles on ingest (§8b)  ⛔
+
+- [x] Update `backend/application/content/sanitize.ts` to **allow through Substack's CSS `class`
+  attributes** on all permitted elements (headings, paragraphs, lists, blockquotes, images, figures,
+  links, spans, divs). These classes carry Substack's typography and spacing rules.
+- [x] Update the sanitizer to **allow inline `style` attributes** on elements within the article body.
+  These carry font-size, colour, spacing, and layout directives from Substack's editor. Security-sensitive
+  values (`expression()`, `url(javascript:...)`, etc.) are stripped; visual CSS properties are kept.
+- [x] Verify the sanitizer still strips all security-sensitive content: `<script>`, `<style>` tags (and
+  their content), event handlers (`onclick`, `onerror`, etc.), `javascript:` / `data:` / `vbscript:` URLs,
+  and HTML comments. 🧪
+- [x] Add unit tests for the updated sanitizer: (a) Substack CSS classes are preserved on elements,
+  (b) inline styles with visual CSS are preserved, (c) dangerous attributes and URLs are still stripped,
+  (d) a real Substack article HTML fixture passes through with styling intact. 🧪
+
+### 6c.2 Prose component — `substackNative` rendering mode (§4a.5)  ⛔
+
+- [x] Add a `substackNative?: boolean` prop to the `Prose` component in `packages/ui/src/components/Prose.tsx`.
+  When `true`, the component applies **layout-only** classes: `max-w-[720px] mx-auto` for reading measure
+  and centering. It does **not** apply `font-body`, `font-display`, `text-[1.0625rem]`, `leading-[1.75]`,
+  or any typography-override classes (`[&_h2]:...`, `[&_p]:...`, `[&_a]:...`, `[&_blockquote]:...`, etc.).
+- [x] In `substackNative` mode, apply a `text-text` colour reset on the container element so that dark
+  mode works correctly (Substack's inline styles may use dark text that would be invisible on our dark
+  background). This is the only visual override.
+- [x] In `substackNative` mode, do **not** apply `prose-drop-cap` or `prose-pull-quote` CSS classes.
+  Drop caps, pull-quote borders, and editorial typography rules are reserved for the editorial mode (MDX
+  pages like *Our Ideal* and *About*).
+- [x] The existing editorial mode (non-`substackNative`) remains unchanged for MDX-rendered content:
+  Lora headings, DM Sans body, drop caps, pull-quote borders, link overrides, inter-paragraph spacing
+  — all per the current §4a.5 spec. Verify MDX pages (`/our-ideal`, `/about`) still render correctly. 🧪
+
+### 6c.3 Article details page — wire `substackNative` mode (§7.3)
+
+- [x] Update `frontend/web/src/app/wisdom/[category]/[slug]/page.tsx` to pass `substackNative` prop
+  to the `<Prose>` component when rendering `article.bodyHtml`.
+- [x] Verify the article header banner (breadcrumbs, title, category badge, date, reading time) still
+  uses our design system (Lora title, DM Sans metadata, Badge component). Only the article body below
+  the banner switches to Substack-native styling.
+- [x] Verify the article tags section, share buttons, "Read on Substack" CTA, and related articles
+  section all continue using our design system components and typography.
+
+### 6c.4 CSS boundary — prevent global style conflicts (§8b)
+
+- [x] Audit `globals.css` and `tokens.css` for any base/reset rules or token declarations that cascade
+  into `dangerouslySetInnerHTML` content and would override Substack's inline styles or classes. Add
+  scoping or specificity guards if needed (e.g., Substack-native body wrapped in a `.substack-body`
+  class that resets Tailwind's base layer).
+- [x] Verify Tailwind's preflight/reset layer does not strip or normalise Substack's heading sizes,
+  list styles, or blockquote formatting inside the `substackNative` container.
+- [x] Test with a real Substack article that uses varied formatting (headings, bold, italic, lists,
+  blockquotes, embedded images, links, code blocks) — confirm visual fidelity with the original
+  Substack publication. 🧪
+
+### 6c.5 Dark mode compatibility (§8b)
+
+- [x] Verify Substack article body text is readable in dark mode: the `text-text` colour reset on the
+  container ensures base text colour follows our dark theme. Test that any Substack inline styles with
+  explicit dark colours (e.g., `color: #333`) are overridden or that the container's `color` cascades
+  correctly.
+- [x] Test with Substack articles that include images, blockquotes, and code blocks in both light and
+  dark mode — no invisible text, no broken layouts. 🧪
+
+### 6c.6 Verification & QA  🧪
+
+- [x] Visual comparison: open the same article on Substack and on the site — the article body should
+  look visually identical (same fonts, sizes, spacing, formatting). Minor differences from image
+  CDN delivery (Cloudinary) are acceptable.
+- [x] Verify MDX pages (`/our-ideal`, `/about`) still render with the full editorial Prose styling
+  (Lora headings, DM Sans body, drop caps, pull quotes). They must not be affected by the
+  `substackNative` changes. 🧪
+- [x] Verify the sanitizer still blocks all XSS vectors even with the relaxed class/style allowlist.
+  Run the existing sanitizer test suite; add new security regression tests. 🧪 🔒
+- [x] Lighthouse audit on an article page — no perf/CLS regression from the styling changes. 🧪
+- [x] Verify no horizontal overflow on article pages at 375px, 768px, 1024px, 1440px. 🧪
 
 ---
 

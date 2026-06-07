@@ -9,7 +9,7 @@ function toDomain(row: any): Article {
     category: row.category,
     tags: row.tags || [],
     excerpt: row.excerpt,
-    bodyHtml: row.body_html,
+    bodyHtml: row.body_html ?? '',
     publishedAt: new Date(row.published_at).toISOString().replace('.000Z', 'Z'),
     readingTime: row.reading_time,
     substackUrl: row.substack_url,
@@ -40,11 +40,15 @@ function toRow(domain: Article): any {
   };
 }
 
+// Columns for listing pages — omits body_html to keep payloads small.
+const LIST_COLS =
+  'id,title,slug,category,tags,excerpt,cover_image,published_at,reading_time,substack_url,featured,category_locked';
+
 export class SupabaseArticleRepository implements ArticleRepository {
   async list(filter?: ArticleListFilter): Promise<Article[]> {
     let query = supabaseAdmin
       .from('articles')
-      .select('*')
+      .select(LIST_COLS)
       .order('published_at', { ascending: false });
 
     if (filter) {

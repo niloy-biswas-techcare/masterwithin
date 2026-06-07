@@ -163,16 +163,31 @@ describe('Application Use-Cases Unit Tests', () => {
   });
 
   describe('deleteArticle Use-Case', () => {
+    const testArticle: Article = {
+      id: 'del-art-1',
+      title: 'Delete Me',
+      slug: 'delete-me',
+      category: 'optimal-living',
+      tags: ['test'],
+      excerpt: 'Blurb',
+      bodyHtml: '<p>Body</p>',
+      publishedAt: '2026-06-01T00:00:00Z',
+      readingTime: 2,
+      substackUrl: 'https://substack.com/p/delete-me',
+      featured: false,
+      categoryLocked: false,
+    };
+
     it('should delete an existing article and audit it', async () => {
       const deleteArticle = makeDeleteArticle(ports.articles, ports.auditLogs);
       const listArticles = makeListArticles(ports.articles);
 
       // Seed an article
-      await ports.articles.upsert(sampleArticle);
+      await ports.articles.upsert(testArticle);
       expect(await listArticles()).toHaveLength(1);
 
       // Delete it
-      await deleteArticle(adminActor, sampleArticle.id);
+      await deleteArticle(adminActor, testArticle.id);
 
       // Verify it's gone
       expect(await listArticles()).toHaveLength(0);
@@ -181,7 +196,7 @@ describe('Application Use-Cases Unit Tests', () => {
       const logs = await ports.auditLogs.list();
       expect(logs).toHaveLength(1);
       expect(logs[0].action).toBe('delete');
-      expect(logs[0].entityId).toBe(sampleArticle.id);
+      expect(logs[0].entityId).toBe(testArticle.id);
     });
 
     it('should throw if article not found', async () => {
@@ -197,18 +212,32 @@ describe('Application Use-Cases Unit Tests', () => {
 
       // Seed 2 articles directly
       const article1: Article = {
-        ...sampleArticle,
         id: 'feed-article-1',
-        slug: 'feed-article-1',
         title: 'Feed Article',
+        slug: 'feed-article-1',
+        category: 'optimal-living',
+        tags: [],
+        excerpt: 'Desc',
+        bodyHtml: '<p>Content</p>',
+        publishedAt: '2026-06-01T00:00:00Z',
+        readingTime: 1,
         substackUrl: 'https://souvik.substack.com/p/feed-article-1',
+        featured: false,
+        categoryLocked: false,
       };
       const article2: Article = {
-        ...sampleArticle,
         id: 'orphan-article-2',
-        slug: 'orphan-article-2',
         title: 'Orphan Article',
+        slug: 'orphan-article-2',
+        category: 'optimal-living',
+        tags: [],
+        excerpt: 'Desc',
+        bodyHtml: '<p>Content</p>',
+        publishedAt: '2026-06-01T00:00:00Z',
+        readingTime: 1,
         substackUrl: 'https://souvik.substack.com/p/orphan-article-2',
+        featured: false,
+        categoryLocked: false,
       };
       await ports.articles.upsert(article1);
       await ports.articles.upsert(article2);

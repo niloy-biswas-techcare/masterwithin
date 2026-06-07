@@ -18,9 +18,10 @@
   --color-danger:    #C0392B;
 
   /* Typography */
-  --font-display: 'Lora', Georgia, serif;
-  --font-body:    'DM Sans', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  --font-display:   'Lora', Georgia, serif;
+  --font-body:      'DM Sans', system-ui, sans-serif;
+  --font-mono:      'JetBrains Mono', ui-monospace, monospace;
+  --font-substack:  'Source Serif 4', Georgia, 'Times New Roman', serif;
 
   /* Radii & elevation */
   --radius-sm: 6px;  --radius-md: 10px;  --radius-lg: 16px;

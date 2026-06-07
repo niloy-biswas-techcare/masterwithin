@@ -117,13 +117,208 @@ body {
 }
 
 /*
- * Substack-native article body — dark mode text inheritance (§8b).
- * In dark mode, Substack's inline text colours (e.g., color: #333) would be invisible
- * on our dark background (#11161D). This rule forces text elements inside the
- * [data-substack-native] container to inherit the container's colour, which is set to
- * var(--color-text) (#E6EAF0 in dark mode) by the Prose component's dark:text class.
- * Elements where Substack explicitly set an inline style="color: ..." are left alone
- * (inline styles have higher specificity).
+ * Substack-native article body typography (§8b).
+ *
+ * Replicates Substack's default reading experience — Source Serif 4, 18px body,
+ * 1.8 line-height, and matching heading/blockquote/list hierarchy — scoped to
+ * [data-substack-native] so it never leaks to the rest of the app.
+ *
+ * Inline style="" attributes from the original Substack HTML win via specificity,
+ * so per-publication customisations (custom fonts, colours) are preserved automatically.
+ */
+
+/* Base reading type */
+[data-substack-native] {
+  font-family: var(--font-substack);
+  font-size: 1.125rem;        /* 18px — Substack default */
+  line-height: 1.8;
+  color: var(--color-text);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Paragraphs */
+[data-substack-native] p {
+  margin: 0 0 1.5em;
+}
+
+/* Headings — Source Serif 4, tighter leading */
+[data-substack-native] h1,
+[data-substack-native] h2,
+[data-substack-native] h3,
+[data-substack-native] h4,
+[data-substack-native] h5,
+[data-substack-native] h6 {
+  font-family: var(--font-substack);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text);
+  margin: 2em 0 0.5em;
+}
+
+[data-substack-native] h1 { font-size: 2rem;      letter-spacing: -0.02em; }
+[data-substack-native] h2 { font-size: 1.5625rem; letter-spacing: -0.015em; }
+[data-substack-native] h3 { font-size: 1.25rem;   letter-spacing: -0.01em; }
+[data-substack-native] h4 { font-size: 1.125rem; }
+[data-substack-native] h5,
+[data-substack-native] h6 { font-size: 1rem; }
+
+/* Remove top margin on headings that immediately follow another heading */
+[data-substack-native] h1 + h2,
+[data-substack-native] h2 + h3,
+[data-substack-native] h3 + h4 {
+  margin-top: 0.75em;
+}
+
+/* Links — inherit article colour, plain underline */
+[data-substack-native] a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+  text-underline-offset: 2px;
+}
+
+[data-theme='dark'] [data-substack-native] a {
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-substack-native] a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Blockquotes — left-rule, italic, Substack-style */
+[data-substack-native] blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.84);
+  padding: 0.25em 0 0.25em 1.5em;
+  margin: 2em 0;
+  font-style: italic;
+  color: var(--color-text);
+}
+
+[data-theme='dark'] [data-substack-native] blockquote {
+  border-left-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Lists */
+[data-substack-native] ul,
+[data-substack-native] ol {
+  margin: 0 0 1.5em;
+  padding-left: 2em;
+}
+
+[data-substack-native] ul { list-style-type: disc; }
+[data-substack-native] ol { list-style-type: decimal; }
+
+[data-substack-native] li {
+  margin-bottom: 0.4em;
+  line-height: 1.7;
+}
+
+[data-substack-native] li > ul,
+[data-substack-native] li > ol {
+  margin: 0.4em 0 0;
+}
+
+/* Code */
+[data-substack-native] pre {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  line-height: 1.6;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  padding: 1em 1.25em;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+[data-theme='dark'] [data-substack-native] pre {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[data-substack-native] code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  padding: 0.15em 0.4em;
+}
+
+[data-theme='dark'] [data-substack-native] code {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-substack-native] pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Images and figures */
+[data-substack-native] img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border-radius: 4px;
+}
+
+[data-substack-native] figure {
+  margin: 2em 0;
+}
+
+[data-substack-native] figcaption {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-muted);
+  font-style: italic;
+  margin-top: 0.6em;
+}
+
+/* Tables */
+[data-substack-native] table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9375rem;
+}
+
+[data-substack-native] th,
+[data-substack-native] td {
+  border: 1px solid var(--color-border);
+  padding: 0.6em 0.9em;
+  text-align: left;
+  color: var(--color-text);
+}
+
+[data-substack-native] th {
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] [data-substack-native] th {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Horizontal rule */
+[data-substack-native] hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5em 0;
+}
+
+/* Superscript / subscript */
+[data-substack-native] sup,
+[data-substack-native] sub {
+  font-size: 0.75em;
+  line-height: 0;
+}
+
+/*
+ * Dark mode text inheritance: Substack inline colour values (e.g. color:#333) become
+ * invisible on our dark background. Forcing inheritance here lets the container's
+ * dark:text-[var(--color-text)] cascade down. Inline style="" wins via specificity,
+ * so explicit per-element colours from the original HTML are still respected.
  */
 [data-theme='dark'] [data-substack-native] h1,
 [data-theme='dark'] [data-substack-native] h2,

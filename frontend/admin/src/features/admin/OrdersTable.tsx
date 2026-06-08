@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { Order, OrderStatus, PaymentStatus, ShippingStatus } from "@mw/backend";
 import { updateOrderStatusAction, deleteOrderAction } from "@/app/actions/orders.actions";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -126,17 +127,36 @@ function OrderRow({ order }: { order: Order }) {
   const paymentStatus  = order.paymentStatus  ?? "unpaid";
   const shippingStatus = order.shippingStatus ?? "not_sent";
 
+  const STATUS_LABELS: Record<string, string> = {
+    accepted: "Order accepted",
+    rejected: "Order rejected",
+    paid: "Marked as paid",
+    sent: "Marked as shipped",
+    received: "Marked as received",
+  };
+
   const update = (patch: Parameters<typeof updateOrderStatusAction>[1]) => {
     startTransition(async () => {
-      await updateOrderStatusAction(order.id!, patch);
-      router.refresh();
+      try {
+        await updateOrderStatusAction(order.id!, patch);
+        const label = Object.values(patch)[0] as string;
+        toast.success(STATUS_LABELS[label] ?? "Order updated");
+        router.refresh();
+      } catch {
+        toast.error("Failed to update order");
+      }
     });
   };
 
   const handleDelete = () => {
     startTransition(async () => {
-      await deleteOrderAction(order.id!);
-      router.refresh();
+      try {
+        await deleteOrderAction(order.id!);
+        toast.success("Order deleted");
+        router.refresh();
+      } catch {
+        toast.error("Failed to delete order");
+      }
     });
   };
 

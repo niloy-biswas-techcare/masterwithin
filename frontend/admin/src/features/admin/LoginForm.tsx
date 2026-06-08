@@ -72,8 +72,13 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full h-11 rounded-md bg-deep text-surface text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+        aria-disabled={pending}
+        aria-label={pending ? "Loading" : undefined}
+        className="w-full h-11 rounded-md bg-deep text-surface text-sm font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity inline-flex items-center justify-center gap-2"
       >
+        {pending && (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-surface/30 border-t-surface" aria-hidden="true" />
+        )}
         {pending ? "Signing in…" : "Sign In"}
       </button>
     </form>

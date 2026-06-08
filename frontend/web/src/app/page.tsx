@@ -1,22 +1,21 @@
 import React from 'react';
 import Link from 'next/link';
-import { getSiteConfig, listArticles, listVideos } from '@mw/backend';
+import { listArticles, listVideos } from '@mw/backend';
 import { SmartArticleCard } from '@/components/shared/SmartCards';
 import { VideoCard } from '@mw/ui';
 import { AnimateOnScroll } from '@/components/shared/AnimateOnScroll';
 import { HeroSection } from '@/features/home/HeroSection';
 import { ArrowRight, BookOpen, GraduationCap, ShoppingBag } from 'lucide-react';
-import type { Article, SiteConfig, Video } from '@mw/types';
+import type { Article, Video } from '@mw/types';
 
 export const revalidate = 3600;
 
 export default async function Home() {
   let articles: Article[] = [];
-  let siteConfig: SiteConfig | null = null;
   let featuredVideos: Video[] = [];
 
   try {
-    [articles, siteConfig] = await Promise.all([listArticles(), getSiteConfig()]);
+    articles = await listArticles();
   } catch (err) {
     console.error('[home] Failed to fetch server data:', err);
   }

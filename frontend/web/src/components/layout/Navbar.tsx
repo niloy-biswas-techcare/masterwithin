@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useUiStore } from '@/store/uiStore';
 import { ThemeToggle } from '../shared/ThemeToggle';
+import { useTheme } from '@/providers/ThemeProvider';
 import { articlesListKey, fetchArticlesIndex } from '@/lib/queries';
 
 
@@ -16,6 +18,7 @@ export function Navbar() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { theme } = useTheme();
 
   const { isMobileMenuOpen, setMobileMenuOpen } = useUiStore();
   const cartItemsCount = useCartStore((state) => state.totalItems());
@@ -86,18 +89,21 @@ export function Navbar() {
         }`}
       >
         <div className="mx-auto h-full max-w-280 flex items-center justify-between px-5 sm:px-8 lg:px-10">
-          {/* Logo — Lora wordmark + dot mark (§4a.5) */}
+          {/* Logo */}
           <Link
             href="/"
             className="font-display text-[15px] font-bold tracking-tight text-text hover:text-primary transition-colors flex items-center gap-2"
             aria-label="Master Within Foundation — Home"
           >
-            {/* Icon mark */}
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-primary">
-              <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
-              <circle cx="10" cy="10" r="5" stroke="currentColor" strokeWidth="1.5"/>
-              <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-            </svg>
+            <Image
+              src={theme === 'dark' ? '/icon-dark.png' : '/icon-light.png'}
+              alt=""
+              width={32}
+              height={32}
+              className="rounded-full"
+              aria-hidden="true"
+              priority
+            />
             <span>Master Within</span>
           </Link>
 

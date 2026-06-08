@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { fontVariables } from '@mw/ui/fonts';
+import { RouteProgressBar } from '@mw/ui';
+import { Toaster } from 'sonner';
 import { Providers } from '@/providers/Providers';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -17,6 +20,14 @@ export const metadata: Metadata = {
   },
   description:
     'A spiritual–philosophical knowledge hub: the most comprehensive English-language resource for deep life questions — meaning, purpose, dharma, relationships, and inner growth.',
+  icons: {
+    icon: [
+      { url: '/icon-light.png', media: '(prefers-color-scheme: light)' },
+      { url: '/icon-dark.png', media: '(prefers-color-scheme: dark)' },
+    ],
+    apple: '/apple-icon.png',
+    shortcut: '/favicon.ico',
+  },
   openGraph: {
     siteName: 'Master Within Foundation',
     type: 'website',
@@ -46,6 +57,9 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
+        <Suspense>
+          <RouteProgressBar />
+        </Suspense>
         <Providers>
           <WebVitals />
           <div className="flex min-h-screen flex-col bg-bg text-text transition-colors duration-300">
@@ -54,6 +68,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

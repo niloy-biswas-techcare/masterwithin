@@ -24,7 +24,7 @@ export function RelatedVideosClient({ currentVideoId, category }: RelatedVideosC
   if (related.length === 0) {
     return (
       <EmptyState
-        heading="More talks coming soon."
+        title="More talks coming soon."
         description="New videos in this category will appear here after the next sync."
       />
     );

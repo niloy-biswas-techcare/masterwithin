@@ -539,7 +539,7 @@ export function MediaClient() {
         {/* Bottom CTA */}
         <div className="flex flex-col items-center text-center gap-4 pt-6 border-t border-border">
           <p className="font-display italic text-text/70 max-w-lg">
-            "The spoken word opens the door; the written word deepens the room."
+            &ldquo;The spoken word opens the door; the written word deepens the room.&rdquo;
           </p>
           <Link
             href="/wisdom"

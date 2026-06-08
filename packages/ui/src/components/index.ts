@@ -16,3 +16,5 @@ export * from './CldImage';
 export * from './VideoCard';
 export * from './PlaylistCard';
 export * from './VideoPlayer';
+export * from './RouteProgressBar';
+export * from './TableSkeleton';

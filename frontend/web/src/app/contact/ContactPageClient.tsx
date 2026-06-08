@@ -245,7 +245,7 @@ function WhatsAppForm({ businessWaNumber }: { businessWaNumber: string }) {
         </Button>
 
         <p className="text-center text-xs text-text/50 leading-relaxed">
-          We'll reach back to you on WhatsApp at the number you provide above.
+          We&apos;ll reach back to you on WhatsApp at the number you provide above.
         </p>
       </form>
     </div>

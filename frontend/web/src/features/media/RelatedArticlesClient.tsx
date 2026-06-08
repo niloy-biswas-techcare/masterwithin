@@ -23,7 +23,7 @@ export function RelatedArticlesClient({ category }: RelatedArticlesClientProps) 
   if (related.length === 0) {
     return (
       <EmptyState
-        heading="The library is growing."
+        title="The library is growing."
         description="Articles in this category will appear here after the next sync."
       />
     );

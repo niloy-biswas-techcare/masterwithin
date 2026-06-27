@@ -46,3 +46,6 @@ test-results/
 
 # Supabase CLI local state (machine-specific, not for version control)
 supabase/.temp/
+
+# Local Netlify folder
+.netlify

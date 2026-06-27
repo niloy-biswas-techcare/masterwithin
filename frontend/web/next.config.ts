@@ -45,6 +45,45 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      // 1. All pages — 1-day CDN cache with stale-while-revalidate.
+      //    Must come FIRST so the specific rules below can override it.
+      //    Pages with `export const revalidate` (ISR) will have their own
+      //    s-maxage set by Next.js/Vercel at render time, which takes precedence.
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=86400, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      // 2. /_next/static/ — content-addressed (hashed filenames), safe to cache forever.
+      //    Overrides rule 1 for these paths.
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // 3. API routes — never cache; responses are dynamic and may be user-specific.
+      //    Overrides rule 1 for these paths.
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store',
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       // Stub for future immutable-slug redirect mappings (§13)

@@ -43,3 +43,6 @@ test-results/
 
 .claude
 .vercel
+
+# Supabase CLI local state (machine-specific, not for version control)
+supabase/.temp/

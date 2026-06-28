@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 // ---------------------------------------------------------------------------
-// Bot classification lists
+// Bot classification
 // ---------------------------------------------------------------------------
 
-/**
- * SEO-valuable crawlers. These are rate-limited (via Upstash when configured)
- * but never blocked outright — blocking them hurts search rankings.
- */
+// SEO-valuable crawlers — rate-limited but never blocked outright.
 const GOOD_BOT_PATTERNS = [
   'googlebot',
   'google-inspectiontool',
@@ -20,14 +19,12 @@ const GOOD_BOT_PATTERNS = [
   'linkedinbot',
   'twitterbot',
   'facebookexternalhit',
-  'slurp', // Yahoo
-  'ia_archiver', // Internet Archive
+  'slurp',
+  'ia_archiver',
 ];
 
-/**
- * Aggressive SEO scrapers, AI training crawlers, and spam bots.
- * Blocked with 403 — they provide no SEO value and burn edge quota.
- */
+// Aggressive scrapers, AI training crawlers, spam bots — always 403.
+// These provide no SEO value and burn edge quota.
 const BAD_BOT_PATTERNS = [
   'semrushbot',
   'ahrefsbot',
@@ -36,8 +33,8 @@ const BAD_BOT_PATTERNS = [
   'blexbot',
   'serpstatbot',
   'petalbot',
-  'bytespider', // TikTok
-  'gptbot', // OpenAI
+  'bytespider',
+  'gptbot',
   'anthropic-ai',
   'ccbot',
   'claudebot',
@@ -46,14 +43,14 @@ const BAD_BOT_PATTERNS = [
   'seznambot',
   'siteauditbot',
   'rogerbot',
+  'piplbot',
+  'neevabot',
+  'dataforseobot',
+  'screaming frog',
 ];
 
-/**
- * Generic patterns that indicate a bot-like UA not in either allowlist.
- * Unknown crawlers are blocked — if a legitimate bot gets caught, add it
- * to GOOD_BOT_PATTERNS above.
- */
-const GENERIC_BOT_RE = /bot|crawler|spider|scraper|fetcher|wget|curl|python-requests/i;
+// Generic bot signals not in either list above — blocked by default.
+const GENERIC_BOT_RE = /bot|crawler|spider|scraper|fetcher|wget|curl|python-requests|go-http-client|okhttp/i;
 
 type BotClass = 'good' | 'bad' | 'unknown-bot' | 'human';
 
@@ -66,54 +63,70 @@ function classifyUA(ua: string): BotClass {
 }
 
 // ---------------------------------------------------------------------------
-// Rate limiting
+// Rate limiting via Upstash Redis
+//
+// Set these in Vercel env vars (and .env.local for dev):
+//   UPSTASH_REDIS_REST_URL=https://...upstash.io
+//   UPSTASH_REDIS_REST_TOKEN=...
+//
+// Create a free Redis database at https://console.upstash.com
+// If env vars are absent, rate limiting is skipped (allow-all fallback).
 // ---------------------------------------------------------------------------
-//
-// ⚠️  IN-MEMORY THROTTLING DOES NOT WORK ON VERCEL EDGE RUNTIME.
-//
-// Middleware runs on a globally distributed fleet of edge nodes. Each node
-// has isolated, non-persistent memory that is not shared across the fleet.
-// A Map<ip, count> here would give each of thousands of edge nodes its own
-// independent counter, so a single IP could hit every node once per window
-// without ever being throttled.
-//
-// The correct solution is a distributed atomic store. The drop-in for Vercel
-// is Upstash Redis + @upstash/ratelimit (free tier: 10,000 req/day):
-//
-//   Step 1 — install (run from the monorepo root):
-//     pnpm add @upstash/ratelimit @upstash/redis --filter web
-//
-//   Step 2 — create a free Redis database at https://console.upstash.com
-//             and copy the REST URL and token.
-//
-//   Step 3 — add to Vercel environment variables (and .env.local for dev):
-//     UPSTASH_REDIS_REST_URL=https://...upstash.io
-//     UPSTASH_REDIS_REST_TOKEN=...
-//
-//   Step 4 — replace the stub below with the real implementation:
-//
+
+const _redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
+
+// Good bots: 1 request per 10 seconds per IP.
+// Prevents crawlers from hammering pages faster than Googlebot's recommended rate.
+const _botLimiter = _redis
+  ? new Ratelimit({
+      redis: _redis,
+      limiter: Ratelimit.slidingWindow(1, '10 s'),
+      prefix: 'mw:bot',
+      analytics: true,
+    })
+  : null;
+
+// Human / unknown traffic: 120 requests per 60 seconds per IP.
+// Stops DDoS amplification while leaving room for heavy legitimate users.
+const _humanLimiter = _redis
+  ? new Ratelimit({
+      redis: _redis,
+      limiter: Ratelimit.slidingWindow(120, '60 s'),
+      prefix: 'mw:human',
+      analytics: true,
+    })
+  : null;
+
 // ---------------------------------------------------------------------------
-/*
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+// Helpers
+// ---------------------------------------------------------------------------
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  // Sliding window: 1 request per 10 seconds per IP, per bot.
-  limiter: Ratelimit.slidingWindow(1, '10 s'),
-  prefix: 'mw:bot',
-  analytics: true, // visible in Upstash console
-});
-
-async function rateLimit(ip: string): Promise<{ limited: boolean; resetMs: number }> {
-  const { success, reset } = await ratelimit.limit(ip);
-  return { limited: !success, resetMs: reset };
+function getIP(req: NextRequest): string {
+  return (
+    req.headers.get('x-real-ip') ??
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    '127.0.0.1'
+  );
 }
-*/
 
-// Stub — always allows through. Remove once Upstash is wired up.
-async function rateLimit(_ip: string): Promise<{ limited: boolean; resetMs: number }> {
-  return { limited: false, resetMs: 0 };
+function rateLimitResponse(reset: number, limit: number): NextResponse {
+  const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+  return new NextResponse('Too Many Requests', {
+    status: 429,
+    headers: {
+      'Content-Type': 'text/plain',
+      'Retry-After': String(retryAfter),
+      'X-RateLimit-Limit': String(limit),
+      'X-RateLimit-Remaining': '0',
+      'X-RateLimit-Reset': String(Math.ceil(reset / 1000)),
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -121,15 +134,13 @@ async function rateLimit(_ip: string): Promise<{ limited: boolean; resetMs: numb
 // ---------------------------------------------------------------------------
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  // Skip entirely outside production so local dev is unaffected.
-  if (process.env.NODE_ENV !== 'production') {
-    return NextResponse.next();
-  }
+  // Skip in dev so local work is unaffected.
+  if (process.env.NODE_ENV !== 'production') return NextResponse.next();
 
   const ua = request.headers.get('user-agent') ?? '';
   const botClass = classifyUA(ua);
 
-  // 1. Bad bots and unknown crawlers — reject immediately.
+  // 1. Bad bots and unknown crawlers — reject immediately, no Upstash call.
   if (botClass === 'bad' || botClass === 'unknown-bot') {
     return new NextResponse('Forbidden', {
       status: 403,
@@ -137,39 +148,22 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     });
   }
 
-  // 2. Known good bots — apply rate limit.
-  if (botClass === 'good') {
-    // Vercel sets x-real-ip; x-forwarded-for is the fallback for other hosts.
-    const ip =
-      request.headers.get('x-real-ip') ??
-      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-      '127.0.0.1';
+  // 2. Apply rate limiting for both good bots and human traffic.
+  const limiter = botClass === 'good' ? _botLimiter : _humanLimiter;
 
-    const { limited, resetMs } = await rateLimit(ip);
-
-    if (limited) {
-      const retryAfter = Math.max(1, Math.ceil((resetMs - Date.now()) / 1000));
-      return new NextResponse('Too Many Requests', {
-        status: 429,
-        headers: {
-          'Content-Type': 'text/plain',
-          // RFC 9110 §10.2.4: seconds until the client may retry.
-          'Retry-After': String(retryAfter),
-          // Informal header used by some crawlers to respect the window.
-          'X-RateLimit-Policy': '1;w=10',
-        },
-      });
-    }
+  if (limiter) {
+    const ip = getIP(request);
+    const { success, reset, limit } = await limiter.limit(ip);
+    if (!success) return rateLimitResponse(reset, limit);
   }
 
-  // 3. Human traffic (and good bots that passed rate limiting) — pass through.
   return NextResponse.next();
 }
 
 export const config = {
-  // Run on all routes except Next.js internals and static files.
+  // Run on all routes except Next.js internals and static assets.
   // Keeping middleware off /_next/* and image/font files avoids unnecessary
-  // edge invocations for assets that are already cached by the CDN.
+  // edge invocations for assets already cached by the CDN.
   matcher: [
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)',
   ],

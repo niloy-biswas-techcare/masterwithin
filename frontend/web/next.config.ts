@@ -43,6 +43,17 @@ const nextConfig: NextConfig = {
         hostname: 'substack-post-media.s3.amazonaws.com',
         pathname: '/**',
       },
+      // YouTube thumbnail CDN domains
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {

@@ -161,10 +161,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  // Run on all routes except Next.js internals and static assets.
-  // Keeping middleware off /_next/* and image/font files avoids unnecessary
-  // edge invocations for assets already cached by the CDN.
+  // Run on all routes except Next.js internals, static assets, and the files
+  // that crawlers MUST be able to read (robots.txt, sitemap.xml).
+  // Blocking robots.txt from bad bots prevents them from ever seeing the
+  // Disallow rules — they need to read it to know they are unwelcome.
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)',
   ],
 };

@@ -1,5 +1,11 @@
 import type { Article, ArticleRepository, ArticleListFilter } from '../../domain';
+import { htmlToText } from '../../application/content/sanitize';
 import { supabaseAdmin } from './client';
+
+/** Decode any numeric HTML entities left in stored excerpts (e.g. &#2453; → Bengali char). */
+function decodeExcerpt(raw: string): string {
+  return htmlToText(raw);
+}
 
 function toDomain(row: any): Article {
   const art: Article = {
@@ -8,7 +14,7 @@ function toDomain(row: any): Article {
     slug: row.slug,
     category: row.category,
     tags: row.tags || [],
-    excerpt: row.excerpt,
+    excerpt: decodeExcerpt(row.excerpt ?? ''),
     bodyHtml: row.body_html ?? '',
     publishedAt: new Date(row.published_at).toISOString().replace('.000Z', 'Z'),
     readingTime: row.reading_time,

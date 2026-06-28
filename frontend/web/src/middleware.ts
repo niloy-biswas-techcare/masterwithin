@@ -161,11 +161,31 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  // Run on all routes except Next.js internals, static assets, and the files
-  // that crawlers MUST be able to read (robots.txt, sitemap.xml).
-  // Blocking robots.txt from bad bots prevents them from ever seeing the
-  // Disallow rules — they need to read it to know they are unwelcome.
+  // Run ONLY on routes where per-request logic is genuinely needed.
+  //
+  // WHY so narrow:
+  // Vercel middleware runs before the CDN cache is consulted, so it fires on
+  // every single request — including those served entirely from cache. Matching
+  // all routes means every Googlebot crawl and every user page view burns an
+  // edge invocation, even for fully static / ISR-cached pages.
+  //
+  // Static and ISR pages (/wisdom, /courses, /media, /store, home, etc.) are
+  // already served from Vercel's CDN. By excluding them here, a cache hit
+  // costs ZERO edge invocations. Bot protection for those routes is handled
+  // by the Vercel Firewall rules (CDN-level, no invocation cost).
+  //
+  // What IS matched here:
+  //   /api/search-index  — force-dynamic, hits Supabase on every call
+  //   /api/og            — dynamic OG image generation
+  //   /api/videos        — cached but worth rate-limiting direct abuse
+  //   /api/playlists     — same as above
+  //   /media/[videoId]   — server-rendered on demand (not cached)
+  //   /media/playlists/… — server-rendered on demand
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)',
+    '/api/search-index',
+    '/api/og',
+    '/api/videos',
+    '/api/playlists',
+    '/media/:path*',
   ],
 };

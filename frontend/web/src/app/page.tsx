@@ -90,9 +90,9 @@ export default async function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:auto-rows-fr">
             {displayedArticles.map((art, i) => (
-              <AnimateOnScroll key={art.id} variant="fadeUp" delay={i * 0.05} className="h-full">
+              <AnimateOnScroll key={art.id} variant="fadeUp" delay={i * 0.05} className="h-full flex flex-col">
                 <SmartArticleCard
                   article={art}
                   href={`/wisdom/${art.category}/${art.slug}`}

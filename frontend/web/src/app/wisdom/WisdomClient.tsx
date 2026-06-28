@@ -447,7 +447,7 @@ export function WisdomClient() {
             variants={gridVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 md:auto-rows-fr"
           >
             {paginatedArticles.map((art) => (
               <motion.div key={art.id} variants={cardVariants} className="h-full flex flex-col">

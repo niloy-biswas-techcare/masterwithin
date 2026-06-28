@@ -79,7 +79,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       {/* Articles Grid */}
       {articles.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:auto-rows-fr">
           {articles.map((art) => (
             <SmartArticleCard
               key={art.id}

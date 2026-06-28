@@ -37,7 +37,7 @@ export function ArticleCard({
 }: ArticleCardProps) {
   const LinkEl: React.ElementType = linkComponent ?? 'a';
   return (
-    <Card className={cn('flex flex-col overflow-hidden group transition-transform duration-150 active:scale-[0.98]', className)}>
+    <Card className={cn('flex flex-col overflow-hidden group transition-transform duration-150 active:scale-[0.98] min-h-[360px]', className)}>
       <LinkEl
         href={href}
         className="flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
